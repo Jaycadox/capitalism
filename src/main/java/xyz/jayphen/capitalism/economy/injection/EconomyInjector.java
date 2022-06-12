@@ -12,65 +12,63 @@ import java.sql.Statement;
 import java.util.UUID;
 
 public class EconomyInjector {
-    public EconomyInjector() {
-        if(!exists())
-            generate();
-    }
-    public void generate() {
-        String sql = "CREATE TABLE `meta` (\n" +
-                "\t`total_money` INT(32));";
+	public EconomyInjector () {
+		if (!exists()) generate();
+	}
 
-        try {
-            Statement stmt = Database.ctn.createStatement();
-            stmt.execute(sql);
-            stmt = Database.ctn.createStatement();
-            sql = "INSERT INTO meta VALUES(0);";
-            stmt.execute(sql);
-        } catch (SQLException e) {
-        }
-    }
+	public void generate () {
+		String sql = "CREATE TABLE `meta` (\n" + "\t`total_money` INT(32));";
 
-    private void setMoney(double v) throws SQLException {
-        Statement stmt = Database.ctn.createStatement();
-        stmt.execute("UPDATE meta\n" + "SET total_money = " + v + ";");
-    }
+		try {
+			Statement stmt = Database.ctn.createStatement();
+			stmt.execute(sql);
+			stmt = Database.ctn.createStatement();
+			sql = "INSERT INTO meta VALUES(0);";
+			stmt.execute(sql);
+		} catch (SQLException e) {
+		}
+	}
 
-    public long getMoney() {
-        try {
-            Statement stmt = null;
-            stmt = Database.ctn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT total_money FROM meta;");
-            rs.next();
-            return rs.getInt("total_money");
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-    private void addMoney(int amt) {
-        try {
-            setMoney(getMoney() + amt);
-        } catch(Exception e) {
-            e.printStackTrace();
-        }
-    }
+	public long getMoney () {
+		try {
+			Statement stmt = null;
+			stmt = Database.ctn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT total_money FROM meta;");
+			rs.next();
+			return rs.getInt("total_money");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
-    public TransactionResult inject(UUID player, int amount) {
-        DatabasePlayer injector = DatabasePlayer.nonPlayer("11111111");
-        if(injector.setMoneySafe((int) (injector.getMoneySafe() + amount)))
-        {
-            addMoney(amount);
-        }
-        return new Transaction(injector.getUuid(), player, amount).transact();
-    }
+	private void setMoney (double v) throws SQLException {
+		Statement stmt = Database.ctn.createStatement();
+		stmt.execute("UPDATE meta\n" + "SET total_money = " + v + ";");
+	}
 
-    public boolean exists()
-    {
-        try {
-            DatabaseMetaData dbm = Database.ctn.getMetaData();
-            return dbm.getTables(null, null, "meta", null).next();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	private void addMoney (int amt) {
+		try {
+			setMoney(getMoney() + amt);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public TransactionResult inject (UUID player, int amount) {
+		DatabasePlayer injector = DatabasePlayer.nonPlayer("11111111");
+		if (injector.setMoneySafe((int) (injector.getMoneySafe() + amount))) {
+			addMoney(amount);
+		}
+		return new Transaction(injector.getUuid(), player, amount).transact();
+	}
+
+	public boolean exists () {
+		try {
+			DatabaseMetaData dbm = Database.ctn.getMetaData();
+			return dbm.getTables(null, null, "meta", null).next();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

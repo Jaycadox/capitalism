@@ -8,43 +8,41 @@ import xyz.jayphen.capitalism.economy.CapitalismEconomy;
 import xyz.jayphen.capitalism.events.register.EventRegister;
 import xyz.jayphen.capitalism.hooks.EconomyHook;
 
-import javax.xml.crypto.Data;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public final class Capitalism extends JavaPlugin {
 
-    public static Logger LOG = null;
-    public static Plugin plugin = null;
-    public static Database db = null;
-    public final EconomyHook HOOK = new EconomyHook(this);
-    public static CapitalismEconomy eco = new CapitalismEconomy();
+	public static Logger LOG = null;
+	public static Plugin plugin = null;
+	public static Database db = null;
+	public static CapitalismEconomy eco = new CapitalismEconomy();
+	public final EconomyHook HOOK = new EconomyHook(this);
 
-    @Override
-    public void onEnable() {
-        plugin = this;
-        LOG = this.getLogger();
-        CommandRegister.registerAllCommands(this);
-        LOG.info("Registered commands.");
-        if (HOOK.vault(eco))
-        {
-            LOG.info("Vault has been hooked.");
-        }
+	@Override
+	public void onEnable () {
+		plugin = this;
+		LOG = this.getLogger();
+		CommandRegister.registerAllCommands(this);
+		LOG.info("Registered commands.");
+		if (HOOK.vault(eco)) {
+			LOG.info("Vault has been hooked.");
+		}
 
-        EventRegister.registerAll();
-        LOG.info("Registered events.");
-        db = new Database();
-        LOG.info("Loaded database.");
+		EventRegister.registerAll();
+		LOG.info("Registered events.");
+		db = new Database();
+		LOG.info("Loaded database.");
 
-    }
+	}
 
 
-    @Override
-    public void onDisable() {
-        try {
-            Database.ctn.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+	@Override
+	public void onDisable () {
+		try {
+			Database.ctn.close();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }
