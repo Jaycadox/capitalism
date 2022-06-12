@@ -9,6 +9,7 @@ import xyz.jayphen.capitalism.events.register.EventRegister;
 import xyz.jayphen.capitalism.hooks.EconomyHook;
 
 import javax.xml.crypto.Data;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public final class Capitalism extends JavaPlugin {
@@ -40,6 +41,10 @@ public final class Capitalism extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
+        try {
+            Database.ctn.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

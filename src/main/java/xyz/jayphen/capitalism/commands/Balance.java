@@ -25,7 +25,7 @@ public class Balance implements CommandExecutor {
         p.sendMessage(
                 new MessageBuilder("Economy")
                 .append(Token.TokenType.CAPTION, "You have")
-                .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(DatabasePlayer.from(p).getMoney())).build()
+                .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(DatabasePlayer.from(p).getMoneySafe())).build()
         );
 
 

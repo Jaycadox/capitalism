@@ -73,7 +73,10 @@ public class CapitalismEconomy implements Economy {
 
     @Override
     public double getBalance(OfflinePlayer offlinePlayer) {
-        return DatabasePlayer.from(offlinePlayer).getMoney();
+        try {
+            return DatabasePlayer.from(offlinePlayer).getMoney();
+        } catch(Exception e) {e.printStackTrace();}
+        return 0;
     }
 
     @Override
@@ -83,7 +86,10 @@ public class CapitalismEconomy implements Economy {
 
     @Override
     public double getBalance(OfflinePlayer offlinePlayer, String s) {
-        return DatabasePlayer.from(offlinePlayer).getMoney();
+        try {
+            return DatabasePlayer.from(offlinePlayer).getMoney();
+        } catch(Exception e) {e.printStackTrace();}
+        return 0;
     }
 
     @Override
@@ -93,7 +99,12 @@ public class CapitalismEconomy implements Economy {
 
     @Override
     public boolean has(OfflinePlayer offlinePlayer, double v) {
-        return DatabasePlayer.from(offlinePlayer).getMoney() >= v;
+        try {
+            return DatabasePlayer.from(offlinePlayer).getMoney() >= v;
+        } catch(Exception e) {
+            return false;
+        }
+
     }
 
     @Override
@@ -113,11 +124,14 @@ public class CapitalismEconomy implements Economy {
 
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer offlinePlayer, double v) {
-        if (!has(offlinePlayer, v)) {
-            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Insufficient funds.");
-        }
-        DatabasePlayer.from(offlinePlayer).setMoney(DatabasePlayer.from(offlinePlayer).getMoney() - v);
-        return null;
+        try {
+            if (!has(offlinePlayer, v)) {
+                return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "insufficient funds");
+            }
+            DatabasePlayer.from(offlinePlayer).setMoney(DatabasePlayer.from(offlinePlayer).getMoney() - v);
+            return new EconomyResponse(v, DatabasePlayer.from(offlinePlayer).getMoney(), EconomyResponse.ResponseType.SUCCESS, "success");
+        } catch(Exception e) {e.printStackTrace();}
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "error");
     }
 
     @Override
@@ -137,8 +151,11 @@ public class CapitalismEconomy implements Economy {
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer offlinePlayer, double v) {
-        DatabasePlayer.from(offlinePlayer).setMoney(DatabasePlayer.from(offlinePlayer).getMoney() + v);
-        return null;
+        try {
+            DatabasePlayer.from(offlinePlayer).setMoney(DatabasePlayer.from(offlinePlayer).getMoney() + v);
+            return new EconomyResponse(v, DatabasePlayer.from(offlinePlayer).getMoney(), EconomyResponse.ResponseType.SUCCESS, "success");
+        } catch(Exception e) {e.printStackTrace();}
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "error");
     }
 
     @Override

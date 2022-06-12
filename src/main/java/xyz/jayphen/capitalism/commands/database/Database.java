@@ -1,16 +1,29 @@
 package xyz.jayphen.capitalism.commands.database;
 
 import xyz.jayphen.capitalism.Capitalism;
+import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
 
 import java.io.File;
 import java.sql.*;
 
 public class Database {
-    String dbPath = new File(Capitalism.plugin.getDataFolder() + "\\database.db").getAbsolutePath();
+    public static String dbPath = new File(Capitalism.plugin.getDataFolder() + "\\database.db").getAbsolutePath();
+    public static Connection ctn;
+    public static EconomyInjector injector = null;
+
     public Database()
     {
         if(!exists())
             generate();
+        if(ctn == null) {
+            try {
+                ctn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        injector = new EconomyInjector();
     }
 
     public void createNewTable(Connection cnt) {
@@ -25,29 +38,22 @@ public class Database {
             Statement stmt = cnt.createStatement();
             stmt.execute(sql);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
         }
     }
     public Connection connect()
     {
-        String url = "jdbc:sqlite:" + dbPath;
-        try {
-            return DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return ctn;
     }
     private void generate()
     {
 
         String url = "jdbc:sqlite:" + dbPath;
         try {
-            System.out.println(dbPath);
             new File(Capitalism.plugin.getDataFolder() + "\\").mkdir();
             File f = new File(dbPath);
             f.createNewFile();
-
-            Connection conn = DriverManager.getConnection(url);
+            ctn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+            Connection conn = connect();
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
                 Capitalism.LOG.info("[SQLITE] Driver name: " + meta.getDriverName());

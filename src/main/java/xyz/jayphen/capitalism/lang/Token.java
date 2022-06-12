@@ -3,7 +3,8 @@ package xyz.jayphen.capitalism.lang;
 public class Token {
     public enum TokenType {
         CAPTION,
-        VARIABLE
+        VARIABLE,
+        BRACKET
     }
     String content = "";
     TokenType token = null;

@@ -4,7 +4,8 @@ import java.text.DecimalFormat;
 
 public class NumberFormatter {
     public static String addCommas(double val) {
-        DecimalFormat formatter = new DecimalFormat("#,###.00");
+        if(val == 0) return "0";
+        DecimalFormat formatter = new DecimalFormat("#,###");
         return formatter.format(val);
     }
 }
