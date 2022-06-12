@@ -1,6 +1,7 @@
 package xyz.jayphen.capitalism.events.register;
 
 import xyz.jayphen.capitalism.Capitalism;
+import xyz.jayphen.capitalism.events.Lottery;
 import xyz.jayphen.capitalism.events.PlayerJoin;
 import xyz.jayphen.capitalism.events.PlayerLeave;
 import xyz.jayphen.capitalism.events.PlaytimeRewards;
@@ -10,7 +11,9 @@ public class EventRegister {
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new PlayerJoin(), Capitalism.plugin);
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new PlayerLeave(), Capitalism.plugin);
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new PlaytimeRewards(), Capitalism.plugin);
+		Capitalism.plugin.getServer().getPluginManager().registerEvents(new Lottery(), Capitalism.plugin);
 		PlaytimeRewards.register();
+		Lottery.register();
 
 	}
 }

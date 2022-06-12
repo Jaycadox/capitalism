@@ -28,11 +28,10 @@ public final class Capitalism extends JavaPlugin {
 		if (HOOK.vault(eco)) {
 			LOG.info("Vault has been hooked.");
 		}
-
-		EventRegister.registerAll();
-		LOG.info("Registered events.");
 		db = new Database();
 		LOG.info("Loaded database.");
+		EventRegister.registerAll();
+		LOG.info("Registered events.");
 
 	}
 

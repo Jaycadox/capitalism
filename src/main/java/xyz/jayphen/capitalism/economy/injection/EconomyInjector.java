@@ -54,7 +54,9 @@ public class EconomyInjector {
 			e.printStackTrace();
 		}
 	}
-
+	public DatabasePlayer getInjector() {
+		return DatabasePlayer.nonPlayer("11111111");
+	}
 	public TransactionResult inject (UUID player, int amount) {
 		DatabasePlayer injector = DatabasePlayer.nonPlayer("11111111");
 		if (injector.setMoneySafe((int) (injector.getMoneySafe() + amount))) {

@@ -12,5 +12,7 @@ public class PlayerJoin implements Listener {
 	public void onPlayerJoin (PlayerJoinEvent event) {
 		DatabasePlayer.from(event.getPlayer());
 		event.setJoinMessage(new MessageBuilder("Join").append(Token.TokenType.CAPTION, event.getPlayer().getName()).build());
+
+		Lottery.nag(event.getPlayer());
 	}
 }

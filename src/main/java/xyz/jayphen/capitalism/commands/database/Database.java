@@ -26,12 +26,17 @@ public class Database {
 
 	public void createNewTable (Connection cnt) {
 		// SQL statement for creating a new table
-		String sql = "CREATE TABLE `players` (\n" + "\t`uuid` TEXT(32),\n" + "\t`money` INT(32),\n" + "\tPRIMARY KEY (`uuid`)\n" + ");";
+		String sql = "CREATE TABLE `players` (\n"
+				+ "\t`uuid` TEXT(32),\n"
+				+ "\t`money` INT(32),\n"
+				+ "\t`joined_lottery` INT(32),\n"
+				+ "\tPRIMARY KEY (`uuid`));";
 
 		try {
 			Statement stmt = cnt.createStatement();
 			stmt.execute(sql);
 		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 	}
 

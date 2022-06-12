@@ -14,6 +14,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -60,7 +61,21 @@ public class DatabasePlayer {
 		}
 		return 0;
 	}
-
+	public static ArrayList<UUID> allLotteryEnteredPeople() {
+		ArrayList<UUID> list = new ArrayList<>();
+		try {
+			Statement stmt = null;
+			stmt = Database.ctn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM players WHERE joined_lottery = 1");
+			while (rs.next()) {
+				list.add(UUID.fromString(rs.getString("uuid")));
+			}
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 	public UUID getUuid () {
 		return uuid;
 	}
@@ -94,8 +109,28 @@ public class DatabasePlayer {
 			return false;
 		}
 	}
+	public boolean getJoinedLottery() {
+		try {
+			Statement stmt = null;
+			stmt = Database.ctn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT joined_lottery FROM players WHERE uuid = '" + uuid.toString() + "'");
+			rs.next();
+			return rs.getInt("joined_lottery") == 1;
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	public void setJoinedLottery(boolean val) {
+		try {
+			Statement stmt = null;
+			stmt = Database.ctn.createStatement();
+			stmt.execute("UPDATE players\n" + "SET joined_lottery = " + (val ? 1 : 0) + " WHERE uuid = '" + uuid.toString() + "';");
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 
-
+	}
 	public boolean exists () {
 		Statement stmt = null;
 		try {
@@ -112,7 +147,7 @@ public class DatabasePlayer {
 	}
 
 	public void generate (double startingCash) {
-		String sql = "INSERT INTO players\n" + "VALUES ('" + uuid.toString() + "', " + 0 + "); ";
+		String sql = "INSERT INTO players\n" + "VALUES ('" + uuid.toString() + "', " + 0 + ", 0); ";
 		try {
 			Statement stmt = Database.ctn.createStatement();
 			stmt.execute(sql);
