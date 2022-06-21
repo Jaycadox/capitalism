@@ -10,7 +10,7 @@ import xyz.jayphen.capitalism.lang.Token;
 public class PlayerJoin implements Listener {
 	@EventHandler
 	public void onPlayerJoin (PlayerJoinEvent event) {
-		DatabasePlayer.from(event.getPlayer());
+		DatabasePlayer dbp = DatabasePlayer.from(event.getPlayer());
 		event.setJoinMessage(new MessageBuilder("Join").append(Token.TokenType.CAPTION, event.getPlayer().getName()).build());
 
 		Lottery.nag(event.getPlayer());

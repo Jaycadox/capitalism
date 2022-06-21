@@ -141,14 +141,20 @@ public class Lottery implements Listener {
 	private static boolean checkForLottery() {
 		Calendar rightNow = Calendar.getInstance();
 		int hour = rightNow.get(Calendar.HOUR_OF_DAY);
-		return hour == (12 + 5);
+		return hour == (12 + 8);
 	}
 
 	@EventHandler
 	public void onChat (AsyncPlayerChatEvent e) {
 		if (e.getMessage().equals("__I_JOIN_LOTTERY__")) {
 			e.setCancelled(true);
-			if(DatabasePlayer.from(e.getPlayer()).getJoinedLottery()) return;
+			if(DatabasePlayer.from(e.getPlayer()).getJoinedLottery()) {
+				e.getPlayer().sendMessage(
+						new MessageBuilder("Lottery")
+								.append(Token.TokenType.CAPTION, "You have already been entered in the lottery")
+								.build());
+				return;
+			}
 			DatabasePlayer.from(e.getPlayer()).setJoinedLottery(true);
 			e.getPlayer().sendMessage(
 					new MessageBuilder("Lottery")

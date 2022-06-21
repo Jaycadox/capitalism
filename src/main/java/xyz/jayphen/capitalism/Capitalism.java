@@ -1,5 +1,7 @@
 package xyz.jayphen.capitalism;
 
+import com.sk89q.worldedit.WorldEdit;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.jayphen.capitalism.commands.database.Database;
@@ -21,6 +23,7 @@ public final class Capitalism extends JavaPlugin {
 
 	@Override
 	public void onEnable () {
+
 		plugin = this;
 		LOG = this.getLogger();
 		CommandRegister.registerAllCommands(this);
@@ -32,6 +35,12 @@ public final class Capitalism extends JavaPlugin {
 		LOG.info("Loaded database.");
 		EventRegister.registerAll();
 		LOG.info("Registered events.");
+
+		if(!Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+			LOG.warning("WorldEdit not found.");
+		} else {
+			WorldEdit.getInstance().getItemFactory();
+		}
 
 	}
 

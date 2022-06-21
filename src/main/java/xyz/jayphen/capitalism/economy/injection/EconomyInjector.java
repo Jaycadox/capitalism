@@ -15,7 +15,7 @@ public class EconomyInjector {
 	public EconomyInjector () {
 		if (!exists()) generate();
 	}
-
+	public static final String SERVER = "11111111";
 	public void generate () {
 		String sql = "CREATE TABLE `meta` (\n" + "\t`total_money` INT(32));";
 
@@ -25,7 +25,7 @@ public class EconomyInjector {
 			stmt = Database.ctn.createStatement();
 			sql = "INSERT INTO meta VALUES(0);";
 			stmt.execute(sql);
-		} catch (SQLException e) {
+		} catch (SQLException ignored) {
 		}
 	}
 
@@ -55,10 +55,10 @@ public class EconomyInjector {
 		}
 	}
 	public DatabasePlayer getInjector() {
-		return DatabasePlayer.nonPlayer("11111111");
+		return DatabasePlayer.nonPlayer(SERVER);
 	}
 	public TransactionResult inject (UUID player, int amount) {
-		DatabasePlayer injector = DatabasePlayer.nonPlayer("11111111");
+		DatabasePlayer injector = DatabasePlayer.nonPlayer(SERVER);
 		if (injector.setMoneySafe((int) (injector.getMoneySafe() + amount))) {
 			addMoney(amount);
 		}

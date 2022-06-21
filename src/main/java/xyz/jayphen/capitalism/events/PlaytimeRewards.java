@@ -26,7 +26,7 @@ public class PlaytimeRewards implements Listener {
 			public void run () {
 				showReward();
 			}
-		}.runTaskTimer(Capitalism.plugin, 0, 60 * 25 * 20);
+		}.runTaskTimer(Capitalism.plugin, 60 * 25 * 20, 60 * 25 * 20);
 	}
 
 	private static void showReward () {

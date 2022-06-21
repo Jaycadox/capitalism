@@ -1,5 +1,6 @@
 package xyz.jayphen.capitalism.commands.database.player;
 
+import com.google.gson.Gson;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -10,10 +11,7 @@ import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.NumberFormatter;
 import xyz.jayphen.capitalism.lang.Token;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -23,10 +21,26 @@ public class DatabasePlayer {
 	Connection connection = null;
 	UUID uuid = null;
 
+	public JSONPlayer getJsonPlayer () {
+		return jsonPlayer;
+	}
+
+	JSONPlayer jsonPlayer = null;
+	public static Gson gson = new Gson();
+
+
 	public DatabasePlayer (Connection c, UUID uuid) {
 		this.connection = c;
 		this.uuid = uuid;
 		if (!exists()) generate(1000000);
+		try {
+			jsonPlayer = loadJsonPlayer();
+			jsonPlayer.getData().uuid = uuid.toString();
+			jsonPlayer.save();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public static DatabasePlayer from (OfflinePlayer p) {
@@ -76,10 +90,45 @@ public class DatabasePlayer {
 		}
 		return list;
 	}
+
+	public static ArrayList<JSONPlayerData> allJsonPlayerData() {
+		ArrayList<JSONPlayerData> list = new ArrayList<>();
+		try {
+			Statement stmt = null;
+			stmt = Database.ctn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM players");
+			while (rs.next()) {
+				list.add(gson.fromJson(rs.getString("json"), JSONPlayerData.class));
+			}
+			return list;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
 	public UUID getUuid () {
 		return uuid;
 	}
 
+	private JSONPlayer loadJsonPlayer () throws SQLException {
+		Statement stmt = Database.ctn.createStatement();
+		ResultSet rs = stmt.executeQuery("SELECT json FROM players WHERE uuid = '" + uuid.toString() + "'");
+		rs.next();
+		JSONPlayer jpl = new JSONPlayer();
+		jpl.setDbp(this);
+		jpl.setData(gson.fromJson(rs.getString("json"), JSONPlayerData.class));
+		return jpl;
+	}
+	protected void saveJsonPlayer() {
+		try {
+			PreparedStatement stmt = Database.ctn.prepareStatement("UPDATE players\n" + "SET json=? WHERE uuid = '" + uuid.toString() + "';");
+			stmt.setString(1, gson.toJson(jsonPlayer.getData()));
+			stmt.execute();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	public double getMoney () throws SQLException {
 		Statement stmt = null;
 		stmt = Database.ctn.createStatement();
@@ -147,7 +196,8 @@ public class DatabasePlayer {
 	}
 
 	public void generate (double startingCash) {
-		String sql = "INSERT INTO players\n" + "VALUES ('" + uuid.toString() + "', " + 0 + ", 0); ";
+
+		String sql = "INSERT INTO players\n" + "VALUES ('" + uuid.toString() + "', " + 0 + ", 0, \"{}\"); ";
 		try {
 			Statement stmt = Database.ctn.createStatement();
 			stmt.execute(sql);

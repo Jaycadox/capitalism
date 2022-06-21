@@ -30,6 +30,7 @@ public class Database {
 				+ "\t`uuid` TEXT(32),\n"
 				+ "\t`money` INT(32),\n"
 				+ "\t`joined_lottery` INT(32),\n"
+				+  "\t`json` TEXT(32),\n"
 				+ "\tPRIMARY KEY (`uuid`));";
 
 		try {

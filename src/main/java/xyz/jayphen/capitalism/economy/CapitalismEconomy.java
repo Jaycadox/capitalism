@@ -3,6 +3,7 @@ package xyz.jayphen.capitalism.economy;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
+import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 
 import java.util.List;
@@ -46,22 +47,22 @@ public class CapitalismEconomy implements Economy {
 
 	@Override
 	public boolean hasAccount (String s) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean hasAccount (OfflinePlayer offlinePlayer) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean hasAccount (String s, String s1) {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean hasAccount (OfflinePlayer offlinePlayer, String s) {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -145,7 +146,7 @@ public class CapitalismEconomy implements Economy {
 
 	@Override
 	public EconomyResponse withdrawPlayer (OfflinePlayer offlinePlayer, String s, double v) {
-		return null;
+		return withdrawPlayer(offlinePlayer, v);
 	}
 
 	@Override
@@ -171,7 +172,8 @@ public class CapitalismEconomy implements Economy {
 
 	@Override
 	public EconomyResponse depositPlayer (OfflinePlayer offlinePlayer, String s, double v) {
-		return null;
+
+		return depositPlayer(offlinePlayer, v);
 	}
 
 	@Override

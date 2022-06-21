@@ -1,5 +1,8 @@
 package xyz.jayphen.capitalism.economy.transaction;
 
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -9,6 +12,7 @@ import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.Token;
 
+import javax.swing.*;
 import java.util.UUID;
 
 public class Transaction {
@@ -37,27 +41,12 @@ public class Transaction {
 	public void sendWatermark (UUID p) {
 		OfflinePlayer player = Bukkit.getOfflinePlayer(p);
 		if (player.getPlayer() != null && player.hasPlayedBefore()) {
-			player.getPlayer().sendMessage(new MessageBuilder("Economy").append(Token.TokenType.CAPTION, "Transaction pending...").build());
+			player.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(new MessageBuilder("Economy").append(Token.TokenType.CAPTION, "Transaction pending...").build()));
 		}
 	}
 
 	public void checkEconomyIntegrity () {
-		long money = DatabasePlayer.sumMoney();
-		if (money == 0) {
-			Capitalism.LOG.warning("[INTEGRITY] Failed to sum economy");
-			return;
-		}
-		long knownMoney = Database.injector.getMoney();
-		if (knownMoney == 0) {
-			Capitalism.LOG.warning("[INTEGRITY] Failed to get economy sum");
-			return;
-		}
-		if (knownMoney != money) {
-			Capitalism.LOG.warning("[INTEGRITY] Mismatch of " + Math.abs(knownMoney - money) + " detected in economy.");
-		} else {
-			Capitalism.LOG.info("[INTEGRITY] No economy mismatch detected.");
-
-		}
+		return; //todo: fix
 	}
 
 	public TransactionResult transact () {
@@ -82,6 +71,10 @@ public class Transaction {
 			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "general error");
 		}
 		checkEconomyIntegrity();
+		DatabasePlayer.from(from).getJsonPlayer().getData().stats.moneySent += amount;
+		DatabasePlayer.from(from).getJsonPlayer().save();
+		DatabasePlayer.from(to).getJsonPlayer().getData().stats.moneyRecieved += amount;
+		DatabasePlayer.from(to).getJsonPlayer().save();
 		return new TransactionResult(TransactionResult.TransactionResultType.SUCCESS, tag);
 	}
 }

@@ -2,8 +2,7 @@ name: Capitalism
 version: '${project.version}'
 main: xyz.jayphen.capitalism.Capitalism
 api-version: 1.18
-depend:
-  - Vault
+depend: [Vault, WorldEdit]
 commands:
   balance:
     description: View your balance
@@ -19,3 +18,11 @@ commands:
       - send
       - transfer
       - donate
+  land:
+    description: Allows you to manage the properties you own
+    permission: core.land
+    aliases:
+      - landlord
+      - l
+  admin:
+    permission: core.admin
