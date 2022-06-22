@@ -81,14 +81,14 @@ public class InventoryScroll {
 	int suggestedCol = 0;
 
 	public void render() {
-		if(entireView.size() == 0) {
+		if(entireView.isEmpty()) {
 			inventory.setItem(startRow, startPos, ChatColor.YELLOW + "Empty list", Material.OAK_SIGN, ()->{});
 			return;
 		}
 
 
 		int col = startPos;
-		for(int i = 0; i <= size; i++) {
+		for(int i = viewStart; i < viewEnd; i++) {
 			if(i == entireView.size()) break;
 			inventory.setItem(startRow, col, entireView.get(i).stack, entireView.get(i).runnable);
 			col++;
@@ -96,7 +96,7 @@ public class InventoryScroll {
 		suggestedRow = startRow;
 		suggestedCol = col;
 
-		if(!(size < entireView.size())) return;
+		if(size >= entireView.size()) return;
 
 		if(viewStart != 0)
 			inventory.setItem(getSuggestedRow(), getSuggestedCol(),

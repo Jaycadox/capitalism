@@ -7,6 +7,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import xyz.jayphen.capitalism.commands.database.Database;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
+import xyz.jayphen.capitalism.economy.transaction.TaxTransaction;
 import xyz.jayphen.capitalism.economy.transaction.Transaction;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 import xyz.jayphen.capitalism.events.tax.TaxResult;
@@ -22,9 +23,11 @@ public class DeathTax implements Listener {
 		if(dbp.getMoneySafe() == 0) return;
 		TaxResult tax = TaxedDeath.INSTANCE.applyTax((int) dbp.getMoneySafe());
 		if(tax.getAmountTaxed() == 0) return;
+
 		Transaction t = new Transaction(event.getEntity().getUniqueId(),
 		                                DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
 		                                (int)tax.getAmountTaxed());
+
 		TransactionResult result = t.transact();
 		if(result.getType() == TransactionResult.TransactionResultType.ERROR) {
 			event.getEntity().sendMessage(new MessageBuilder("Death Tax")
@@ -37,7 +40,7 @@ public class DeathTax implements Listener {
 		event.getEntity().sendMessage(new MessageBuilder("Death Tax")
 				                              .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
 				                              .append(Token.TokenType.CAPTION, "has been deducted from your account. This was")
-				                              .append(Token.TokenType.VARIABLE, (Math.floor(tax.getTaxAmount()) * 100) + "%")
+				                              .append(Token.TokenType.VARIABLE, (Math.ceil(tax.getTaxAmount() * 100)) + "%")
 				                              .append(Token.TokenType.CAPTION, "of your account's balance")
 				                              .build());
 	}

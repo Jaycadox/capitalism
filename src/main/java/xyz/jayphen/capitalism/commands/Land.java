@@ -66,39 +66,69 @@ public class Land implements CommandExecutor, TabCompleter {
 	@Override
 	public boolean onCommand (CommandSender commandSender, Command command, String s, String[] args)
 	{
+		Claim c = null;
+		if(args.length > 0 && args[0].startsWith("id=")) {
+			try {
+				int selectedID = Integer.parseInt(args[0].replace("id=", ""));
+				ArrayList<Claim> claims = DatabasePlayer.from(((Player)commandSender)).getJsonPlayer().getData().claims;
+				if(selectedID >= claims.size() || 0 > selectedID) {
+					commandSender.sendMessage(new MessageBuilder("Land").appendCaption("Invalid ID selection").build());
+					return true;
+				}
+				c = claims.get(selectedID);
+				String[] newArgs = new String[args.length - 1];
+				for(int i = 1; i < args.length; i++) {
+					newArgs[i - 1] = args[i];
+				}
+				args = newArgs;
+			} catch(Exception ignored) {ignored.printStackTrace();}
+		}
+		String[] finalArgs = args;
+		Claim finalC = c;
 		new BukkitRunnable() {
 			@Override
 			public void run () {
-				asyncCommandHandler(commandSender, args);
+				asyncCommandHandler(commandSender, finalArgs, finalC);
 			}
 		}.runTaskAsynchronously(Capitalism.plugin);
 		return true;
 	}
 
-	private void asyncCommandHandler (CommandSender commandSender, String[] args) {
+	private void asyncCommandHandler (CommandSender commandSender, String[] args, Claim oClaim) {
 		if(!(commandSender instanceof Player p)) return;
-
-		Claim c = ClaimManager.getDatabaseClaim(ClaimManager.getCachedClaim(p.getLocation()).orElse(null));
-		if(c == null) {
+		Claim cache = oClaim != null ? oClaim : ClaimManager.getCachedClaim(p.getLocation()).orElse(null);
+		if(cache == null) {
 			p.sendMessage(new MessageBuilder("Land").appendCaption("You are currently not inside a claimed area of land").build());
 			return;
 		}
-		if(!c.hasPermission(p, Claim.ClaimInteractionType.OWNER)) {
+		if(!cache.hasPermission(p, Claim.ClaimInteractionType.OWNER)) {
 			p.sendMessage(new MessageBuilder("Land").appendCaption("You do not have permission to view the Landlord menu for this claimed area").build());
 			return;
 		}
+		Claim c = ClaimManager.getDatabaseClaim(cache);
+
 
 		if(args.length == 0) {
-			InventoryHelper inventoryHelper = new InventoryHelper("Landlord", 1, (inv, ctx) -> {
+			InventoryHelper inventoryHelper = new InventoryHelper("Landlord > " + ClaimManager.getDatabaseClaim(c).getName(), 1, (inv, ctx) -> {
 				if(ctx.equals("root")) {
-					inv.setMargin(3, 0);
-					inv.setItem(0, 1, ChatColor.YELLOW + "Settings", Material.LODESTONE, () -> {
+					inv.setMargin(0, 0);
+					inv.addMargin(0, 0);
+					inv.addMargin(0, 1);
+					inv.addMargin(0, 2);
+					inv.addMargin(0, 3);
+					inv.addMargin(0, 6);
+					inv.addMargin(0, 7);
+					inv.setItem(0, 8, InventoryHelper.getHead(p, "&aView profile", null) ,() -> {
+						p.closeInventory();
+						p.performCommand("profile");
+					});
+					inv.setItem(0, 1 + 3, ChatColor.YELLOW + "Settings", Material.LODESTONE, () -> {
 						inv.push("settings", 1);
 					});
-					inv.setItem(0, 0, ChatColor.YELLOW + "Claim Information", Material.PAPER, () -> {
+					inv.setItem(0, 0 + 3, ChatColor.YELLOW + "Claim Information", Material.PAPER, () -> {
 						inv.push("info", 1);
 					});
-					inv.setItem(0, 2, ChatColor.YELLOW + "Trusted Players", Material.GOLDEN_PICKAXE, () -> {
+					inv.setItem(0, 2 + 3, ChatColor.YELLOW + "Trusted Players", Material.GOLDEN_PICKAXE, () -> {
 						inv.push("trusted", 1);
 					});
 				}
@@ -158,12 +188,12 @@ public class Land implements CommandExecutor, TabCompleter {
 				if(ctx.equals("info")) {
 					inv.setMargin(1, 0);
 					inv.setItem(0, 0, ChatColor.YELLOW + "Claim Area", Material.GRASS_BLOCK, () -> {},
-					            Stream.of("&7This claim's area is: &e" + c.getArea() + " blocks")
+					            Stream.of("&7This claim's area is: &e" + c.getArea() + " blocks", "&7Location: &e" + c.getMidpointX() + ", " + c.getMidpointZ())
 							            .map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
 
 					inv.setItem(0, 5, ChatColor.RED + "Destroy Claim", Material.TNT, () -> {
 						inv.push("destroy", 1);
-					}, Stream.of("&7This action is &c&lIRREVERSIBLE!", "&4&lYou will NOT recieve any money as a result of this")
+					}, Stream.of("&7This action is &c&lIRREVERSIBLE!", "&4&lYou will NOT receive any money as a result of this")
 							           .map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
 
 					inv.setItem(0, 1, ChatColor.YELLOW + "Claim Value", Material.GREEN_DYE, () -> {},
@@ -172,6 +202,29 @@ public class Land implements CommandExecutor, TabCompleter {
 					inv.setItem(0, 2, InventoryHelper.getHead(Bukkit.getOfflinePlayer(UUID.fromString(c.owner)), "&eClaim Owner",
 					                                          List.of("&7Username: &e" + Bukkit.getOfflinePlayer(UUID.fromString(c.owner)).getName())
 					), () -> {});
+					inv.setItem(0, 3, ChatColor.YELLOW + "Rename claim", Material.NAME_TAG, () -> {
+						p.closeInventory();
+
+						int id = 0;
+						for(Claim tC : DatabasePlayer.from(p).getJsonPlayer().getData().claims) {
+							if(tC.location.hashCode() == c.location.hashCode()) break;
+							id++;
+						}
+
+						int finalId = id;
+						ChatInput.createQuery("new name for claim", response -> {
+
+							if(response.length() > 20) {
+								p.sendMessage(new MessageBuilder("Land").appendCaption("Name cannot be over 16 characters").build());
+								return;
+							}
+							DatabasePlayer.from(p).getJsonPlayer().getClaim(c).name = response;
+							DatabasePlayer.from(p).getJsonPlayer().save();
+							p.performCommand("land id=" + finalId);
+
+							p.sendMessage(new MessageBuilder("Land").appendCaption("Land claim's name has been set to:").appendVariable(response).build());
+						}, p);
+					}, List.of());
 				}
 				if(ctx.equals("settings")) {
 					inv.setMargin(1, 0);

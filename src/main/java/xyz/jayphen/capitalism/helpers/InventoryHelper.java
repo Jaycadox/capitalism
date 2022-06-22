@@ -90,20 +90,30 @@ public class InventoryHelper {
 				inventory.setItem(row * getColumnCount() + i, marginItem());
 			}
 		}
+		for(int row = 0; row < marginVertical; row++) {
+			for(int i = 0; i < getColumnCount(); i++) {
+				inventory.setItem(row * getColumnCount() + i, marginItem());
+			}
+		}
+		for(int row = getRowCount() - 1; row > getRowCount() - 1 - marginVertical; row--) {
+			for(int i = 0; i < getColumnCount(); i++) {
+				inventory.setItem(row * getColumnCount() + i, marginItem());
+			}
+		}
 	}
 
 	public void setItem(int row, int column, String name, Material mat, Runnable onClick) {
-		setItem(row, column, name, mat, onClick, null);
+		setItem(row, column, ChatColor.translateAlternateColorCodes('&', name), mat, onClick, null);
 	}
 	public void setItem(int row, int column, String name, Material mat, Runnable onClick, List<String> lore) {
 		ItemStack iStack = new ItemStack(mat);
 		ItemMeta meta = iStack.getItemMeta();
 		if(lore == null) {
 			meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+		} else {
+			meta.setLore(lore.stream().map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
 		}
-		meta.setLore(lore);
-
-		meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + name);
+		meta.setDisplayName(ChatColor.RESET + "" + ChatColor.WHITE + ChatColor.translateAlternateColorCodes('&', name));
 		iStack.setItemMeta(meta);
 		setItem(row, column, iStack, onClick);
 	}

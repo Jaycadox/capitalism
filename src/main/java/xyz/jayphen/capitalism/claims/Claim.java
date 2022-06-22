@@ -17,6 +17,7 @@ public class Claim {
 
 	public ClaimLocation location = null;
 	public String owner = null;
+	public String name = "Unnamed land claim";
 
 	public ArrayList<String> getTrusted() {
 		if(trusted == null) {
@@ -24,7 +25,12 @@ public class Claim {
 		}
 		return trusted;
 	}
-
+	public String getName() {
+		if(name == null) {
+			name = "Unnamed land claim";
+		}
+		return name;
+	}
 	private ArrayList<String> trusted = new ArrayList<>();
 
 	private ClaimSettings permissions = new ClaimSettings();
@@ -126,7 +132,7 @@ public class Claim {
 		return (startX + endX) / 2;
 	}
 	public int getEstWorth() {
-		return (this.getArea() * (200 + (this.getDistanceFromSpawn() / 30)));
+		return (this.getArea() * (3000 + ((this.getDistanceFromSpawn() / 30) * 100)));
 	}
 	public int getMidpointZ() {
 		int startZ = Math.min(location.startZ, location.endZ);

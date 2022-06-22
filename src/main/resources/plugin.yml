@@ -18,6 +18,14 @@ commands:
       - send
       - transfer
       - donate
+  profile:
+    description: View information about your player and account
+    permission: core.profile
+    aliases:
+      - p
+      - self
+      - prof
+      - stats
   land:
     description: Allows you to manage the properties you own
     permission: core.land

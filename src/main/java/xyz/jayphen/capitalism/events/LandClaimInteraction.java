@@ -6,15 +6,23 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.jayphen.capitalism.Capitalism;
@@ -47,6 +55,7 @@ public class LandClaimInteraction implements Listener {
 		}
 		Claim claim = optClaim.get();
 		if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) return;
+		if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.OWNER)) return;
 		if(event.getClickedBlock() != null && (WOODEN_DOORS.contains(event.getClickedBlock().getType()) || WOODEN_TRAPDOORS.contains(event.getClickedBlock().getType()))) {
 			if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.WOOD)) return;
 		}
@@ -108,39 +117,41 @@ public class LandClaimInteraction implements Listener {
 
 	@EventHandler
 	public void blockPlaceEvent(BlockPlaceEvent event) {
-		if (blockEventHandler(event, event.getPlayer())) {
-			event.setCancelled(true);
-			Optional<Claim> optClaim = ClaimManager.getCachedClaim((event.getBlock().getLocation()));
-			String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() :
-					"a nearby claim border";
-
-			event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
-					ChatColor.GRAY + "Interaction blocked as the land is claimed by: "
-							+ ChatColor.YELLOW + claimOwner));
+		if (!blockEventHandler(event, event.getPlayer())) {
+			return;
 		}
+		event.setCancelled(true);
+		Optional<Claim> optClaim = ClaimManager.getCachedClaim((event.getBlock().getLocation()));
+		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() :
+				"a nearby claim border";
+
+		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
+				ChatColor.GRAY + "Interaction blocked as the land is claimed by: "
+						+ ChatColor.YELLOW + claimOwner));
 	}
 
 
 	@EventHandler
 	public void blockBreakEvent(BlockBreakEvent event) {
-		if (blockEventHandler(event, event.getPlayer())) {
-			event.setCancelled(true);
-			Optional<Claim> optClaim = ClaimManager.getCachedClaim((event.getBlock().getLocation()));
-
-			String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() :
-					"a nearby claim border";
-
-			event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
-					ChatColor.GRAY + "Interaction blocked as the land is claimed by: "
-							+ ChatColor.YELLOW + claimOwner));
+		if (!blockEventHandler(event, event.getPlayer())) {
+			return;
 		}
+		event.setCancelled(true);
+		Optional<Claim> optClaim = ClaimManager.getCachedClaim((event.getBlock().getLocation()));
+
+		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() :
+				"a nearby claim border";
+
+		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
+				ChatColor.GRAY + "Interaction blocked as the land is claimed by: "
+						+ ChatColor.YELLOW + claimOwner));
 	}
 	private boolean blockEventHandler (BlockEvent event, Player p) {
 		Location loc = event.getBlock().getLocation();
 		if(isInClaimedLandAndNotTheOwner(loc, p)) {
 			return true;
 		}
-		boolean inClaimedLand = isInClaimedLand(loc);
+		boolean inClaimedLand = isInClaimedLandAndNotTheOwner(loc, p);
 		if(inClaimedLand) return false;
 		for(int i = -3; i < 3; i++) {
 			for(int j = -3; j < 3; j++) {
@@ -194,7 +205,7 @@ public class LandClaimInteraction implements Listener {
 		}
 		boolean nearEmiter = false;
 		for(Location emit : knownUnclaimedTNTEmiters) {
-			if(emit.distance(event.getLocation()) < 20) {
+			if(emit.distance(event.getLocation()) < 40) {
 				nearEmiter = true;
 				break;
 			}
@@ -207,7 +218,7 @@ public class LandClaimInteraction implements Listener {
 				public void run () {
 					knownUnclaimedTNTEmiters.removeIf(x -> x.hashCode() == event.getLocation().hashCode());
 				}
-			}.runTaskLater(Capitalism.plugin, 60);
+			}.runTaskLater(Capitalism.plugin, 120);
 		}
 
 		boolean inLandClaim = (blocksInLandClaim > blocksUnclaimed) && !nearEmiter && isInClaimedLand(event.getLocation());
@@ -219,7 +230,68 @@ public class LandClaimInteraction implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void onTntExplosion(BlockExplodeEvent event) {
+		if(System.currentTimeMillis() - lastReset > 1000) {
+			tntCount = 0;
+			lastReset = System.currentTimeMillis();
+		}
+		if(++tntCount > 20) {
+			event.setCancelled(true);
+		}
 
+		int blocksInLandClaim = 0, blocksUnclaimed = 0;
+
+		for(Block b : event.blockList()) {
+			if(isInClaimedLand(b.getLocation())) {
+				blocksInLandClaim++;
+			} else {
+				blocksUnclaimed++;
+			}
+		}
+		boolean nearEmiter = false;
+		for(Location emit : knownUnclaimedTNTEmiters) {
+			if(emit.distance(event.getBlock().getLocation()) < 40) {
+				nearEmiter = true;
+				break;
+			}
+		}
+
+		if(!(blocksInLandClaim > blocksUnclaimed)) {
+			knownUnclaimedTNTEmiters.add(event.getBlock().getLocation());
+			new BukkitRunnable() {
+				@Override
+				public void run () {
+					knownUnclaimedTNTEmiters.removeIf(x -> x.hashCode() == event.getBlock().getLocation().hashCode());
+				}
+			}.runTaskLater(Capitalism.plugin, 120);
+		}
+
+		boolean inLandClaim = (blocksInLandClaim > blocksUnclaimed) && !nearEmiter && isInClaimedLand(event.getBlock().getLocation());
+
+		for(Block b : event.blockList()) {
+			if(!inLandClaim && isInClaimedLand(b.getLocation())) {
+				event.setCancelled(true);
+			}
+		}
+	}
+	@EventHandler
+	public void onAttack(EntityDamageByEntityEvent e) {
+		if(e.getEntity() instanceof Player) return;
+		if(e.getEntity() instanceof Villager && e.getDamager() instanceof Zombie) return;
+		if(isInClaimedLandAndNotTheOwner(e.getEntity().getLocation(), e.getDamager())) {
+			e.setCancelled(true);
+		}
+	}
+
+	@EventHandler(ignoreCancelled = true)
+	public void onPlayerPortal(PlayerPortalEvent event)
+	{
+		if(isInClaimedLandAndNotTheOwner(event.getTo(), event.getPlayer())) {
+			event.setCanCreatePortal(false);
+			event.setTo(new Location(event.getFrom().getWorld(), 0, 0, 0));
+		}
+	}
 
 	@EventHandler
 	public void growEvent(StructureGrowEvent event) {
@@ -242,9 +314,10 @@ public class LandClaimInteraction implements Listener {
 		return optClaim.isPresent();
 	}
 
-	boolean isInClaimedLandAndNotTheOwner(Location loc, Player p) {
+	boolean isInClaimedLandAndNotTheOwner(Location loc, Entity p) {
 		Optional<Claim> optClaim = ClaimManager.getCachedClaim(loc);
-		if(optClaim.isPresent() && !optClaim.get().hasPermission(p, Claim.ClaimInteractionType.GENERAL)) {
+		if(optClaim.isPresent() && optClaim.get().owner.equals(p.getUniqueId().toString())) return false;
+		if(optClaim.isPresent() && p instanceof Player && optClaim.get().hasPermission((Player)p, Claim.ClaimInteractionType.GENERAL)) {
 			return false;
 		}
 		return optClaim.isPresent();
