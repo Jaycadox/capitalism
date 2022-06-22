@@ -12,7 +12,10 @@ public class EventRegister {
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new DeathTax(), Capitalism.plugin);
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new LandClaimMovement(), Capitalism.plugin);
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new LandClaimInteraction(), Capitalism.plugin);
+		Capitalism.plugin.getServer().getPluginManager().registerEvents(new InventoryHelperEvent(), Capitalism.plugin);
+		Capitalism.plugin.getServer().getPluginManager().registerEvents(new ChatInputEvent(), Capitalism.plugin);
 		PlaytimeRewards.register();
+		ClaimVisualizer.register();
 		Lottery.register();
 
 	}

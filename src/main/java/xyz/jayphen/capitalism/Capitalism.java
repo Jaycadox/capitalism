@@ -7,6 +7,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import xyz.jayphen.capitalism.commands.database.Database;
 import xyz.jayphen.capitalism.commands.handler.CommandRegister;
 import xyz.jayphen.capitalism.economy.CapitalismEconomy;
+import xyz.jayphen.capitalism.events.InventoryHelperEvent;
 import xyz.jayphen.capitalism.events.register.EventRegister;
 import xyz.jayphen.capitalism.hooks.EconomyHook;
 
@@ -47,10 +48,12 @@ public final class Capitalism extends JavaPlugin {
 
 	@Override
 	public void onDisable () {
+
 		try {
 			Database.ctn.close();
 		} catch (SQLException e) {
-			throw new RuntimeException(e);
+			e.printStackTrace();
 		}
+		InventoryHelperEvent.closeInventories();
 	}
 }

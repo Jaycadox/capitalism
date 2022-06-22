@@ -1,5 +1,6 @@
 package xyz.jayphen.capitalism.claims;
 
-public class ClaimPermission {
+public class ClaimSettings {
 	public boolean accessWoodDoorsAndTrapdoors = false;
+	public boolean visualize = false;
 }

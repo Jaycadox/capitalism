@@ -1,7 +1,6 @@
 package xyz.jayphen.capitalism.claims;
 
 import org.bukkit.*;
-import org.bukkit.entity.Player;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 
 import java.awt.geom.Point2D;
@@ -11,6 +10,7 @@ import java.util.UUID;
 
 public class Claim {
 	public enum ClaimInteractionType {
+		OWNER,
 		GENERAL,
 		WOOD,
 	}
@@ -27,11 +27,11 @@ public class Claim {
 
 	private ArrayList<String> trusted = new ArrayList<>();
 
-	private ClaimPermission permissions = new ClaimPermission();
+	private ClaimSettings permissions = new ClaimSettings();
 
-	public ClaimPermission getPermissions() {
+	public ClaimSettings getPermissions() {
 		if(permissions == null) {
-			permissions = new ClaimPermission();
+			permissions = new ClaimSettings();
 		}
 		return permissions;
 	}
@@ -46,6 +46,7 @@ public class Claim {
 
 	public boolean hasPermission(OfflinePlayer p, ClaimInteractionType permission) {
 		if(p.getUniqueId().toString().equals(owner)) return true;
+		if(permission == ClaimInteractionType.OWNER && p.getUniqueId().toString().equals(owner)) return true;
 		if(permission == ClaimInteractionType.GENERAL && trusted.contains(p.getUniqueId().toString())) return true;
 		if(permission == ClaimInteractionType.WOOD && permissions.accessWoodDoorsAndTrapdoors) return true;
 		return false;
@@ -117,6 +118,23 @@ public class Claim {
 		return (int) Math.abs(Point2D.distance(avgX, avgZ, x + 5000, y + 5000));
 
 	}
+
+	public int getMidpointX() {
+		int startX = Math.min(location.startX, location.endX);
+		int endX = Math.max(location.startX, location.endX);
+
+		return (startX + endX) / 2;
+	}
+	public int getEstWorth() {
+		return (this.getArea() * (200 + (this.getDistanceFromSpawn() / 30)));
+	}
+	public int getMidpointZ() {
+		int startZ = Math.min(location.startZ, location.endZ);
+		int endZ = Math.max(location.startZ, location.endZ);
+
+		return (startZ + endZ) / 2;
+	}
+
 	public int getDistanceFromSpawn() {
 		return getDistanceFrom(0, 0);
 

@@ -4,6 +4,9 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -17,6 +20,7 @@ import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
 import xyz.jayphen.capitalism.economy.transaction.TaxTransaction;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 import xyz.jayphen.capitalism.events.tax.TaxedTransaction;
+import xyz.jayphen.capitalism.helpers.InventoryHelper;
 import xyz.jayphen.capitalism.helpers.WorldEditHelper;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.NumberFormatter;
@@ -58,9 +62,11 @@ public class Admin implements CommandExecutor, TabCompleter {
 			Claim claim = ClaimManager.adminDrafts.get(((Player) commandSender).getUniqueId());
 
 			for(Location loc : claim.getBorderBlocks()) {
-				((Player)commandSender).spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, loc.getBlockY() + 0.1, loc.getBlockZ() + 0.5, 1, new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1));
+				for(int i = 0; i < 255; i++) {
+					((Player)commandSender).spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, i + 0.1, loc.getBlockZ() + 0.5, 1, new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1));
+				}
 			}
-			commandSender.sendMessage("Claim should cost around " + ChatColor.GREEN + "$" + (claim.getArea() * (200 + (claim.getDistanceFromSpawn() / 30)))
+			commandSender.sendMessage("Claim should cost around " + ChatColor.GREEN + "$" + claim.getEstWorth()
 					                          + ChatColor.WHITE + " assuming a base cost of $200 per block with $1 added every 30 blocks away it is from spawn.");
 		} else if(args[0].equals("removedraft")) {
 			ClaimManager.adminDrafts.remove(((Player)commandSender).getUniqueId());
@@ -117,8 +123,43 @@ public class Admin implements CommandExecutor, TabCompleter {
 			claim.destroy();
 
 		}
+		else if(args[0].equals("stats")) {
+			if(args.length != 2) {
+				commandSender.sendMessage(ChatColor.RED + "Missing 'player' field");
+				return true;
+			}
+			OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+			if(!offlinePlayer.hasPlayedBefore()) {
+				commandSender.sendMessage(ChatColor.RED + "Invalid player");
+				return true;
+			}
+			commandSender.sendMessage(ChatColor.GREEN + "--- Stats for " + offlinePlayer.getName() + " ---");
+			commandSender.sendMessage(ChatColor.YELLOW + "Account balance: "
+					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(DatabasePlayer.from(offlinePlayer).getMoneySafe()));
+			commandSender.sendMessage(ChatColor.YELLOW + "Amount sent: "
+					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(DatabasePlayer.from(offlinePlayer).getJsonPlayer().getData().stats.moneySent));
+			commandSender.sendMessage(ChatColor.YELLOW + "Amount received: "
+					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(DatabasePlayer.from(offlinePlayer).getJsonPlayer().getData().stats.moneyRecieved));
+			commandSender.sendMessage(ChatColor.YELLOW + "Amount taxed: "
+					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(DatabasePlayer.from(offlinePlayer).getJsonPlayer().getData().stats.amountTaxed));
+			commandSender.sendMessage(ChatColor.YELLOW + "Claims:");
+			int id = 0;
+			for(Claim c : DatabasePlayer.from(offlinePlayer).getJsonPlayer().getData().claims) {
+				commandSender.sendMessage(ChatColor.GOLD + "  " + ++id + ChatColor.WHITE + ": Location: " + c.getMidpointX() + ", " + c.getMidpointZ());
+				commandSender.sendMessage("    " + ChatColor.WHITE + "Area: " + ChatColor.YELLOW + c.getArea());
+				commandSender.sendMessage("    " + ChatColor.WHITE + "Est. Worth: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(c.getEstWorth()));
+				if(commandSender instanceof Player p) {
+					p.spigot().sendMessage(
+					new ComponentBuilder(ChatColor.YELLOW + "    [Teleport] ")
+							.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + c.getMidpointX() + " ~ " + c.getMidpointZ())).append(
+									new ComponentBuilder(ChatColor.RED + "[Destroy]")
+											.event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin destroyclaim")).create()
+							).create());
 
-			return true;
+				}
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -135,7 +176,7 @@ public class Admin implements CommandExecutor, TabCompleter {
 				return Arrays.asList("No_active_draft");
 			}
 			Claim claim = ClaimManager.adminDrafts.get(((Player)sender).getUniqueId());
-			return Arrays.asList("" + (claim.getArea() * (200 + (claim.getDistanceFromSpawn() / 30))));
+			return Arrays.asList("" + claim.getEstWorth());
 		}
 		return new ArrayList<>();
 	}
