@@ -56,9 +56,9 @@ public class Transaction {
 			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "cannot transact less than $1");
 		}
 
-		if (to == from) {
-			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "cannot transact to the same player");
-		}
+		//if (to == from) {
+		//	return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "cannot transact to the same player");
+		//}
 
 		EconomyResponse withdraw = Capitalism.eco.withdrawPlayer(Bukkit.getOfflinePlayer(from), amount);
 

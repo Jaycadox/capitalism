@@ -32,6 +32,17 @@ public class InventoryHelper {
 	private InventoryHelperRunnable onRender = null;
 	private String title = null;
 	private int marginHorizontal = 0;
+
+	public boolean isRightClick () {
+		return wasRightClick;
+	}
+
+	public void setRightClick (boolean wasRightClick) {
+		this.wasRightClick = wasRightClick;
+	}
+
+	private boolean wasRightClick = false;
+
 	private int marginVertical = 0;
 	private ItemStack lastItemAdded = null;
 	public InventoryHelper(String title, int rows, InventoryHelperRunnable render) {
@@ -50,6 +61,15 @@ public class InventoryHelper {
 	}
 	public boolean in(String name) {
 		return this.inventoryNameStack.get(this.inventoryNameStack.size() - 1).equals(name);
+	}
+
+	public static void close(Player p) {
+		new BukkitRunnable() {
+			@Override
+			public void run () {
+				p.closeInventory();
+			}
+		}.runTask(Capitalism.plugin);
 	}
 
 	public void setMargin(int horiz, int vert) {

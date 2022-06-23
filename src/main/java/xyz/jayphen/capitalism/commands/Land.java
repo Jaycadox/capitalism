@@ -13,8 +13,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.Claim;
+import xyz.jayphen.capitalism.claims.ClaimLocation;
 import xyz.jayphen.capitalism.claims.ClaimManager;
+import xyz.jayphen.capitalism.claims.ClaimOffer;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.commands.database.player.JSONPlayer;
 import xyz.jayphen.capitalism.helpers.ChatInput;
 import xyz.jayphen.capitalism.helpers.ChatQueryRunnable;
 import xyz.jayphen.capitalism.helpers.InventoryHelper;
@@ -106,7 +109,7 @@ public class Land implements CommandExecutor, TabCompleter {
 			return;
 		}
 		Claim c = ClaimManager.getDatabaseClaim(cache);
-
+		final InventoryScroll[] scroll = {null};
 
 		if(args.length == 0) {
 			InventoryHelper inventoryHelper = new InventoryHelper("Landlord > " + ClaimManager.getDatabaseClaim(c).getName(), 1, (inv, ctx) -> {
@@ -119,7 +122,7 @@ public class Land implements CommandExecutor, TabCompleter {
 					inv.addMargin(0, 6);
 					inv.addMargin(0, 7);
 					inv.setItem(0, 8, InventoryHelper.getHead(p, "&aView profile", null) ,() -> {
-						p.closeInventory();
+						InventoryHelper.close(p);
 						p.performCommand("profile");
 					});
 					inv.setItem(0, 1 + 3, ChatColor.YELLOW + "Settings", Material.LODESTONE, () -> {
@@ -142,28 +145,32 @@ public class Land implements CommandExecutor, TabCompleter {
 										.appendCaption("for changes to take effect")
 										.build()
 						);
-						p.closeInventory();
+						InventoryHelper.close(p);
 					});
 					inv.addMargin(0, 1);
 				}
 				if(ctx.equals("trusted")) {
 					inv.setMargin(1, 0);
-					InventoryScroll scroll = InventoryScroll.get(0, 4, inv, ClaimManager.getDatabaseClaim(c).getTrusted().stream().map(x -> {
+					var list = ClaimManager.getDatabaseClaim(c).getTrusted().stream().map(x -> {
 						OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(x));
 						return new InventoryScroll.ItemRunnable(
-							InventoryHelper.getHead(player, ChatColor.YELLOW + player.getName(), List.of(
-									"&7Click to: &c&lUN-TRUST PLAYER"
-							))
-							, () -> {
-								DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().removeIf(pl -> x.equals(player.getUniqueId().toString()));
-								DatabasePlayer.from(p).getJsonPlayer().save();
-								p.sendMessage(new MessageBuilder("Land").appendVariable(player.getName()).appendCaption("has been removed from the trust list").build());
-							});
-						}).collect(Collectors.toList())
-					);
-					scroll.render();
+								InventoryHelper.getHead(player, ChatColor.YELLOW + player.getName(), List.of(
+										"&7Click to: &c&lUN-TRUST PLAYER"
+								))
+								, () -> {
+							DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().removeIf(pl -> x.equals(player.getUniqueId().toString()));
+							DatabasePlayer.from(p).getJsonPlayer().save();
+							p.sendMessage(new MessageBuilder("Land").appendVariable(player.getName()).appendCaption("has been removed from the trust list").build());
+						});
+					}).collect(Collectors.toList());
+					if(scroll[0] == null) {
+						scroll[0] = new InventoryScroll(0, 4, inv, list, ctx, p.getUniqueId());
+					} else {
+						scroll[0].setView(list);
+					}
+					scroll[0].render();
 					inv.setItem(0, 5, ChatColor.GREEN + "" + ChatColor.BOLD + "ADD TRUSTED USER", Material.GREEN_WOOL, () -> {
-						p.closeInventory();
+						InventoryHelper.close(p);
 						ChatInput.createQuery("player name to be trusted", response -> {
 							OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(response);
 							if(!offlinePlayer.hasPlayedBefore()) {
@@ -185,6 +192,74 @@ public class Land implements CommandExecutor, TabCompleter {
 						}, p);
 					});
 				}
+				if(ctx.equals("selltransfer")) {
+					inv.setMargin(1, 0);
+					inv.setItem(0, 2, ChatColor.YELLOW + "Sell Claim", Material.GOLD_INGOT, () -> {
+						InventoryHelper.close(p);
+						ChatInput.createQuery("amount of money to sell for", response -> {
+							InventoryHelper.close(p);
+							int amount = 0;
+							try {
+								amount = Integer.parseInt(response);
+							} catch(Exception e) {
+								p.sendMessage(new MessageBuilder("Land").appendCaption("Has to be a valid number").build());
+								return;
+							}
+							if(1 > amount) {
+								p.sendMessage(new MessageBuilder("Land").appendCaption("Cannot sell for a free or negative price").build());
+								return;
+							}
+							int finalAmount = amount;
+							ChatInput.createQuery("player name to sell land to", name -> {
+								InventoryHelper.close(p);
+								OfflinePlayer tPlayer = Bukkit.getOfflinePlayer(name);
+								if(!tPlayer.hasPlayedBefore()) {
+									p.sendMessage(new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").build());
+									return;
+								}
+								DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().getClaimOffers().add(
+										new ClaimOffer(new ClaimLocation(c.location.startX, c.location.startZ, c.location.endX, c.location.endZ, c.location.world), finalAmount)
+								);
+								DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().save();
+								p.sendMessage(new MessageBuilder("Land").appendCaption("Created offer for")
+										              .appendVariable("$" + NumberFormatter.addCommas(finalAmount))
+										              .appendCaption("to")
+										              .appendVariable(tPlayer.getName()).build());
+								DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().queueMessage(
+										new MessageBuilder("Land")
+												.appendVariable(p.getName())
+												.appendCaption("is offering to sell you a land claim, type")
+												.appendVariable("/profile")
+												.appendCaption("for more info").build()
+								);
+							}, p);
+						}, p);
+						inv.push("sell", 1);
+					});
+					inv.setItem(0, 4, ChatColor.RED + "Transfer Claim", Material.REDSTONE_BLOCK, () -> {
+						InventoryHelper.close(p);
+						ChatInput.createQuery("player name to transfer claim to", response -> {
+							OfflinePlayer tPlayer = Bukkit.getOfflinePlayer(response);
+							if(!tPlayer.hasPlayedBefore()) {
+								p.sendMessage(new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").build());
+								return;
+							}
+							String area = "(" + c.location.startX + ", " + c.location.startZ + " -> " + c.location.endX + ", " + c.location.endZ + ")";
+							ClaimManager.getDatabaseClaim(c).transfer(tPlayer.getUniqueId());
+							p.sendMessage(new MessageBuilder("Land").appendCaption("You no longer own the land at")
+									              .appendVariable(area + ".")
+									              .appendCaption("This is because ownership has been transferred to")
+									              .appendVariable(tPlayer.getName())
+									              .build());
+							DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().queueMessage(new MessageBuilder("Land").appendCaption("You now own the land at")
+									                    .appendVariable(area + ".")
+									                    .appendCaption("This was free as it has been transferred to you by")
+									                    .appendVariable(p.getName())
+									                    .build());
+
+						}, p);
+					});
+				}
 				if(ctx.equals("info")) {
 					inv.setMargin(1, 0);
 					inv.setItem(0, 0, ChatColor.YELLOW + "Claim Area", Material.GRASS_BLOCK, () -> {},
@@ -195,6 +270,19 @@ public class Land implements CommandExecutor, TabCompleter {
 						inv.push("destroy", 1);
 					}, Stream.of("&7This action is &c&lIRREVERSIBLE!", "&4&lYou will NOT receive any money as a result of this")
 							           .map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
+					if(DatabasePlayer.from(p).getClaimOffersFromClaim(c).isEmpty())
+					{
+						inv.setItem(0, 4, ChatColor.YELLOW + "Sell/Transfer Claim", Material.ENDER_PEARL, () -> {
+							inv.push("selltransfer", 1);
+						});
+					} else {
+						ClaimOffer offer = DatabasePlayer.from(p).getClaimOffersFromClaim(c).get(0);
+						inv.setItem(0, 4, ChatColor.RED + "Cancel ongoing offer", Material.ENDER_EYE, () -> {
+							DatabasePlayer.from(p).deleteAllOffersForClaim(c);
+						}, List.of("&7Offer to player: &e" + Bukkit.getOfflinePlayer(DatabasePlayer.getRecipientOfClaimOffer(offer)).getName(),
+						           "&7Offered for: &e$" + NumberFormatter.addCommas(offer.price)));
+					}
+
 
 					inv.setItem(0, 1, ChatColor.YELLOW + "Claim Value", Material.GREEN_DYE, () -> {},
 					            Stream.of("&7This claim's estimated value is: &a$" + NumberFormatter.addCommas(c.getEstWorth()))
@@ -203,7 +291,7 @@ public class Land implements CommandExecutor, TabCompleter {
 					                                          List.of("&7Username: &e" + Bukkit.getOfflinePlayer(UUID.fromString(c.owner)).getName())
 					), () -> {});
 					inv.setItem(0, 3, ChatColor.YELLOW + "Rename claim", Material.NAME_TAG, () -> {
-						p.closeInventory();
+						InventoryHelper.close(p);
 
 						int id = 0;
 						for(Claim tC : DatabasePlayer.from(p).getJsonPlayer().getData().claims) {

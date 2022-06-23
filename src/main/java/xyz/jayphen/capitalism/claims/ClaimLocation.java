@@ -9,6 +9,15 @@ public class ClaimLocation {
 	public int endZ = 0;
 
 	public String world = "";
+	public ClaimLocation() {}
+
+	public ClaimLocation (int startX, int startZ, int endX, int endZ, String world) {
+		this.startX = startX;
+		this.startZ = startZ;
+		this.endX = endX;
+		this.endZ = endZ;
+		this.world = world;
+	}
 
 	@Override
 	public boolean equals (Object o) {

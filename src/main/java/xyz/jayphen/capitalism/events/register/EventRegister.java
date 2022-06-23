@@ -17,6 +17,6 @@ public class EventRegister {
 		PlaytimeRewards.register();
 		ClaimVisualizer.register();
 		Lottery.register();
-
+		MessageQueue.register();
 	}
 }

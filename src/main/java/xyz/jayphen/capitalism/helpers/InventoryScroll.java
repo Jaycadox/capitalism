@@ -16,23 +16,31 @@ public class InventoryScroll {
 	int startRow = 0;
 	int size = 0;
 	int startPos = 0;
-
+	int ogSize = 0;
 	int viewStart = 0;
 	int viewEnd = 0;
 	public record ItemRunnable(ItemStack stack, Runnable runnable) {};
-	List<ItemRunnable> entireView;
-	public static final ArrayList<InventoryScroll> INSTANCES = new ArrayList<>();
 
-	public static InventoryScroll get(int column, int size, InventoryHelper inv, List<ItemRunnable> items) {
-		for(InventoryScroll inst : INSTANCES) {
-			if(inst.hashCode() == Objects.hash(items)) return inst;
+	public void setView (List<ItemRunnable> entireView) {
+		this.entireView = entireView;
+		this.size = ogSize;
+		if(size < entireView.size()) {
+			this.size -= 2;
 		}
-		InventoryScroll scroll = new InventoryScroll(column, size, inv, items);
-		return scroll;
+		viewEnd = this.size;
+		viewStart = 0;
 	}
 
-	public InventoryScroll(int column, int size, InventoryHelper inv, List<ItemRunnable> items) {
+	List<ItemRunnable> entireView;
+
+	public String contex;
+	public UUID player;
+
+
+	public InventoryScroll(int column, int size, InventoryHelper inv, List<ItemRunnable> items, String context, UUID player) {
+		System.out.println("constructed context: " + context);
 		inventory = inv;
+		this.ogSize = size;
 		this.size = size;
 		if(size < items.size()) {
 			this.size -= 2;
@@ -40,7 +48,8 @@ public class InventoryScroll {
 		startPos = column;
 		entireView = items;
 		viewEnd = this.size;
-		INSTANCES.add(this);
+		this.contex = context;
+		this.player = player;
 	}
 
 	@Override
@@ -53,7 +62,7 @@ public class InventoryScroll {
 
 	@Override
 	public int hashCode () {
-		return Objects.hash(entireView);
+		return Objects.hash(entireView, contex, player);
 	}
 
 	public void scrollRight() {

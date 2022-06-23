@@ -20,7 +20,9 @@ public class TaxTransaction {
 	public int getTotalAmount () {
 		return totalAmount;
 	}
-
+	public int getTotalAmount (ITax provider) {
+		return (int) (totalAmount + provider.applyTax(amount).getAmountTaxed());
+	}
 	int totalAmount = 0;
 
 	public TaxTransaction (OfflinePlayer from, OfflinePlayer to, int amount) {
@@ -78,7 +80,7 @@ public class TaxTransaction {
 		if (res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
 			if(!silent)
 				Bukkit.getPlayer(from).sendMessage(new MessageBuilder("Transaction").append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount)).append(Token.TokenType.CAPTION, "could not be transferred to").append(Token.TokenType.VARIABLE, Bukkit.getOfflinePlayer(to).getName()).append(Token.TokenType.CAPTION, "due to").append(Token.TokenType.VARIABLE, res.getErrorReason()).build());
-			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "insufficient funds");
+			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, res.getErrorReason());
 		}
 		return new TransactionResult(TransactionResult.TransactionResultType.SUCCESS, tag, "");
 	}

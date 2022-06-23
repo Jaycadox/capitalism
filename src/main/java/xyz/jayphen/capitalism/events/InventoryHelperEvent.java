@@ -10,7 +10,13 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import xyz.jayphen.capitalism.helpers.InventoryHelper;
 
+import java.util.HashMap;
+import java.util.UUID;
+
 public class InventoryHelperEvent implements Listener {
+
+	public static final HashMap<UUID, Boolean> CLICK_TYPES = new HashMap<>();
+
 	@EventHandler
 	public void onInventoryInteract(InventoryClickEvent event) {
 		if(!InventoryHelper.isInventory(event.getInventory())) return;
@@ -18,11 +24,27 @@ public class InventoryHelperEvent implements Listener {
 		if(event.getClickedInventory() == null || !InventoryHelper.isInventory(event.getClickedInventory())) return;
 		int slot = event.getSlot();
 		ItemStack item = event.getClickedInventory().getItem(slot);
+		CLICK_TYPES.put(event.getWhoClicked().getUniqueId(), event.getClick().isLeftClick());
 		if(item == null) return;
-		InventoryHelper.fromItem(item).run();
+		try {
+			InventoryHelper.fromItem(item).run();
+		} catch(Exception e) {
+			e.printStackTrace();
+			event.setCancelled(true);
+			event.getWhoClicked().closeInventory();
+		}
+
 		InventoryHelper helper = InventoryHelper.getInventory(event.getClickedInventory());
 		if(helper == null) return;
-		helper.reRender((Player) event.getWhoClicked());
+
+		try {
+			helper.reRender((Player) event.getWhoClicked());
+		} catch(Exception e) {
+			e.printStackTrace();
+			event.setCancelled(true);
+			event.getWhoClicked().closeInventory();
+		}
+
 	}
 
 	@EventHandler

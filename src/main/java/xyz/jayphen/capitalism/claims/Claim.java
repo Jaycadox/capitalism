@@ -112,6 +112,18 @@ public class Claim {
 		}
 		return 0;
 	}
+
+	public void transfer(UUID p) {
+		this.destroy();
+		DatabasePlayer.from(p).getJsonPlayer().getData().claims.add(
+				new Claim(new Location(Bukkit.getWorld(location.world), location.startX, 0, location.startZ),
+				          new Location(Bukkit.getWorld(location.world), location.endX, 0, location.endZ),
+		p));
+		DatabasePlayer.from(p).getJsonPlayer().save();
+
+		DatabasePlayer.from(UUID.fromString(owner)).getJsonPlayer().save();
+	}
+
 	public int getDistanceFrom(int x, int y) {
 		int startX = Math.min(location.startX + 5000, location.endX + 5000);
 		int endX = Math.max(location.startX + 5000, location.endX + 5000);

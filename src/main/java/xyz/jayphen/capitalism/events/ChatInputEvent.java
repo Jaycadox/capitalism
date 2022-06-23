@@ -23,12 +23,18 @@ public class ChatInputEvent implements Listener
 				ChatInput.OPEN_QUERIES.removeIf(x -> x.player() == event.getPlayer().getUniqueId());
 				event.getPlayer().sendMessage(new MessageBuilder("Query").appendCaption("Running query for:")
 						                              .appendVariable(q.query()).appendCaption("with value:").appendVariable(event.getMessage()).build());
-				new BukkitRunnable() {
-					@Override
-					public void run () {
-						q.runnable().run(event.getMessage());
-					}
-				}.runTask(Capitalism.plugin);
+				try {
+					new BukkitRunnable() {
+						@Override
+						public void run () {
+							q.runnable().run(event.getMessage());
+						}
+					}.runTask(Capitalism.plugin);
+				} catch(Exception e) {
+					e.printStackTrace();
+					event.getPlayer().closeInventory();
+				}
+
 				return;
 			}
 		}

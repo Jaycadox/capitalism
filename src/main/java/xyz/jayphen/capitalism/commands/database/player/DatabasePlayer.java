@@ -5,6 +5,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import xyz.jayphen.capitalism.Capitalism;
+import xyz.jayphen.capitalism.claims.Claim;
+import xyz.jayphen.capitalism.claims.ClaimOffer;
 import xyz.jayphen.capitalism.commands.database.Database;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
@@ -14,7 +16,9 @@ import xyz.jayphen.capitalism.lang.Token;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class DatabasePlayer {
 	private static HashMap<UUID, DatabasePlayer> cache = new HashMap<>();
@@ -106,7 +110,42 @@ public class DatabasePlayer {
 		}
 		return list;
 	}
+	public static Claim getClaimFromClaimOffer(ClaimOffer offer) {
+		if(!offer.valid) return null;
+		for(JSONPlayerData data : allJsonPlayerData()) {
+			if(data.claims == null) continue;
+			Optional<Claim> optClaim = data.claims.stream().filter(x -> x.location.hashCode() == offer.locationOffer.hashCode()).findFirst();
+			if(optClaim.isPresent()) return optClaim.get();
+		}
+		return null;
+	}
 
+	public static ArrayList<ClaimOffer> getClaimOffersFromClaim(Claim claim) {
+		ArrayList<ClaimOffer> offers = new ArrayList<>();
+		for(JSONPlayerData data : allJsonPlayerData()) {
+			if(data.claimOffers == null) continue;
+			offers.addAll(data.claimOffers.stream().filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode()).toList());
+		}
+		return offers;
+	}
+	public static UUID getRecipientOfClaimOffer(ClaimOffer offer) {
+		Claim claim = getClaimFromClaimOffer(offer);
+		for(JSONPlayerData data : allJsonPlayerData()) {
+			if(DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers == null) continue;
+			ClaimOffer optOffer = DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers.stream()
+					.filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode()).findFirst().orElse(null);
+			if(optOffer != null) return UUID.fromString(data.uuid);
+		}
+		return null;
+	}
+	public void deleteAllOffersForClaim(Claim claim) {
+		this.getJsonPlayer().getClaimOffers();
+		for(JSONPlayerData data : allJsonPlayerData()) {
+			if(DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers == null) continue;
+			DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers = new ArrayList<>(DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers.stream().filter(x -> x.locationOffer.hashCode() != claim.location.hashCode()).collect(Collectors.toList()));
+			DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().save();
+		}
+	}
 	public UUID getUuid () {
 		return uuid;
 	}
@@ -120,6 +159,7 @@ public class DatabasePlayer {
 		jpl.setData(gson.fromJson(rs.getString("json"), JSONPlayerData.class));
 		return jpl;
 	}
+
 	protected void saveJsonPlayer() {
 		try {
 			PreparedStatement stmt = Database.ctn.prepareStatement("UPDATE players\n" + "SET json=? WHERE uuid = '" + uuid.toString() + "';");
