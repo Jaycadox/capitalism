@@ -1,10 +1,13 @@
 package xyz.jayphen.capitalism.commands.database.player;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimLocation;
 import xyz.jayphen.capitalism.claims.ClaimOffer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class JSONPlayer {
@@ -19,15 +22,39 @@ public class JSONPlayer {
 
 	private DatabasePlayer dbp;
 
-	public ArrayList<String> getMessageQueue() {
+	public List<Component> getMessageQueue() {
 		if(data.messageQueue == null) {
 			data.messageQueue = new ArrayList<>();
 		}
-		return data.messageQueue;
+		return data.messageQueue.stream().map(x -> GsonComponentSerializer.gson().deserialize(x)).collect(Collectors.toList());
+	}
+	public Long getBannedUntil() {
+		if(data.bannedUntil == null) {
+			data.bannedUntil = (long) -1;
+		}
+		return data.bannedUntil;
+	}
+	public ArrayList<String> getBanRecord() {
+		if(data.banRecord == null) {
+			data.banRecord = new ArrayList<>();
+		}
+		return data.banRecord;
+	}
+	public String getBanReason() {
+		if(data.banReason == null) {
+			data.banReason = "";
+		}
+		return data.banReason;
+	}
+	public void removeMessageFromQueue(Component cmp) {
+		data.messageQueue = data.messageQueue.stream().filter(x -> cmp.hashCode() == GsonComponentSerializer.gson().deserialize(x).hashCode()).collect(Collectors.toCollection(ArrayList::new));
+	}
+	private void addMessageQueue(Component cmp) {
+		data.messageQueue.add(GsonComponentSerializer.gson().serialize(cmp));
 	}
 
-	public void queueMessage(String msg) {
-		getMessageQueue().add(msg);
+	public void queueMessage(Component msg) {
+		addMessageQueue(msg);
 		save();
 	}
 

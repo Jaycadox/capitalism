@@ -12,7 +12,10 @@ public class JSONPlayerData {
 	public ArrayList<Claim> claims = new ArrayList<>();
 	public ArrayList<ClaimOffer> claimOffers = new ArrayList<>();
 	public ArrayList<String> messageQueue = new ArrayList<>();
+	public Long bannedUntil = (long) -1;
+	public String banReason = "";
 
+	public ArrayList<String> banRecord = new ArrayList<>();
 	public boolean seenLandlordTip = false;
 
 

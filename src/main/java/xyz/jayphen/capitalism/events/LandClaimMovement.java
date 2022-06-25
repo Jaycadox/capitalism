@@ -39,13 +39,12 @@ public class LandClaimMovement implements Listener {
 				if(DatabasePlayer.from(enteredPlayer).getJsonPlayer().getData().seenLandlordTip) return;
 				DatabasePlayer.from(enteredPlayer).getJsonPlayer().getData().seenLandlordTip = true;
 				DatabasePlayer.from(enteredPlayer).getJsonPlayer().save();
-				enteredPlayer.sendMessage(
-						new MessageBuilder("Tip")
-								.appendCaption("You can type")
-								.appendVariable("/land")
-								.appendCaption("whilst standing inside your land claim to open the Landlord Settings menu")
-								.build()
-				);
+
+				new MessageBuilder("Tip")
+						.appendCaption("You can type")
+						.appendVariable("/land")
+						.appendCaption("whilst standing inside your land claim to open the Landlord Settings menu")
+						.send(enteredPlayer);
 			}
 		});
 

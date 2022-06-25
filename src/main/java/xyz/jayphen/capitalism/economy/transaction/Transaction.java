@@ -41,7 +41,7 @@ public class Transaction {
 	public void sendWatermark (UUID p) {
 		OfflinePlayer player = Bukkit.getOfflinePlayer(p);
 		if (player.getPlayer() != null && player.hasPlayedBefore()) {
-			player.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(new MessageBuilder("Economy").append(Token.TokenType.CAPTION, "Transaction pending...").build()));
+			new MessageBuilder("Economy").appendCaption("Transaction pending...").sendActionBar(player.getPlayer());
 		}
 	}
 

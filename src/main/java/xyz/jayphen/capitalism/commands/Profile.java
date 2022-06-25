@@ -81,7 +81,7 @@ public class Profile implements CommandExecutor {
 				scroll[0].render();
 			}
 			if(submenu.equals("offers")) {
-				List<InventoryScroll.ItemRunnable> itemRunnables = databasePlayer.getJsonPlayer().getData().claimOffers.stream().map(
+				List<InventoryScroll.ItemRunnable> itemRunnables = databasePlayer.getJsonPlayer().getClaimOffers().stream().map(
 						x -> {
 							Claim c = DatabasePlayer.getClaimFromClaimOffer(x);
 							String area = "(" + c.location.startX + ", " + c.location.startZ + " -> " + c.location.endX + ", " + c.location.endZ + ")";
@@ -102,8 +102,8 @@ public class Profile implements CommandExecutor {
 									TaxTransaction transaction = new TaxTransaction(p, Bukkit.getOfflinePlayer(UUID.fromString(c.owner)), x.price);
 									var result = transaction.transact(TaxedTransaction.INSTANCE, true);
 									if(result.getType() != TransactionResult.TransactionResultType.SUCCESS) {
-										p.sendMessage(new MessageBuilder("Land Purchase").appendCaption("Transaction failed due to:")
-												              .appendVariable(result.getErrorReason()).build());
+										new MessageBuilder("Land Purchase").appendCaption("Transaction failed due to:")
+												.appendVariable(result.getErrorReason()).send(p);
 										return;
 									}
 									DatabasePlayer.from(UUID.fromString(DatabasePlayer.getClaimFromClaimOffer(x).owner)).deleteAllOffersForClaim(DatabasePlayer.getClaimFromClaimOffer(x));
@@ -117,24 +117,24 @@ public class Profile implements CommandExecutor {
 													.appendVariable(p.getName())
 													.appendCaption("for")
 													.appendVariable("$" + NumberFormatter.addCommas(x.price))
-													.build());
+													.make());
 
-									p.sendMessage(new MessageBuilder("Land").appendCaption("You now own the land at")
-											                    .appendVariable(area + ".")
-											                    .appendCaption("This action has costed you")
-											                    .appendVariable("$" + NumberFormatter.addCommas(transaction.getTotalAmount(TaxedTransaction.INSTANCE)))
-											                    .build());
+									new MessageBuilder("Land").appendCaption("You now own the land at")
+											.appendVariable(area + ".")
+											.appendCaption("This action has costed you")
+											.appendVariable("$" + NumberFormatter.addCommas(transaction.getTotalAmount(TaxedTransaction.INSTANCE)))
+											.send(p);
 									InventoryHelper.close(p);
 								} else {
 									DatabasePlayer.from(UUID.fromString(DatabasePlayer.getClaimFromClaimOffer(x).owner)).deleteAllOffersForClaim(DatabasePlayer.getClaimFromClaimOffer(x));
 									DatabasePlayer.from(UUID.fromString(DatabasePlayer.getClaimFromClaimOffer(x).owner)).getJsonPlayer().save();
-									p.sendMessage(new MessageBuilder("Land").appendCaption("Offer has been rejected")
-											              .build());
+									new MessageBuilder("Land").appendCaption("Offer has been rejected")
+											              .send(p);
 									DatabasePlayer.from(UUID.fromString(DatabasePlayer.getClaimFromClaimOffer(x).owner)).getJsonPlayer().queueMessage(
 											new MessageBuilder("Land").appendCaption("Your land claim offer to")
 													.appendVariable(p.getName())
 													.appendCaption("has been rejected")
-													.build());
+													.make());
 								}
 
 							};
@@ -161,8 +161,8 @@ public class Profile implements CommandExecutor {
 				helper.setItem(0, 3, "&eMoney sent", Material.ENDER_PEARL, () -> {
 				}, List.of("&7You've sent: &a&l$" + NumberFormatter.addCommas(databasePlayer.getJsonPlayer().getData().stats.moneySent)));
 				helper.setItem(0, 4, "&eTax brackets", Material.IRON_BARS, () -> {
-				}, List.of("&7Transaction tax: &e" + (100 * TaxedTransaction.INSTANCE.applyTax((int) databasePlayer.getMoneySafe()).getTaxAmount()) + "%",
-				           "&7Death tax: &e" + (100 * TaxedDeath.INSTANCE.applyTax((int) databasePlayer.getMoneySafe()).getTaxAmount()) + "%"
+				}, List.of("&7Transaction tax: &e" + (int) (100 * TaxedTransaction.INSTANCE.applyTax((int) databasePlayer.getMoneySafe()).getTaxAmount()) + "%",
+				           "&7Death tax: &e" + (int) (100 * TaxedDeath.INSTANCE.applyTax((int) databasePlayer.getMoneySafe()).getTaxAmount()) + "%"
 				));
 			}
 		});

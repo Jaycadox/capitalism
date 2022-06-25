@@ -38,7 +38,7 @@ public class InventoryScroll {
 
 
 	public InventoryScroll(int column, int size, InventoryHelper inv, List<ItemRunnable> items, String context, UUID player) {
-		System.out.println("constructed context: " + context);
+
 		inventory = inv;
 		this.ogSize = size;
 		this.size = size;

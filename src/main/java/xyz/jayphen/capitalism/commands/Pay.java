@@ -22,7 +22,7 @@ public class Pay implements CommandExecutor {
 	@Override
 	public boolean onCommand (CommandSender commandSender, Command command, String s, String[] args) {
 		if (!(commandSender instanceof Player)) {
-			commandSender.sendMessage(new MessageBuilder("Economy").append(Token.TokenType.CAPTION, "Only players can use this command").build());
+			new MessageBuilder("Economy").appendCaption("Only players can use this command").send(commandSender);
 			return true;
 		}
 		if (args.length != 2) {
@@ -42,12 +42,15 @@ public class Pay implements CommandExecutor {
 		try {
 			Integer.parseInt(args[1]);
 		} catch (NumberFormatException e) {
-			commandSender.sendMessage(new MessageBuilder("Economy").append(Token.TokenType.CAPTION, "Invalid amount of money specified").build());
+			new MessageBuilder("Economy").appendCaption("Invalid amount of money specified").send(commandSender);
 			return true;
 		}
 		OfflinePlayer otherPlayer = Bukkit.getServer().getOfflinePlayer(args[0]);
 		if (!otherPlayer.hasPlayedBefore()) {
-			commandSender.sendMessage(new MessageBuilder("Economy").append(Token.TokenType.CAPTION, "The player").append(Token.TokenType.VARIABLE, args[0]).append(Token.TokenType.CAPTION, "could not be found").build());
+			new MessageBuilder("Economy")
+					.appendCaption("The player")
+					.appendVariable(args[0])
+					.appendCaption("could not be found").send(commandSender);
 			return true;
 		}
 		Player p = (Player) commandSender;
@@ -55,11 +58,11 @@ public class Pay implements CommandExecutor {
 		TaxResult tax = TaxedTransaction.INSTANCE.applyTax(amount);
 
 		if((int)tax.getAmountTaxed() + amount > DatabasePlayer.from(p).getMoneySafe()) {
-			commandSender.sendMessage(new MessageBuilder("Transaction")
-					                          .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount))
-					                          .append(Token.TokenType.CAPTION, "could not be transfered due to")
-					                          .append(Token.TokenType.VARIABLE, "insufficient funds")
-					                          .build());
+			new MessageBuilder("Transaction")
+					.appendVariable("$" + NumberFormatter.addCommas(amount))
+					.appendCaption("could not be transfered due to")
+					.appendVariable("insufficient funds")
+					.send(commandSender);
 			return true;
 		}
 
@@ -68,34 +71,47 @@ public class Pay implements CommandExecutor {
 		TransactionResult tax_res = tax_t.transact();
 
 		if (tax_res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
-			commandSender.sendMessage(new MessageBuilder("Transaction").append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount + (int)tax.getAmountTaxed())).append(Token.TokenType.CAPTION, "(after tax) could not be sent due to").append(Token.TokenType.VARIABLE, tax_res.getErrorReason()).build());
+			new MessageBuilder("Transaction")
+					.appendVariable("$" + NumberFormatter.addCommas(amount + (int)tax.getAmountTaxed()))
+					.appendCaption("(after tax) could not be sent due to")
+					.appendVariable(tax_res.getErrorReason()).send(commandSender);
 			return true;
 		}
 		DatabasePlayer.from(p).getJsonPlayer().getData().stats.amountTaxed += tax.getAmountTaxed();
 		DatabasePlayer.from(p).getJsonPlayer().save();
-		commandSender.sendMessage(new MessageBuilder("Transaction Tax")
-				                          .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
-				                          .append(Token.TokenType.CAPTION, "has been removed from your account following a")
-				                          .append(Token.TokenType.VARIABLE, tax.getTaxAmount() * 100 + "%")
-				                          .append(Token.TokenType.CAPTION, "tax")
-				                          .build());
+		new MessageBuilder("Transaction Tax")
+				.appendVariable("$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
+				.appendCaption("has been removed from your account following a")
+				.appendVariable(tax.getTaxAmount() * 100 + "%")
+				.appendCaption("tax")
+				.send(commandSender);
 
 		Transaction t = new Transaction(p, otherPlayer, amount);
 		TransactionResult res = t.transact();
 
 		if (res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
-			commandSender.sendMessage(new MessageBuilder("Transaction").append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount)).append(Token.TokenType.CAPTION, "could not be transferred to").append(Token.TokenType.VARIABLE, otherPlayer.getName()).append(Token.TokenType.CAPTION, "due to").append(Token.TokenType.VARIABLE, res.getErrorReason()).build());
+			new MessageBuilder("Transaction")
+					.appendVariable("$" + NumberFormatter.addCommas(amount))
+					.appendCaption("could not be transferred to")
+					.appendVariable(otherPlayer.getName())
+					.appendCaption("due to")
+					.appendVariable(res.getErrorReason()).send(commandSender);
 			return true;
 		}
-		commandSender.sendMessage(new MessageBuilder("Transaction")
-				                          .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount))
-				                          .append(Token.TokenType.BRACKET, res.getHash())
-				                          .append(Token.TokenType.CAPTION, "has been transferred to")
-				                          .append(Token.TokenType.VARIABLE, otherPlayer.getName() + ".")
-				                          .append(Token.TokenType.CAPTION, "You now have")
-				                          .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(DatabasePlayer.from(p).getMoneySafe())).build());
+		new MessageBuilder("Transaction")
+				.appendVariable("$" + NumberFormatter.addCommas(amount))
+				.append(Token.TokenType.BRACKET, res.getHash())
+				.appendCaption("has been transferred to")
+				.appendVariable(otherPlayer.getName() + ".")
+				.appendCaption("You now have")
+				.appendVariable("$" + NumberFormatter.addCommas(DatabasePlayer.from(p).getMoneySafe())).send(commandSender);
 		if (otherPlayer.isOnline() && otherPlayer.getPlayer() != null) {
-			otherPlayer.getPlayer().sendMessage(new MessageBuilder("Transaction").append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount)).append(Token.TokenType.BRACKET, res.getHash()).append(Token.TokenType.CAPTION, "has been transferred to your balance. You how have").append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(DatabasePlayer.from(otherPlayer).getMoneySafe())).build());
+			new MessageBuilder("Transaction")
+					.appendVariable("$" + NumberFormatter.addCommas(amount))
+					.append(Token.TokenType.BRACKET, res.getHash())
+					.appendCaption("has been transferred to your balance. You how have")
+					.appendVariable("$" + NumberFormatter.addCommas(DatabasePlayer.from(otherPlayer).getMoneySafe()))
+					.send(otherPlayer.getPlayer());
 		}
 
 

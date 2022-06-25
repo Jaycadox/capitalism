@@ -30,18 +30,18 @@ public class DeathTax implements Listener {
 
 		TransactionResult result = t.transact();
 		if(result.getType() == TransactionResult.TransactionResultType.ERROR) {
-			event.getEntity().sendMessage(new MessageBuilder("Death Tax")
-					                              .append(Token.TokenType.CAPTION, "Failed to apply death tax. You've gotten lucky this time >:(")
-					                              .build());
+			new MessageBuilder("Death Tax")
+					.appendCaption("Failed to apply death tax. You've gotten lucky this time >:(")
+					.send(event.getEntity());
 			return;
 		}
 		dbp.getJsonPlayer().getData().stats.amountTaxed += tax.getAmountTaxed();
 		dbp.getJsonPlayer().save();
-		event.getEntity().sendMessage(new MessageBuilder("Death Tax")
-				                              .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
-				                              .append(Token.TokenType.CAPTION, "has been deducted from your account. This was")
-				                              .append(Token.TokenType.VARIABLE, (Math.ceil(tax.getTaxAmount() * 100)) + "%")
-				                              .append(Token.TokenType.CAPTION, "of your account's balance")
-				                              .build());
+		new MessageBuilder("Death Tax")
+				.appendVariable("$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
+				.appendCaption("has been deducted from your account. This was")
+				.appendVariable((Math.ceil(tax.getTaxAmount() * 100)) + "%")
+				.appendCaption("of your account's balance")
+				.send(event.getEntity());
 	}
 }

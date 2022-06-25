@@ -1,6 +1,7 @@
 package xyz.jayphen.capitalism.events;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -15,14 +16,14 @@ import java.util.stream.Collectors;
 
 public class ChatInputEvent implements Listener
 {
-	@EventHandler
-	public void onChat(AsyncPlayerChatEvent event) {
+
+	public static boolean onChat(AsyncPlayerChatEvent event) {
 		for(ChatInput.Query q : ChatInput.OPEN_QUERIES) {
 			if(q.player() == event.getPlayer().getUniqueId()) {
 				event.setCancelled(true);
 				ChatInput.OPEN_QUERIES.removeIf(x -> x.player() == event.getPlayer().getUniqueId());
-				event.getPlayer().sendMessage(new MessageBuilder("Query").appendCaption("Running query for:")
-						                              .appendVariable(q.query()).appendCaption("with value:").appendVariable(event.getMessage()).build());
+				new MessageBuilder("Query").appendCaption("Running query for:")
+						.appendVariable(q.query()).appendCaption("with value:").appendVariable(event.getMessage()).send(event.getPlayer());
 				try {
 					new BukkitRunnable() {
 						@Override
@@ -35,9 +36,10 @@ public class ChatInputEvent implements Listener
 					event.getPlayer().closeInventory();
 				}
 
-				return;
+				return true;
 			}
 		}
+		return false;
 	}
 	@EventHandler
 	public void onLeave(PlayerQuitEvent event) {
@@ -52,8 +54,8 @@ public class ChatInputEvent implements Listener
 					for(ChatInput.Query q : ChatInput.getOpenQueries()) {
 						if (q.player() == event.getPlayer().getUniqueId()) {
 							ChatInput.getOpenQueries().removeIf(x -> x.player() == event.getPlayer().getUniqueId());
-							event.getPlayer().sendMessage(new MessageBuilder("Query").appendCaption("Canceled query with name:")
-									                              .appendVariable(q.query()).build());
+							new MessageBuilder("Query").appendCaption("Canceled query with name:")
+									.appendVariable(q.query()).send(event.getPlayer());
 						}
 					}
 				} catch(Exception ignored) {}

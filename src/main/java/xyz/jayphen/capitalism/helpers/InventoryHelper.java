@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class InventoryHelper {
 	private static final ArrayList<InventoryHelper> INVENTORIES = new ArrayList<>();
-	private final HashMap<ItemStack, Runnable> ITEMS = new HashMap<>();
+	public final HashMap<ItemStack, Runnable> ITEMS = new HashMap<>();
 
 	public Inventory getInventory () {
 		return inventory;
@@ -54,6 +54,7 @@ public class InventoryHelper {
 		this.onRender = render;
 	}
 	public void push(String name, int rows) {
+
 		this.inventoryNameStack.add(name);
 	}
 	public void pop() {
@@ -214,7 +215,7 @@ public class InventoryHelper {
 		INVENTORIES.remove(this);
 	}
 
-	public static Runnable fromItem(ItemStack itemStack) {
+	public Runnable fromItem(ItemStack itemStack) {
 		Runnable r = () -> {
 		};
 		if(SPECIAL_ITEMS.containsKey(itemStack.getItemMeta().getDisplayName())) {
@@ -222,13 +223,13 @@ public class InventoryHelper {
 			SPECIAL_ITEMS.remove(itemStack.getItemMeta().getDisplayName());
 			return r;
 		}
-		for(InventoryHelper i : INVENTORIES) {
-			for(Map.Entry<ItemStack, Runnable> itemStack1 : i.ITEMS.entrySet()) {
-				if(itemStack1.getKey().hashCode() == itemStack.hashCode()) {
-					return itemStack1.getValue();
-				}
+
+		for(Map.Entry<ItemStack, Runnable> itemStack1 : ITEMS.entrySet()) {
+			if(itemStack1.getKey().hashCode() == itemStack.hashCode()) {
+				return itemStack1.getValue();
 			}
 		}
+
 		return r;
 	}
 	public static boolean isInventory(Inventory i) {

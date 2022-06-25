@@ -43,15 +43,16 @@ public class TaxTransaction {
 	}
 	String tag = generateTag();
 	public TransactionResult transact (ITax taxProvider, boolean silent) {
+		if(Bukkit.getPlayer(from) == null) return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "invalid player");
 		TaxResult tax = taxProvider.applyTax(amount);
 		totalAmount = (int) (tax.getAmountTaxed() + amount);
 		if((int)tax.getAmountTaxed() + amount > DatabasePlayer.from(from).getMoneySafe()) {
 			if(!silent)
-				Bukkit.getPlayer(from).sendMessage(new MessageBuilder("Transaction")
-					                          .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount))
-					                          .append(Token.TokenType.CAPTION, "could not be transfered due to")
-					                          .append(Token.TokenType.VARIABLE, "insufficient funds")
-					                          .build());
+				new MessageBuilder("Transaction")
+						.appendVariable("$" + NumberFormatter.addCommas(amount))
+						.appendCaption("could not be transfered due to")
+						.appendVariable("insufficient funds")
+						.send(Bukkit.getPlayer(from));
 			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "insufficient funds (after tax)");
 		}
 
@@ -61,25 +62,30 @@ public class TaxTransaction {
 
 		if (tax_res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
 			if(!silent)
-				Bukkit.getPlayer(from).sendMessage(new MessageBuilder("Transaction").append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount + (int)tax.getAmountTaxed())).append(Token.TokenType.CAPTION, "(after tax) could not be sent due to").append(Token.TokenType.VARIABLE, tax_res.getErrorReason()).build());
+				new MessageBuilder("Transaction").appendVariable("$" + NumberFormatter.addCommas(amount + (int)tax.getAmountTaxed())).appendCaption("(after tax) could not be sent due to").appendVariable(tax_res.getErrorReason()).send(Bukkit.getPlayer(from));
 			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "insufficient funds (after tax)");
 		}
 		DatabasePlayer.from(from).getJsonPlayer().getData().stats.amountTaxed += tax.getAmountTaxed();
 		DatabasePlayer.from(from).getJsonPlayer().save();
 		if(!silent)
-			Bukkit.getPlayer(from).sendMessage(new MessageBuilder("Transaction Tax")
-				                          .append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
-				                          .append(Token.TokenType.CAPTION, "has been removed from your account following a")
-				                          .append(Token.TokenType.VARIABLE, tax.getTaxAmount() * 100 + "%")
-				                          .append(Token.TokenType.CAPTION, "tax")
-				                          .build());
+			new MessageBuilder("Transaction Tax")
+					.appendVariable("$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
+					.appendCaption("has been removed from your account following a")
+					.appendVariable(tax.getTaxAmount() * 100 + "%")
+					.appendCaption("tax")
+					.send(Bukkit.getPlayer(from));
 
 		Transaction t = new Transaction(from, to, amount);
 		TransactionResult res = t.transact();
 
 		if (res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
 			if(!silent)
-				Bukkit.getPlayer(from).sendMessage(new MessageBuilder("Transaction").append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount)).append(Token.TokenType.CAPTION, "could not be transferred to").append(Token.TokenType.VARIABLE, Bukkit.getOfflinePlayer(to).getName()).append(Token.TokenType.CAPTION, "due to").append(Token.TokenType.VARIABLE, res.getErrorReason()).build());
+				new MessageBuilder("Transaction")
+						.appendVariable("$" + NumberFormatter.addCommas(amount))
+						.appendCaption("could not be transferred to")
+						.appendVariable(Bukkit.getOfflinePlayer(to).getName())
+						.appendCaption("due to")
+						.appendVariable(res.getErrorReason()).send(Bukkit.getPlayer(from));
 			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, res.getErrorReason());
 		}
 		return new TransactionResult(TransactionResult.TransactionResultType.SUCCESS, tag, "");

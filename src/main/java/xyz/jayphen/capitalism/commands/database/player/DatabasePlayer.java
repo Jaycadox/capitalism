@@ -1,6 +1,7 @@
 package xyz.jayphen.capitalism.commands.database.player;
 
 import com.google.gson.Gson;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -8,6 +9,8 @@ import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimOffer;
 import xyz.jayphen.capitalism.commands.database.Database;
+import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
+import xyz.jayphen.capitalism.economy.transaction.Transaction;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.NumberFormatter;
@@ -31,35 +34,50 @@ public class DatabasePlayer {
 
 	JSONPlayer jsonPlayer = null;
 	public static Gson gson = new Gson();
-
-
-	public DatabasePlayer (Connection c, UUID uuid) {
+	public DatabasePlayer(Connection c, UUID uuid, int amount) {
 		this.connection = c;
 		this.uuid = uuid;
-		if (!exists()) generate(1000000);
+		boolean didExist = exists();
+		if (!didExist) generate(amount);
 		try {
 			jsonPlayer = loadJsonPlayer();
 			jsonPlayer.getData().uuid = uuid.toString();
 			jsonPlayer.save();
+			if(!didExist) {
+				this.getJsonPlayer().queueMessage(
+						new MessageBuilder("Welcome")
+								.appendCaption("Hello,")
+								.appendVariable(Bukkit.getOfflinePlayer(uuid).getName() + ".")
+								.appendCaption("Welcome to Capitalism. The goal is to reach $1,000,000,000. You have been awarded")
+								.appendVariable("$" + NumberFormatter.addCommas(amount))
+								.appendCaption("as a starting bonus. For more information regarding how to play,")
+								.appendComponent(MiniMessage.miniMessage()
+										                 .deserialize("<click:open_url:https://capitalism.jayphen.xyz><yellow>click here</yellow></click>"))
+								.appendCaption("to view the 'Quick start guide' and documentation")
+								.make());
+			}
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-
 	}
+
 
 	public static DatabasePlayer from (OfflinePlayer p) {
 		return from(p.getUniqueId());
 	}
 
 	public static DatabasePlayer from (UUID p) {
+		return from(p, 1000000);
+	}
+	public static DatabasePlayer from (UUID p, int startingCash) {
 		if (cache.containsKey(p)) {
 			return cache.get(p);
 		}
-		DatabasePlayer databasePlayer = new DatabasePlayer(Capitalism.db.connect(), p);
+		DatabasePlayer databasePlayer = new DatabasePlayer(Capitalism.db.connect(), p, startingCash);
 		cache.put(p, databasePlayer);
 		return databasePlayer;
 	}
-
 	public static DatabasePlayer nonPlayer (String s) {
 		return DatabasePlayer.from(UUID.fromString(s + "-0000-0000-0000-000000000000"));
 	}
@@ -234,7 +252,25 @@ public class DatabasePlayer {
 			throw new RuntimeException(e);
 		}
 	}
+	public void delete(boolean giveStartingBonus) {
+		ArrayList<String> banHistory = this.getJsonPlayer().getBanRecord();
+		Transaction transaction = new Transaction(Bukkit.getOfflinePlayer(getUuid()).getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), (int) getMoneySafe());
+		transaction.transact();
+		try {
+			Statement stmt = Database.ctn.createStatement();
+			stmt.execute("DELETE FROM players WHERE uuid = '" + uuid.toString() + "'");
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+		UUID uuid = getUuid();
+		cache.remove(uuid);
+		DatabasePlayer.from(uuid, giveStartingBonus ? 1000000 : 0).getJsonPlayer().queueMessage(
+				new MessageBuilder("Capitalism").appendCaption("Your player data has been reset by an administrator").make()
+		);
+		DatabasePlayer.from(uuid).getJsonPlayer().getData().banRecord = banHistory;
+		DatabasePlayer.from(uuid).getJsonPlayer().save();
 
+	}
 	public void generate (double startingCash) {
 
 		String sql = "INSERT INTO players\n" + "VALUES ('" + uuid.toString() + "', " + 0 + ", 0, \"{}\"); ";
@@ -244,11 +280,5 @@ public class DatabasePlayer {
 		} catch (SQLException e) {
 		}
 		TransactionResult trs = Database.injector.inject(uuid, (int) startingCash);
-		if (trs.getType() == TransactionResult.TransactionResultType.SUCCESS) {
-			if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
-				Player p = Bukkit.getOfflinePlayer(uuid).getPlayer();
-				p.sendMessage(new MessageBuilder("Welcome").append(Token.TokenType.CAPTION, "Hello,").append(Token.TokenType.VARIABLE, p.getName() + ".").append(Token.TokenType.CAPTION, "Welcome to Capitalism. The goal is to reach $1,000,000,000. You have been awarded").append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(startingCash)).append(Token.TokenType.CAPTION, "as a starting bonus").build());
-			}
-		}
 	}
 }

@@ -14,9 +14,9 @@ public class ChatInput {
 	}
 	public static void createQuery(String text, ChatQueryRunnable onQuery, Player p) {
 		OPEN_QUERIES.add(new Query(p.getUniqueId(), onQuery, text));
-		p.sendMessage(new MessageBuilder("Query")
-				              .appendCaption("Please type in chat your query for:")
-				              .appendVariable(text + ".")
-				              .appendCaption("If you wish to cancel, please sneak").build());
+		new MessageBuilder("Query")
+				.appendCaption("Please type in chat your query for:")
+				.appendVariable(text + ".")
+				.appendCaption("If you wish to cancel, please sneak").send(p);
 	}
 }

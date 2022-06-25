@@ -14,6 +14,7 @@ public class EventRegister {
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new LandClaimInteraction(), Capitalism.plugin);
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new InventoryHelperEvent(), Capitalism.plugin);
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new ChatInputEvent(), Capitalism.plugin);
+		Capitalism.plugin.getServer().getPluginManager().registerEvents(new Chat(), Capitalism.plugin);
 		PlaytimeRewards.register();
 		ClaimVisualizer.register();
 		Lottery.register();

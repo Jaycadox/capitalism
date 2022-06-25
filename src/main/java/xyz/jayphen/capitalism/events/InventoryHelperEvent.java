@@ -26,19 +26,21 @@ public class InventoryHelperEvent implements Listener {
 		ItemStack item = event.getClickedInventory().getItem(slot);
 		CLICK_TYPES.put(event.getWhoClicked().getUniqueId(), event.getClick().isLeftClick());
 		if(item == null) return;
+		InventoryHelper helper = InventoryHelper.getInventory(event.getClickedInventory());
 		try {
-			InventoryHelper.fromItem(item).run();
+			helper.fromItem(item).run();
+
 		} catch(Exception e) {
 			e.printStackTrace();
 			event.setCancelled(true);
 			event.getWhoClicked().closeInventory();
 		}
 
-		InventoryHelper helper = InventoryHelper.getInventory(event.getClickedInventory());
-		if(helper == null) return;
 
+		if(helper == null) return;
 		try {
 			helper.reRender((Player) event.getWhoClicked());
+
 		} catch(Exception e) {
 			e.printStackTrace();
 			event.setCancelled(true);

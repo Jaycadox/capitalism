@@ -75,7 +75,7 @@ public class Land implements CommandExecutor, TabCompleter {
 				int selectedID = Integer.parseInt(args[0].replace("id=", ""));
 				ArrayList<Claim> claims = DatabasePlayer.from(((Player)commandSender)).getJsonPlayer().getData().claims;
 				if(selectedID >= claims.size() || 0 > selectedID) {
-					commandSender.sendMessage(new MessageBuilder("Land").appendCaption("Invalid ID selection").build());
+					new MessageBuilder("Land").appendCaption("Invalid ID selection").send(commandSender);
 					return true;
 				}
 				c = claims.get(selectedID);
@@ -101,11 +101,11 @@ public class Land implements CommandExecutor, TabCompleter {
 		if(!(commandSender instanceof Player p)) return;
 		Claim cache = oClaim != null ? oClaim : ClaimManager.getCachedClaim(p.getLocation()).orElse(null);
 		if(cache == null) {
-			p.sendMessage(new MessageBuilder("Land").appendCaption("You are currently not inside a claimed area of land").build());
+			new MessageBuilder("Land").appendCaption("You are currently not inside a claimed area of land").send(p);
 			return;
 		}
 		if(!cache.hasPermission(p, Claim.ClaimInteractionType.OWNER)) {
-			p.sendMessage(new MessageBuilder("Land").appendCaption("You do not have permission to view the Landlord menu for this claimed area").build());
+			new MessageBuilder("Land").appendCaption("You do not have permission to view the Landlord menu for this claimed area").send(p);
 			return;
 		}
 		Claim c = ClaimManager.getDatabaseClaim(cache);
@@ -139,12 +139,10 @@ public class Land implements CommandExecutor, TabCompleter {
 					inv.setMargin(3, 0);
 					inv.setItem(0, 0, ChatColor.GREEN + "" + ChatColor.BOLD + "CONFIRM", Material.GREEN_WOOL, () -> {
 						ClaimManager.getDatabaseClaim(c).destroy();
-						p.sendMessage(
-								new MessageBuilder("Land").appendCaption("Land claim has been destroyed. Please allow up to")
-										.appendVariable("8 seconds")
-										.appendCaption("for changes to take effect")
-										.build()
-						);
+						new MessageBuilder("Land").appendCaption("Land claim has been destroyed. Please allow up to")
+								.appendVariable("8 seconds")
+								.appendCaption("for changes to take effect")
+								.send(p);
 						InventoryHelper.close(p);
 					});
 					inv.addMargin(0, 1);
@@ -160,7 +158,7 @@ public class Land implements CommandExecutor, TabCompleter {
 								, () -> {
 							DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().removeIf(pl -> x.equals(player.getUniqueId().toString()));
 							DatabasePlayer.from(p).getJsonPlayer().save();
-							p.sendMessage(new MessageBuilder("Land").appendVariable(player.getName()).appendCaption("has been removed from the trust list").build());
+							new MessageBuilder("Land").appendVariable(player.getName()).appendCaption("has been removed from the trust list").send(p);
 						});
 					}).collect(Collectors.toList());
 					if(scroll[0] == null) {
@@ -174,20 +172,20 @@ public class Land implements CommandExecutor, TabCompleter {
 						ChatInput.createQuery("player name to be trusted", response -> {
 							OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(response);
 							if(!offlinePlayer.hasPlayedBefore()) {
-								p.sendMessage(new MessageBuilder("Land").appendCaption("Could not find that player").build());
+								new MessageBuilder("Land").appendCaption("Could not find that player").send(p);
 								return;
 							}
 							if(DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().contains(offlinePlayer.getUniqueId().toString())) {
-								p.sendMessage(new MessageBuilder("Land").appendCaption("That player is already trusted").build());
+								new MessageBuilder("Land").appendCaption("That player is already trusted").send(p);
 								return;
 							}
 							if(offlinePlayer.getUniqueId() == p.getUniqueId()) {
-								p.sendMessage(new MessageBuilder("Land").appendCaption("You cannot trust yourself").build());
+								new MessageBuilder("Land").appendCaption("You cannot trust yourself").send(p);
 								return;
 							}
 							DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().add(offlinePlayer.getUniqueId().toString());
 							DatabasePlayer.from(p).getJsonPlayer().save();
-							p.sendMessage(new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been added to the trust list").build());
+							new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been added to the trust list").send(p);
 							inv.show(p, "trusted");
 						}, p);
 					});
@@ -202,11 +200,11 @@ public class Land implements CommandExecutor, TabCompleter {
 							try {
 								amount = Integer.parseInt(response);
 							} catch(Exception e) {
-								p.sendMessage(new MessageBuilder("Land").appendCaption("Has to be a valid number").build());
+								new MessageBuilder("Land").appendCaption("Has to be a valid number").send(p);
 								return;
 							}
 							if(1 > amount) {
-								p.sendMessage(new MessageBuilder("Land").appendCaption("Cannot sell for a free or negative price").build());
+								new MessageBuilder("Land").appendCaption("Cannot sell for a free or negative price").send(p);
 								return;
 							}
 							int finalAmount = amount;
@@ -214,23 +212,23 @@ public class Land implements CommandExecutor, TabCompleter {
 								InventoryHelper.close(p);
 								OfflinePlayer tPlayer = Bukkit.getOfflinePlayer(name);
 								if(!tPlayer.hasPlayedBefore()) {
-									p.sendMessage(new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").build());
+									new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").send(p);
 									return;
 								}
 								DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().getClaimOffers().add(
 										new ClaimOffer(new ClaimLocation(c.location.startX, c.location.startZ, c.location.endX, c.location.endZ, c.location.world), finalAmount)
 								);
 								DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().save();
-								p.sendMessage(new MessageBuilder("Land").appendCaption("Created offer for")
-										              .appendVariable("$" + NumberFormatter.addCommas(finalAmount))
-										              .appendCaption("to")
-										              .appendVariable(tPlayer.getName()).build());
+								new MessageBuilder("Land").appendCaption("Created offer for")
+										.appendVariable("$" + NumberFormatter.addCommas(finalAmount))
+										.appendCaption("to")
+										.appendVariable(tPlayer.getName()).send(p);
 								DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().queueMessage(
 										new MessageBuilder("Land")
 												.appendVariable(p.getName())
 												.appendCaption("is offering to sell you a land claim, type")
 												.appendVariable("/profile")
-												.appendCaption("for more info").build()
+												.appendCaption("for more info").make()
 								);
 							}, p);
 						}, p);
@@ -241,21 +239,21 @@ public class Land implements CommandExecutor, TabCompleter {
 						ChatInput.createQuery("player name to transfer claim to", response -> {
 							OfflinePlayer tPlayer = Bukkit.getOfflinePlayer(response);
 							if(!tPlayer.hasPlayedBefore()) {
-								p.sendMessage(new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").build());
+								new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").send(p);
 								return;
 							}
 							String area = "(" + c.location.startX + ", " + c.location.startZ + " -> " + c.location.endX + ", " + c.location.endZ + ")";
 							ClaimManager.getDatabaseClaim(c).transfer(tPlayer.getUniqueId());
-							p.sendMessage(new MessageBuilder("Land").appendCaption("You no longer own the land at")
+							new MessageBuilder("Land").appendCaption("You no longer own the land at")
 									              .appendVariable(area + ".")
 									              .appendCaption("This is because ownership has been transferred to")
 									              .appendVariable(tPlayer.getName())
-									              .build());
+									              .send(p);
 							DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().queueMessage(new MessageBuilder("Land").appendCaption("You now own the land at")
 									                    .appendVariable(area + ".")
 									                    .appendCaption("This was free as it has been transferred to you by")
 									                    .appendVariable(p.getName())
-									                    .build());
+									                    .make());
 
 						}, p);
 					});
@@ -303,14 +301,14 @@ public class Land implements CommandExecutor, TabCompleter {
 						ChatInput.createQuery("new name for claim", response -> {
 
 							if(response.length() > 20) {
-								p.sendMessage(new MessageBuilder("Land").appendCaption("Name cannot be over 16 characters").build());
+								new MessageBuilder("Land").appendCaption("Name cannot be over 16 characters").send(p);
 								return;
 							}
 							DatabasePlayer.from(p).getJsonPlayer().getClaim(c).name = response;
 							DatabasePlayer.from(p).getJsonPlayer().save();
 							p.performCommand("land id=" + finalId);
 
-							p.sendMessage(new MessageBuilder("Land").appendCaption("Land claim's name has been set to:").appendVariable(response).build());
+							new MessageBuilder("Land").appendCaption("Land claim's name has been set to:").appendVariable(response).send(p);
 						}, p);
 					}, List.of());
 				}
@@ -338,11 +336,11 @@ public class Land implements CommandExecutor, TabCompleter {
 		}
 		if(args.length >= 1 && args[0].equals("settings")) {
 			if(args.length == 1) {
-				p.sendMessage(new MessageBuilder("Land").appendCaption("Name of preference has not been provided").build());
+				new MessageBuilder("Land").appendCaption("Name of preference has not been provided").send(p);
 				return;
 			}
 			if(args.length == 2) {
-				p.sendMessage(new MessageBuilder("Land").appendCaption("Value of preference not provided. This can be 'true/yes/on/enable' or 'false/no/off/disable'").build());
+				new MessageBuilder("Land").appendCaption("Value of preference not provided. This can be 'true/yes/on/enable' or 'false/no/off/disable'").send(p);
 				return;
 			}
 			String preferenceName = args[1];
@@ -352,70 +350,66 @@ public class Land implements CommandExecutor, TabCompleter {
 					|| args[2].equalsIgnoreCase("on");
 			HashMap<String, BooleanRunnable> table = generatePreferenceTable(c);
 			if(!table.containsKey(preferenceName)) {
-				p.sendMessage(new MessageBuilder("Land").appendCaption("Could not find preference with name:").appendVariable(preferenceName).build());
+				new MessageBuilder("Land").appendCaption("Could not find preference with name:").appendVariable(preferenceName).send(p);
 				return;
 			}
 			table.get(preferenceName).run(p, preferenceToggle);
-			p.sendMessage(new MessageBuilder("Land").appendVariable(preferenceName)
-					              .appendCaption("has been").appendVariable(preferenceToggle ? "enabled" : "disabled").build());
+			new MessageBuilder("Land").appendVariable(preferenceName)
+					.appendCaption("has been").appendVariable(preferenceToggle ? "enabled" : "disabled").send(p);
 			DatabasePlayer.from(p).getJsonPlayer().save();
 		}
 		if(args.length >= 1 && args[0].equals("trusted")) {
 			if(args.length == 1) {
-				p.sendMessage(new MessageBuilder("Land").appendCaption("Sub argument to 'trusted' not provided").build());
+				new MessageBuilder("Land").appendCaption("Sub argument to 'trusted' not provided").send(p);
 				return;
 			}
 			if(args.length == 2 && args[1].equals("list")) {
 				if(c.getTrusted().isEmpty()) {
-					p.sendMessage(
-							new MessageBuilder("Land").appendCaption("This claim has no trusted players").build()
-					);
+					new MessageBuilder("Land").appendCaption("This claim has no trusted players").send(p);
 					return;
 				} else {
-					p.sendMessage(
-							new MessageBuilder("Land").appendCaption("These players have general trust permissions on this claim:")
-									.appendList(ClaimManager.getDatabaseClaim(c).getTrusted().stream().map(x -> Bukkit.getOfflinePlayer(UUID.fromString(x)).getName()).collect(Collectors.toList())).build()
-					);
+					new MessageBuilder("Land").appendCaption("These players have general trust permissions on this claim:")
+							.appendList(ClaimManager.getDatabaseClaim(c).getTrusted().stream().map(x -> Bukkit.getOfflinePlayer(UUID.fromString(x)).getName()).collect(Collectors.toList())).send(p);
 					return;
 				}
 			}
 			if(args[1].equals("add")) {
 				if(args.length == 2) {
-					p.sendMessage(new MessageBuilder("Land").appendCaption("Player to be trusted is not specified").build());
+					new MessageBuilder("Land").appendCaption("Player to be trusted is not specified").send(p);
 					return;
 				}
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
 				if(!offlinePlayer.hasPlayedBefore()) {
-					p.sendMessage(new MessageBuilder("Land").appendCaption("Could not find player").appendVariable(args[2]).build());
+					new MessageBuilder("Land").appendCaption("Could not find player").appendVariable(args[2]).send(p);
 					return;
 				}
 				List<OfflinePlayer> trusted = ClaimManager.getDatabaseClaim(c).getTrusted().stream().map(x -> Bukkit.getOfflinePlayer(UUID.fromString(x))).toList();
 				if(trusted.contains(offlinePlayer) || offlinePlayer.getUniqueId() == p.getUniqueId()) {
-					p.sendMessage(new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("is on the trust list").build());
+					new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("is on the trust list").send(p);
 					return;
 				}
 				DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().add(offlinePlayer.getUniqueId().toString());
 				DatabasePlayer.from(p).getJsonPlayer().save();
-				p.sendMessage(new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been added to the trust list").build());
+				new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been added to the trust list").send(p);
 			}
 			if(args[1].equals("remove")) {
 				if(args.length == 2) {
-					p.sendMessage(new MessageBuilder("Land").appendCaption("Player to be removed from the trust list is not specified").build());
+					new MessageBuilder("Land").appendCaption("Player to be removed from the trust list is not specified").send(p);
 					return;
 				}
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
 				if(!offlinePlayer.hasPlayedBefore()) {
-					p.sendMessage(new MessageBuilder("Land").appendCaption("Could not find player").appendVariable(args[2]).build());
+					new MessageBuilder("Land").appendCaption("Could not find player").appendVariable(args[2]).send(p);
 					return;
 				}
 				List<OfflinePlayer> trusted = ClaimManager.getDatabaseClaim(c).getTrusted().stream().map(x -> Bukkit.getOfflinePlayer(UUID.fromString(x))).toList();
 				if(!trusted.contains(offlinePlayer)) {
-					p.sendMessage(new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("is not on the trust list").build());
+					new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("is not on the trust list").send(p);
 					return;
 				}
 				DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().removeIf(x -> x.equals(offlinePlayer.getUniqueId().toString()));
 				DatabasePlayer.from(p).getJsonPlayer().save();
-				p.sendMessage(new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been removed from the trust list").build());
+				new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been removed from the trust list").send(p);
 			}
 
 		}

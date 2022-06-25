@@ -50,11 +50,12 @@ public class Lottery implements Listener {
 	public static void nag(Player p) {
 		if(amount == 0) return;
 		if(DatabasePlayer.from(p).getJoinedLottery()) return;
-		MessageBuilder mb = new MessageBuilder("Lottery")
-				.append(Token.TokenType.CAPTION, "Click here to join lottery for")
-				.append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount) + ".")
-				.append(Token.TokenType.CAPTION, "Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.");
-		p.spigot().sendMessage(mb.buildWithCommand("__I_JOIN_LOTTERY__"));
+		new MessageBuilder("Lottery")
+				.appendData(Token.TokenType.CHAT, "Click here", "__I_JOIN_LOTTERY__")
+				.appendCaption("to join lottery for")
+				.appendVariable("$" + NumberFormatter.addCommas(amount) + ".")
+				.appendCaption("Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.").send(p);
+
 	}
 	public static void register () {
 		if(!exists())
@@ -75,21 +76,19 @@ public class Lottery implements Listener {
 			handleWin();
 		amount = (int) Math.min(Database.injector.getInjector().getMoneySafe(), 200000);
 		if(amount < 200000) {
-			Bukkit.getServer().broadcastMessage(
-					new MessageBuilder("Lottery")
-							.append(Token.TokenType.CAPTION, "Bank is currently too poor for a lottery to be hosted")
-							.build()
-			);
+
+			new MessageBuilder("Lottery")
+					.appendCaption("Bank is currently too poor for a lottery to be hosted")
+					.broadcast();
+
 			amount = 0;
 			return;
 		}
-		MessageBuilder mb = new MessageBuilder("Lottery")
-				.append(Token.TokenType.CAPTION, "Click here to join lottery for")
-				.append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount) + ".")
-				.append(Token.TokenType.CAPTION, "Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.");
-		Bukkit.getConsoleSender().sendMessage(mb.build());
-		Bukkit.getServer().spigot().broadcast(mb
-			.buildWithCommand("__I_JOIN_LOTTERY__"));
+		new MessageBuilder("Lottery")
+				.appendData(Token.TokenType.CHAT, "Click here", "__I_JOIN_LOTTERY__")
+				.appendCaption("to join lottery for")
+				.appendVariable("$" + NumberFormatter.addCommas(amount) + ".")
+				.appendCaption("Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.").broadcast();
 	}
 	private static void handleWin() {
 		ArrayList<UUID> entered = DatabasePlayer.allLotteryEnteredPeople();
@@ -97,11 +96,10 @@ public class Lottery implements Listener {
 			DatabasePlayer.from(u).setJoinedLottery(false);
 		}
 		if(entered.size() < 2) {
-			Bukkit.broadcastMessage(
-					new MessageBuilder("Lottery")
-							.append(Token.TokenType.CAPTION, "Not enough people joined the lottery for a roll")
-							.build()
-			);
+
+			new MessageBuilder("Lottery")
+					.appendCaption("Not enough people joined the lottery for a roll")
+					.broadcast();
 			amount = 0;
 			return;
 		}
@@ -114,11 +112,11 @@ public class Lottery implements Listener {
 			}
 		}
 		if(eligible.isEmpty()) {
-			Bukkit.broadcastMessage(
-					new MessageBuilder("Lottery")
-							.append(Token.TokenType.CAPTION, "Nobody who entered is online, skipping roll")
-							.build()
-			);
+
+			new MessageBuilder("Lottery")
+					.appendCaption("Nobody who entered is online, skipping roll")
+					.broadcast();
+
 			amount = 0;
 			return;
 		}
@@ -126,13 +124,11 @@ public class Lottery implements Listener {
 
 		OfflinePlayer selected = Bukkit.getOfflinePlayer(random(eligible));
 		new Transaction(Database.injector.getInjector().getUuid(), selected.getUniqueId(), amount).transact();
-		Bukkit.broadcastMessage(
-				new MessageBuilder("Lottery")
-						.append(Token.TokenType.VARIABLE, selected.getName())
-						.append(Token.TokenType.CAPTION, "has won the lottery for")
-						.append(Token.TokenType.VARIABLE, "$" + NumberFormatter.addCommas(amount) + "!")
-						.build()
-		);
+		new MessageBuilder("Lottery")
+				.appendVariable(selected.getName())
+				.appendCaption("has won the lottery for")
+				.appendVariable("$" + NumberFormatter.addCommas(amount) + "!")
+				.broadcast();
 		amount = 0;
 	}
 	public static UUID random(List<UUID> lottery) {
@@ -141,7 +137,7 @@ public class Lottery implements Listener {
 	private static boolean checkForLottery() {
 		Calendar rightNow = Calendar.getInstance();
 		int hour = rightNow.get(Calendar.HOUR_OF_DAY);
-		return hour == (12 + 8);
+		return hour == (0);
 	}
 
 	@EventHandler
@@ -149,18 +145,16 @@ public class Lottery implements Listener {
 		if (e.getMessage().equals("__I_JOIN_LOTTERY__")) {
 			e.setCancelled(true);
 			if(DatabasePlayer.from(e.getPlayer()).getJoinedLottery()) {
-				e.getPlayer().sendMessage(
-						new MessageBuilder("Lottery")
-								.append(Token.TokenType.CAPTION, "You have already been entered in the lottery")
-								.build());
+				new MessageBuilder("Lottery")
+						.appendCaption("You have already been entered in the lottery")
+						.send(e.getPlayer());
 				return;
 			}
 			DatabasePlayer.from(e.getPlayer()).setJoinedLottery(true);
-			e.getPlayer().sendMessage(
-					new MessageBuilder("Lottery")
-							.append(Token.TokenType.CAPTION, "You've entered the lottery, tune in at around 5-6PM AEST for the roll!")
-							.build()
-			);
+			new MessageBuilder("Lottery")
+					.appendCaption("You've entered the lottery, tune in at around 5-6PM AEST for the roll!")
+					.send(e.getPlayer());
+
 		}
 	}
 }

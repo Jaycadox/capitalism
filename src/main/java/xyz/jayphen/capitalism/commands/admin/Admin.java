@@ -12,6 +12,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimManager;
@@ -19,8 +20,10 @@ import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
 import xyz.jayphen.capitalism.economy.transaction.TaxTransaction;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
+import xyz.jayphen.capitalism.events.PlayerJoin;
 import xyz.jayphen.capitalism.events.tax.TaxedTransaction;
 import xyz.jayphen.capitalism.helpers.InventoryHelper;
+import xyz.jayphen.capitalism.helpers.TimeHelper;
 import xyz.jayphen.capitalism.helpers.WorldEditHelper;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.NumberFormatter;
@@ -39,12 +42,12 @@ public class Admin implements CommandExecutor, TabCompleter {
 			try {
 				World selectionWorld = localSession.getSelectionWorld();
 				if (selectionWorld == null) {
-					commandSender.sendMessage(new MessageBuilder("Admin").append(Token.TokenType.CAPTION, "You don't have an active WorldEdit selection").build());
+					new MessageBuilder("Admin").appendCaption("You don't have an active WorldEdit selection").send(commandSender);
 					return true;
 				}
 				region = localSession.getSelection(selectionWorld);
 			} catch (IncompleteRegionException e) {
-				commandSender.sendMessage(new MessageBuilder("Admin").append(Token.TokenType.CAPTION, "You don't have an active WorldEdit selection").build());
+				new MessageBuilder("Admin").appendCaption("You don't have an active WorldEdit selection").send(commandSender);
 				return true;
 			}
 
@@ -71,6 +74,59 @@ public class Admin implements CommandExecutor, TabCompleter {
 		} else if(args[0].equals("removedraft")) {
 			ClaimManager.adminDrafts.remove(((Player)commandSender).getUniqueId());
 			commandSender.sendMessage("Draft removed");
+		} else if(args[0].equals("delete") && args.length == 2) {
+			OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+			if(!p.hasPlayedBefore()) {
+				commandSender.sendMessage(ChatColor.RED + "Invalid player");
+				return true;
+			}
+
+			DatabasePlayer.from(p.getUniqueId()).delete(false);
+			commandSender.sendMessage(ChatColor.GREEN + "Erased account data belonging to " + p.getName());
+		} else if(args[0].equals("ban") && args.length > 3) {
+			OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+			if(!p.hasPlayedBefore()) {
+				commandSender.sendMessage(ChatColor.RED + "Invalid player");
+				return true;
+			}
+			StringBuilder fArgs = new StringBuilder();
+			for(int i = 2; i < args.length; i++) {
+				fArgs.append(args[i]).append(" ");
+			}
+			var times = TimeHelper.splitTime(fArgs.toString().trim());
+			if(times.size() != 2) {
+				commandSender.sendMessage(ChatColor.RED + "Invalid format. It's /admin ban %player% %time% %reason%");
+				return true;
+			}
+			DatabasePlayer.from(p.getUniqueId()).getJsonPlayer().getBanRecord().add(TimeHelper.toTime(times.get(0)) + "###" + times.get(1) + "###" + System.currentTimeMillis());
+
+			boolean shouldWipe = times.get(1).contains("[wipe]");
+			if(shouldWipe) {
+				Bukkit.dispatchCommand(commandSender, "admin delete " + p.getName());
+			}
+			DatabasePlayer.from(p).getJsonPlayer().getData().bannedUntil = System.currentTimeMillis() + TimeHelper.toTime(times.get(0));
+			DatabasePlayer.from(p).getJsonPlayer().getData().banReason = times.get(1).replace("[wipe] ", "[wipe]");
+			DatabasePlayer.from(p).getJsonPlayer().save();
+			Player onlinePlayer = p.getPlayer();
+			if(onlinePlayer != null) {
+				onlinePlayer.kick(PlayerJoin.getBanMessage(DatabasePlayer.from(p), TimeHelper.toTime(times.get(0))));
+			}
+			commandSender.sendMessage(ChatColor.GREEN + "Applied account ban to " + p.getName() + ". Reason given: "
+				+ ChatColor.YELLOW + times.get(1) + ChatColor.GREEN + ". Time until unban: " + ChatColor.YELLOW + TimeHelper.timeToString(TimeHelper.toTime(times.get(0))));
+		} else if(args[0].equals("unban") && args.length == 2) {
+			OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+			if(!p.hasPlayedBefore()) {
+				commandSender.sendMessage(ChatColor.RED + "Invalid player");
+				return true;
+			}
+			if(DatabasePlayer.from(p).getJsonPlayer().getData().bannedUntil == -1 || (DatabasePlayer.from(p).getJsonPlayer().getData().bannedUntil - System.currentTimeMillis()) < 0) {
+				commandSender.sendMessage(ChatColor.GREEN + "The player " + p.getName() + " isn't banned.");
+				return true;
+			}
+			DatabasePlayer.from(p).getJsonPlayer().getData().bannedUntil = (long) -1;
+			DatabasePlayer.from(p).getJsonPlayer().getData().banReason = "";
+			DatabasePlayer.from(p).getJsonPlayer().save();
+			commandSender.sendMessage(ChatColor.GREEN + "Removed account ban from " + p.getName() + ".");
 		} else if(args[0].equals("sell") && args.length == 3) {
 			if(!ClaimManager.adminDrafts.containsKey(((Player)commandSender).getUniqueId())) {
 				commandSender.sendMessage(ChatColor.RED + "No active draft");
@@ -103,11 +159,11 @@ public class Admin implements CommandExecutor, TabCompleter {
 			DatabasePlayer.from(p).getJsonPlayer().getData().claims.add(c);
 			DatabasePlayer.from(p).getJsonPlayer().save();
 
-			p.sendMessage(new MessageBuilder("Land").appendCaption("You now own the land at")
-					              .appendVariable(area + ".")
-					              .appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount()))
-					              .appendCaption("has been deducted from your account.")
-					              .build());
+			new MessageBuilder("Land").appendCaption("You now own the land at")
+					.appendVariable(area + ".")
+					.appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount()))
+					.appendCaption("has been deducted from your account.")
+					.send(p);
 		} else if(args[0].equals("destroyclaim")) {
 			Optional<Claim> optClaim = ClaimManager.getCachedClaim(((Player)commandSender).getLocation());
 			if(optClaim.isEmpty()) {
@@ -128,23 +184,62 @@ public class Admin implements CommandExecutor, TabCompleter {
 				commandSender.sendMessage(ChatColor.RED + "Missing 'player' field");
 				return true;
 			}
-			OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-			if(!offlinePlayer.hasPlayedBefore()) {
-				commandSender.sendMessage(ChatColor.RED + "Invalid player");
-				return true;
+			DatabasePlayer dbp = null;
+			String name = "Server";
+			if(args[1].equals("#server")) {
+				dbp = DatabasePlayer.nonPlayer(EconomyInjector.SERVER);
+			} else {
+				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+				if(!offlinePlayer.hasPlayedBefore()) {
+					commandSender.sendMessage(ChatColor.RED + "Invalid player");
+					return true;
+				}
+				dbp = DatabasePlayer.from(offlinePlayer);
+				name = offlinePlayer.getName();
 			}
-			commandSender.sendMessage(ChatColor.GREEN + "--- Stats for " + offlinePlayer.getName() + " ---");
+
+
+
+			commandSender.sendMessage(ChatColor.GREEN + "--- Stats for " + name + " ---");
+			if(dbp.getJsonPlayer().getData().bannedUntil == -1 || (dbp.getJsonPlayer().getData().bannedUntil - System.currentTimeMillis()) < 0) {
+				commandSender.sendMessage(ChatColor.YELLOW + "Ban status: "
+						                          + ChatColor.GREEN + "Not banned");
+
+			} else {
+				String timeUntil = TimeHelper.timeToString(dbp.getJsonPlayer().getBannedUntil() - System.currentTimeMillis());
+				String reason = dbp.getJsonPlayer().getBanReason();
+				commandSender.sendMessage(ChatColor.YELLOW + "Ban status: "
+						                          + ChatColor.RED + "Banned. Expires in " + timeUntil + ". Reason: " + reason);
+
+			}
+			int banIndex = 0;
+			commandSender.sendMessage(ChatColor.YELLOW + "Ban record:");
+
+			for(String ban : dbp.getJsonPlayer().getBanRecord()) {
+
+				try {
+					String banLength = TimeHelper.timeToString(Integer.parseInt(ban.split("###")[0]));
+					String banReason = ban.split("###")[1];
+					if(banReason.contains("s")) continue;
+					String banIssued = TimeHelper.timeToString(System.currentTimeMillis() - Long.parseUnsignedLong(ban.split("###")[2]));
+					commandSender.sendMessage(ChatColor.GOLD + "  " + ++banIndex + ChatColor.WHITE + ": " + banReason);
+					commandSender.sendMessage("    " + ChatColor.WHITE + "Ban length: " + ChatColor.YELLOW + banLength);
+					commandSender.sendMessage("    " + ChatColor.WHITE + "Time since issued: " + ChatColor.YELLOW + banIssued);
+				} catch(Exception ignored) {}
+
+			}
+
 			commandSender.sendMessage(ChatColor.YELLOW + "Account balance: "
-					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(DatabasePlayer.from(offlinePlayer).getMoneySafe()));
+					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getMoneySafe()));
 			commandSender.sendMessage(ChatColor.YELLOW + "Amount sent: "
-					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(DatabasePlayer.from(offlinePlayer).getJsonPlayer().getData().stats.moneySent));
+					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneySent));
 			commandSender.sendMessage(ChatColor.YELLOW + "Amount received: "
-					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(DatabasePlayer.from(offlinePlayer).getJsonPlayer().getData().stats.moneyRecieved));
+					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneyRecieved));
 			commandSender.sendMessage(ChatColor.YELLOW + "Amount taxed: "
-					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(DatabasePlayer.from(offlinePlayer).getJsonPlayer().getData().stats.amountTaxed));
+					                          + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.amountTaxed));
 			commandSender.sendMessage(ChatColor.YELLOW + "Claims:");
 			int id = 0;
-			for(Claim c : DatabasePlayer.from(offlinePlayer).getJsonPlayer().getData().claims) {
+			for(Claim c : dbp.getJsonPlayer().getData().claims) {
 				commandSender.sendMessage(ChatColor.GOLD + "  " + ++id + ChatColor.WHITE + ": Location: " + c.getMidpointX() + ", " + c.getMidpointZ());
 				commandSender.sendMessage("    " + ChatColor.WHITE + "Area: " + ChatColor.YELLOW + c.getArea());
 				commandSender.sendMessage("    " + ChatColor.WHITE + "Est. Worth: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(c.getEstWorth()));
@@ -166,18 +261,21 @@ public class Admin implements CommandExecutor, TabCompleter {
 	public List<String> onTabComplete (CommandSender sender, Command command, String label, String[] args) {
 		if(!sender.isOp()) return new ArrayList<>();
 		if(args.length == 1) {
-			return Arrays.asList("draftclaim", "stats", "removedraft", "sell", "destroyclaim");
+			return List.of("draftclaim", "stats", "removedraft", "sell", "destroyclaim", "delete", "ban", "unban");
 		}
-		if(args.length == 2 && (args[0].equals("stats") || args[0].equals("sell"))) {
-			return Bukkit.getServer().getOnlinePlayers().stream().map(x -> x.getName()).collect(Collectors.toList());
+		if(args.length == 2 && (args[0].equals("stats") || args[0].equals("sell") || args[0].equals("ban") || args[0].equals("unban"))) {
+			return Bukkit.getServer().getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
+		}
+		if(args.length == 3 && args[0].equals("ban")) {
+			return List.of("");
 		}
 		if(args.length == 3 && args[0].equals("sell")) {
 			if(!(ClaimManager.adminDrafts.containsKey(((Player)sender).getUniqueId()))) {
-				return Arrays.asList("No_active_draft");
+				return List.of("No_active_draft");
 			}
 			Claim claim = ClaimManager.adminDrafts.get(((Player)sender).getUniqueId());
-			return Arrays.asList("" + claim.getEstWorth());
+			return List.of("" + claim.getEstWorth());
 		}
-		return new ArrayList<>();
+		return null;
 	}
 }

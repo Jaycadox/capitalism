@@ -1,6 +1,8 @@
 package xyz.jayphen.capitalism;
 
 import com.sk89q.worldedit.WorldEdit;
+import net.kyori.adventure.Adventure;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,9 +24,11 @@ public final class Capitalism extends JavaPlugin {
 	public static CapitalismEconomy eco = new CapitalismEconomy();
 	public final EconomyHook HOOK = new EconomyHook(this);
 
+	public static BukkitAudiences ADVENTURE = null;
+
 	@Override
 	public void onEnable () {
-
+		ADVENTURE = BukkitAudiences.create(this);
 		plugin = this;
 		LOG = this.getLogger();
 		CommandRegister.registerAllCommands(this);
@@ -42,18 +46,17 @@ public final class Capitalism extends JavaPlugin {
 		} else {
 			WorldEdit.getInstance().getItemFactory();
 		}
-
 	}
 
 
 	@Override
 	public void onDisable () {
-
 		try {
 			Database.ctn.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		InventoryHelperEvent.closeInventories();
+		ADVENTURE.close();
 	}
 }
