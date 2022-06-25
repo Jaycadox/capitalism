@@ -140,21 +140,23 @@ public class Lottery implements Listener {
 		return hour == (0);
 	}
 
-	@EventHandler
-	public void onChat (AsyncPlayerChatEvent e) {
+
+	public static boolean onChat (AsyncPlayerChatEvent e) {
 		if (e.getMessage().equals("__I_JOIN_LOTTERY__")) {
 			e.setCancelled(true);
 			if(DatabasePlayer.from(e.getPlayer()).getJoinedLottery()) {
 				new MessageBuilder("Lottery")
 						.appendCaption("You have already been entered in the lottery")
 						.send(e.getPlayer());
-				return;
+				return true;
 			}
 			DatabasePlayer.from(e.getPlayer()).setJoinedLottery(true);
 			new MessageBuilder("Lottery")
 					.appendCaption("You've entered the lottery, tune in at around 5-6PM AEST for the roll!")
 					.send(e.getPlayer());
+			return true;
 
 		}
+		return false;
 	}
 }

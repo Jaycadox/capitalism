@@ -1,6 +1,12 @@
 package xyz.jayphen.capitalism.events.register;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.scheduler.BukkitRunnable;
 import xyz.jayphen.capitalism.Capitalism;
+import xyz.jayphen.capitalism.claims.Claim;
+import xyz.jayphen.capitalism.claims.ClaimItemShop;
+import xyz.jayphen.capitalism.claims.ClaimManager;
 import xyz.jayphen.capitalism.events.*;
 
 public class EventRegister {
@@ -19,5 +25,13 @@ public class EventRegister {
 		ClaimVisualizer.register();
 		Lottery.register();
 		MessageQueue.register();
+
+
+		new BukkitRunnable() {
+			@Override
+			public void run () {
+				LandClaimInteraction.monitorSignLoop();
+			}
+		}.runTaskTimer(Capitalism.plugin, 25, 25);
 	}
 }

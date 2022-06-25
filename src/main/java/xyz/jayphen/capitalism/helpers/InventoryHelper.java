@@ -152,6 +152,14 @@ public class InventoryHelper {
 		ITEMS.put(item, onClick);
 		lastItemAdded = item;
 	}
+	public void setItem(int index, ItemStack item, Runnable onClick) {
+		inventory.setItem(
+				(marginVertical * 9) + index,
+				item
+		);
+		ITEMS.put(item, onClick);
+		lastItemAdded = item;
+	}
 	public static ItemStack getHead(OfflinePlayer player, String name, List<String> lore) {
 		ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
 		SkullMeta meta = (SkullMeta) item.getItemMeta();

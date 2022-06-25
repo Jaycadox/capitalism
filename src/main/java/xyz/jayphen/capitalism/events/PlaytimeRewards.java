@@ -51,20 +51,21 @@ public class PlaytimeRewards implements Listener {
 		}.runTaskLater(Capitalism.plugin, 30 * 20);
 	}
 
-	@EventHandler
-	public void onChat (AsyncPlayerChatEvent e) {
+
+	public static boolean onChat (AsyncPlayerChatEvent e) {
 		if (e.getMessage().equals("__I_REDEEM_REWARD__")) {
 			e.setCancelled(true);
 			if (!redeemedPlayers.contains(e.getPlayer().getUniqueId()) && eligiblePlayers.contains(e.getPlayer().getUniqueId())) {
 				eligiblePlayers.remove(e.getPlayer().getUniqueId());
 				redeemedPlayers.add(e.getPlayer().getUniqueId());
-
 				if (Database.injector.inject(e.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
 					new MessageBuilder("Reward").appendVariable("$100,000").appendCaption("has been added to your balance").send(e.getPlayer());
 
 				}
 			}
+			return true;
 		}
+		return false;
 	}
 
 }

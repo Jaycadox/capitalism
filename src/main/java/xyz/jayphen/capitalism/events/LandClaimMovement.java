@@ -15,17 +15,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimManager;
+import xyz.jayphen.capitalism.claims.region.RegionManager;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
 public class LandClaimMovement implements Listener {
 	private static long count = 0;
 	private static final HashMap<UUID, UUID> insideLandClaim = new HashMap<>();
+	private static final HashMap<UUID, RegionManager.Region> insideRegion = new HashMap<>();
 
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
@@ -53,8 +56,14 @@ public class LandClaimMovement implements Listener {
 
 	private void visualize (PlayerMoveEvent event, PlayerRunnable onEnter) {
 		Optional<Claim> optClaim = ClaimManager.getCachedClaim(event.getPlayer().getLocation());
-
-		if(optClaim.isEmpty()) {
+		RegionManager.Region reg = RegionManager.getRegion(event.getPlayer().getLocation());
+		if(insideRegion.isEmpty() || insideRegion.get(event.getPlayer().getUniqueId()) != reg) {
+			insideRegion.put(event.getPlayer().getUniqueId(), reg);
+			event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GRAY + "You are now in the " + ChatColor.YELLOW
+					                                                                                     + reg.toString().toLowerCase(Locale.ROOT)
+					                                                                                     + ChatColor.GRAY + " region."));
+		}
+ 		if(optClaim.isEmpty()) {
 			if(insideLandClaim.containsKey(event.getPlayer().getUniqueId()))
 			{
 				insideLandClaim.remove(event.getPlayer().getUniqueId());

@@ -19,6 +19,24 @@ public class Claim {
 	public String owner = null;
 	public String name = "Unnamed land claim";
 
+	public ClaimItemShop getShopFromCoords(int x, int y, int z) {
+		return getSigns().stream().filter(s -> s.getX() == x && s.getY() == y && s.getZ() == z).findFirst().orElse(null);
+	}
+	public Location getSignLocation(ClaimItemShop shop) {
+		return new Location(Bukkit.getWorld(location.world), shop.getX(), shop.getY(), shop.getZ());
+	}
+
+	public ArrayList<ClaimItemShop> getSigns () {
+		if(this.signs == null) {
+			signs = new ArrayList<>();
+		}
+		return signs;
+	}
+
+	public ArrayList<ClaimItemShop> signs = new ArrayList<>();
+
+
+
 	public ArrayList<String> getTrusted() {
 		if(trusted == null) {
 			trusted = new ArrayList<>();
@@ -130,11 +148,9 @@ public class Claim {
 
 		int startZ = Math.min(location.startZ + 5000, location.endZ + 5000);
 		int endZ = Math.max(location.startZ + 5000, location.endZ + 5000);
-
 		int avgX = (startX + endX) / 2;
 		int avgZ = (startZ + endZ) / 2;
 		return (int) Math.abs(Point2D.distance(avgX, avgZ, x + 5000, y + 5000));
-
 	}
 
 	public int getMidpointX() {

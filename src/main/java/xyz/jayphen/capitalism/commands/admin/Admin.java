@@ -16,6 +16,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimManager;
+import xyz.jayphen.capitalism.claims.region.RegionManager;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
 import xyz.jayphen.capitalism.economy.transaction.TaxTransaction;
@@ -71,6 +72,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 			}
 			commandSender.sendMessage("Claim should cost around " + ChatColor.GREEN + "$" + claim.getEstWorth()
 					                          + ChatColor.WHITE + " assuming a base cost of $200 per block with $1 added every 30 blocks away it is from spawn.");
+			Location loc = new Location(Bukkit.getWorld(claim.location.world), claim.getMidpointX(), 0, claim.getMidpointZ());
+			commandSender.sendMessage("Claim is in region: " + RegionManager.getRegion(loc));
 		} else if(args[0].equals("removedraft")) {
 			ClaimManager.adminDrafts.remove(((Player)commandSender).getUniqueId());
 			commandSender.sendMessage("Draft removed");

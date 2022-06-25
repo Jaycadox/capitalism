@@ -1,5 +1,6 @@
 package xyz.jayphen.capitalism.events;
 
+import com.google.gson.Gson;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -9,6 +10,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -24,12 +27,20 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.Claim;
+import xyz.jayphen.capitalism.claims.ClaimItemShop;
 import xyz.jayphen.capitalism.claims.ClaimManager;
+import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.helpers.ShopHelper;
+import xyz.jayphen.capitalism.lang.MessageBuilder;
+import xyz.jayphen.capitalism.lang.NumberFormatter;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LandClaimInteraction implements Listener {
 	private static final List<Material> WOODEN_DOORS = Arrays.asList(
@@ -39,6 +50,46 @@ public class LandClaimInteraction implements Listener {
 	private static final List<Material> WOODEN_TRAPDOORS = Arrays.asList(
 			Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR, Material.CRIMSON_TRAPDOOR, Material.JUNGLE_TRAPDOOR, Material.DARK_OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR, Material.OAK_TRAPDOOR, Material.WARPED_TRAPDOOR
 	);
+	public static void monitorSignLoop() {
+		for(Claim c : ClaimManager.getAllClaims()) {
+			c = DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().getClaim(c);
+			for(ClaimItemShop shop : c.getSigns()) {
+				Location loc = new Location(Bukkit.getWorld(c.location.world), shop.getX(), shop.getY(), shop.getZ());
+				if(!(loc.getBlock().getState() instanceof Sign)) {
+					Claim finalC = c;
+					c.signs = c.getSigns().stream()
+							.filter(x -> !x.equals(finalC.getShopFromCoords(shop.getX(), shop.getY(), shop.getZ()))).collect(Collectors.toCollection(ArrayList::new));
+					DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().save();
+					DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().queueMessage(
+							new MessageBuilder("Shop").appendCaption("One of the signs in your shop has been broken")
+									.make()
+					);
+				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void onSignEdit(SignChangeEvent event) {
+		Claim c = DatabasePlayer.from(event.getPlayer()).getJsonPlayer().getClaim(ClaimManager.getCachedClaim(event.getBlock().getLocation()).orElse(null));
+		if(c == null) return;
+		new BukkitRunnable() {
+			@Override
+			public void run () {
+				Inventory i = ShopHelper.getInventoryFromSign(event.getBlock().getLocation());
+				if(i == null) return;
+				int price = ShopHelper.getPriceFromSign(event.getBlock().getLocation());
+				if(price == 0) return;
+				c.getSigns();
+				c.signs.add(new ClaimItemShop(price, event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
+				DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().save();
+				DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().queueMessage(
+						new MessageBuilder("Shop").appendCaption("A sign has been registered for")
+								.appendVariable("$" + NumberFormatter.addCommas(price)).make()
+				);
+			}
+		}.runTaskLater(Capitalism.plugin, 1);
+	}
 
 	@EventHandler
 	public void onInteraction(PlayerInteractEvent event) {
@@ -46,7 +97,6 @@ public class LandClaimInteraction implements Listener {
 				event.getAction() == Action.RIGHT_CLICK_BLOCK) && event.getPlayer().isSneaking()) {
 			if(event.getItem() != null && event.getItem().getType().isEdible()) return;
 		}
-
 		Optional<Claim> optClaim =
 				ClaimManager.getCachedClaim((event.getClickedBlock() != null) ? event.getClickedBlock().getLocation() : event.getPlayer().getLocation());
 
@@ -54,6 +104,19 @@ public class LandClaimInteraction implements Listener {
 			return;
 		}
 		Claim claim = optClaim.get();
+		if(true) { //!claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)
+			if(event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				if(event.getClickedBlock().getState() instanceof Chest) {
+					for(ClaimItemShop shop : ClaimManager.getDatabaseClaim(claim).getSigns()) {
+						if(ShopHelper.getChestFromSign(claim.getSignLocation(shop)) != null) {
+							event.setCancelled(true);
+							ShopHelper.openShop(event.getPlayer(), shop, (Chest) event.getClickedBlock().getState(), claim);
+							return;
+						}
+					}
+				}
+			}
+		}
 		if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) return;
 		if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.OWNER)) return;
 		if(event.getClickedBlock() != null && (WOODEN_DOORS.contains(event.getClickedBlock().getType()) || WOODEN_TRAPDOORS.contains(event.getClickedBlock().getType()))) {

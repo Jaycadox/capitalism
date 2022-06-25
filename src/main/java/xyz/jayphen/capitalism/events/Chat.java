@@ -16,6 +16,9 @@ public class Chat implements Listener {
 	@EventHandler(priority = EventPriority.LOW)
 	public void onChat(AsyncPlayerChatEvent event) {
 		if(ChatInputEvent.onChat(event)) return;
+		if(Lottery.onChat(event)) return;
+		if(PlaytimeRewards.onChat(event)) return;
+
 		event.setCancelled(true);
 		var cmp = PlayerDisplay.from(event.getPlayer())
 				.append(Component.text(": ", TextColor.color(0xcccccc)))

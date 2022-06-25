@@ -21,7 +21,7 @@ public class TaxTransaction {
 		return totalAmount;
 	}
 	public int getTotalAmount (ITax provider) {
-		return (int) (totalAmount + provider.applyTax(amount).getAmountTaxed());
+		return totalAmount;
 	}
 	int totalAmount = 0;
 
