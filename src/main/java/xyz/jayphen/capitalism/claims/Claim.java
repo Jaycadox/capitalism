@@ -123,7 +123,7 @@ public class Claim {
 		}
 	}
 
-	private int getTallestEmptyYAtLocation(World w, int x, int z) {
+	public static int getTallestEmptyYAtLocation(World w, int x, int z) {
 		for(int i = 200; i > 0; i--) {
 			Material type = w.getBlockAt(x, i, z).getType();
 			if(type != Material.AIR && type != Material.GRASS && type != Material.TALL_GRASS) return i + 1;
