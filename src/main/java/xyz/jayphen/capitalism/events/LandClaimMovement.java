@@ -25,74 +25,72 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class LandClaimMovement implements Listener {
-	private static final HashMap<UUID, UUID>                 insideLandClaim = new HashMap<>();
-	private static final HashMap<UUID, RegionManager.Region> insideRegion    = new HashMap<>();
-	private static       long                                count           = 0;
-	
-	@EventHandler
-	public void onPlayerMove(PlayerMoveEvent event) {
-		if (count++ % 5 != 0) {
-			return;
-		}
-		visualize(event, new PlayerRunnable() {
-			@Override
-			public void onEnterLand(Player enteredPlayer, Claim claim) {
-				if (!claim.hasPermission(enteredPlayer, Claim.ClaimInteractionType.GENERAL)) return;
-				if (DatabasePlayer.from(enteredPlayer).getJsonPlayer().getData().seenLandlordTip) return;
-				DatabasePlayer.from(enteredPlayer).getJsonPlayer().getData().seenLandlordTip = true;
-				DatabasePlayer.from(enteredPlayer).getJsonPlayer().save();
-				
-				new MessageBuilder("Tip").appendCaption("You can type").appendVariable("/land")
-						.appendCaption("whilst standing inside your land claim to open the Landlord Settings menu").send(enteredPlayer);
-			}
-		});
+		private static final HashMap<UUID, UUID>                 insideLandClaim = new HashMap<>();
+		private static final HashMap<UUID, RegionManager.Region> insideRegion    = new HashMap<>();
+		private static       long                                count           = 0;
 		
-		
-	}
-	
-	private void visualize(PlayerMoveEvent event, PlayerRunnable onEnter) {
-		Optional<Claim>      optClaim = ClaimManager.getCachedClaim(event.getPlayer().getLocation());
-		RegionManager.Region reg      = RegionManager.getRegion(event.getPlayer().getLocation());
-		if (insideRegion.isEmpty() || insideRegion.get(event.getPlayer().getUniqueId()) != reg) {
-			insideRegion.put(event.getPlayer().getUniqueId(), reg);
-			event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
-					ChatColor.GRAY + "You are now in the " + ChatColor.YELLOW + reg.toString().toLowerCase(Locale.ROOT) + ChatColor.GRAY +
-					" region."));
-		}
-		if (optClaim.isEmpty()) {
-			if (insideLandClaim.containsKey(event.getPlayer().getUniqueId())) {
-				insideLandClaim.remove(event.getPlayer().getUniqueId());
-				event.getPlayer().spigot()
-						.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GRAY + "You are now in unclaimed land"));
-			}
-			return;
-		}
-		if (!insideLandClaim.containsKey(event.getPlayer().getUniqueId())) {
-			Claim claim = optClaim.get();
-			insideLandClaim.put(event.getPlayer().getUniqueId(), UUID.fromString(claim.owner));
-			onEnter.onEnterLand(event.getPlayer(), claim);
-			event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
-					ChatColor.GRAY + "Land owned by: " + ChatColor.YELLOW +
-					Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName()));
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					for (Location loc : claim.getBorderBlocks()) {
-						for (int i = event.getPlayer().getLocation().getBlockY(); i < event.getPlayer().getLocation().getBlockY() + 40; i++)
-						{
-							event.getPlayer().spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, i + 0.1, loc.getBlockZ() + 0.5, 1,
-							                                new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1)
-							);
-						}
-					}
+		@EventHandler
+		public void onPlayerMove(PlayerMoveEvent event) {
+				if (count++ % 5 != 0) {
+						return;
 				}
-			}.runTaskAsynchronously(Capitalism.plugin);
-			
-			
+				visualize(event, new PlayerRunnable() {
+						@Override
+						public void onEnterLand(Player enteredPlayer, Claim claim) {
+								if (!claim.hasPermission(enteredPlayer, Claim.ClaimInteractionType.GENERAL)) return;
+								if (DatabasePlayer.from(enteredPlayer).getJsonPlayer().getData().seenLandlordTip) return;
+								DatabasePlayer.from(enteredPlayer).getJsonPlayer().getData().seenLandlordTip = true;
+								DatabasePlayer.from(enteredPlayer).getJsonPlayer().save();
+								
+								new MessageBuilder("Tip").appendCaption("You can type").appendVariable("/land")
+												.appendCaption("whilst standing inside your land claim to open the Landlord Settings menu").send(enteredPlayer);
+						}
+				});
+				
+				
 		}
-	}
+		
+		private void visualize(PlayerMoveEvent event, PlayerRunnable onEnter) {
+				Optional<Claim>      optClaim = ClaimManager.getCachedClaim(event.getPlayer().getLocation());
+				RegionManager.Region reg      = RegionManager.getRegion(event.getPlayer().getLocation());
+				if (insideRegion.isEmpty() || insideRegion.get(event.getPlayer().getUniqueId()) != reg) {
+						insideRegion.put(event.getPlayer().getUniqueId(), reg);
+						event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
+										ChatColor.GRAY + "You are now in the " + ChatColor.YELLOW + reg.toString().toLowerCase(Locale.ROOT) + ChatColor.GRAY +
+										" region."));
+				}
+				if (optClaim.isEmpty()) {
+						if (insideLandClaim.containsKey(event.getPlayer().getUniqueId())) {
+								insideLandClaim.remove(event.getPlayer().getUniqueId());
+								event.getPlayer().spigot()
+												.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GRAY + "You are now in unclaimed land"));
+						}
+						return;
+				}
+				if (!insideLandClaim.containsKey(event.getPlayer().getUniqueId())) {
+						Claim claim = optClaim.get();
+						insideLandClaim.put(event.getPlayer().getUniqueId(), UUID.fromString(claim.owner));
+						onEnter.onEnterLand(event.getPlayer(), claim);
+						event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
+										ChatColor.GRAY + "Land owned by: " + ChatColor.YELLOW + Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName()));
+						new BukkitRunnable() {
+								@Override
+								public void run() {
+										for (Location loc : claim.getBorderBlocks()) {
+												for (int i = event.getPlayer().getLocation().getBlockY(); i < event.getPlayer().getLocation().getBlockY() + 40; i++) {
+														event.getPlayer().spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, i + 0.1, loc.getBlockZ() + 0.5, 1,
+														                                new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1)
+														);
+												}
+										}
+								}
+						}.runTaskAsynchronously(Capitalism.plugin);
+						
+						
+				}
+		}
 }
 
 abstract class PlayerRunnable {
-	public abstract void onEnterLand(Player enteredPlayer, Claim land);
+		public abstract void onEnterLand(Player enteredPlayer, Claim land);
 }

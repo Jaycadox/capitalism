@@ -15,58 +15,55 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class PlaytimeRewards implements Listener {
-	public static ArrayList<UUID> eligiblePlayers = new ArrayList<>();
-	public static ArrayList<UUID> redeemedPlayers = new ArrayList<>();
-	
-	
-	public static void register() {
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				showReward();
-			}
-		}.runTaskTimer(Capitalism.plugin, 60 * 25 * 20, 60 * 25 * 20);
-	}
-	
-	private static void showReward() {
+		public static ArrayList<UUID> eligiblePlayers = new ArrayList<>();
+		public static ArrayList<UUID> redeemedPlayers = new ArrayList<>();
 		
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			eligiblePlayers.add(p.getUniqueId());
-			new MessageBuilder("Reward").appendData(Token.TokenType.CHAT, "Click here", "__I_REDEEM_REWARD__")
-					.appendCaption("to redeem your playtime reward. This will expire in 30 seconds").send(p);
+		
+		public static void register() {
+				new BukkitRunnable() {
+						@Override
+						public void run() {
+								showReward();
+						}
+				}.runTaskTimer(Capitalism.plugin, 60 * 25 * 20, 60 * 25 * 20);
 		}
-		new BukkitRunnable() {
-			@Override
-			public void run() {
+		
+		private static void showReward() {
+				
 				for (Player p : Bukkit.getOnlinePlayers()) {
-					if (!redeemedPlayers.contains(p.getUniqueId()) && eligiblePlayers.contains(p.getUniqueId())) {
-						new MessageBuilder("Reward").appendCaption("Your playtime reward has expired").send(p);
-					}
-					redeemedPlayers.clear();
-					eligiblePlayers.clear();
+						eligiblePlayers.add(p.getUniqueId());
+						new MessageBuilder("Reward").appendData(Token.TokenType.CHAT, "Click here", "__I_REDEEM_REWARD__")
+										.appendCaption("to redeem your playtime reward. This will expire in 30 seconds").send(p);
 				}
-			}
-		}.runTaskLater(Capitalism.plugin, 30 * 20);
-	}
-	
-	
-	public static boolean onChat(AsyncPlayerChatEvent e) {
-		if (e.getMessage().equals("__I_REDEEM_REWARD__")) {
-			e.setCancelled(true);
-			if (!redeemedPlayers.contains(e.getPlayer().getUniqueId()) && eligiblePlayers.contains(e.getPlayer().getUniqueId())) {
-				eligiblePlayers.remove(e.getPlayer().getUniqueId());
-				redeemedPlayers.add(e.getPlayer().getUniqueId());
-				if (Database.injector.inject(e.getPlayer().getUniqueId(), 100000).getType() ==
-				    TransactionResult.TransactionResultType.SUCCESS)
-				{
-					new MessageBuilder("Reward").appendVariable("$100,000").appendCaption("has been added to your balance")
-							.send(e.getPlayer());
-					
-				}
-			}
-			return true;
+				new BukkitRunnable() {
+						@Override
+						public void run() {
+								for (Player p : Bukkit.getOnlinePlayers()) {
+										if (!redeemedPlayers.contains(p.getUniqueId()) && eligiblePlayers.contains(p.getUniqueId())) {
+												new MessageBuilder("Reward").appendCaption("Your playtime reward has expired").send(p);
+										}
+										redeemedPlayers.clear();
+										eligiblePlayers.clear();
+								}
+						}
+				}.runTaskLater(Capitalism.plugin, 30 * 20);
 		}
-		return false;
-	}
-	
+		
+		
+		public static boolean onChat(AsyncPlayerChatEvent e) {
+				if (e.getMessage().equals("__I_REDEEM_REWARD__")) {
+						e.setCancelled(true);
+						if (!redeemedPlayers.contains(e.getPlayer().getUniqueId()) && eligiblePlayers.contains(e.getPlayer().getUniqueId())) {
+								eligiblePlayers.remove(e.getPlayer().getUniqueId());
+								redeemedPlayers.add(e.getPlayer().getUniqueId());
+								if (Database.injector.inject(e.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
+										new MessageBuilder("Reward").appendVariable("$100,000").appendCaption("has been added to your balance").send(e.getPlayer());
+										
+								}
+						}
+						return true;
+				}
+				return false;
+		}
+		
 }

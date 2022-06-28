@@ -10,16 +10,16 @@ import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.players.display.PlayerDisplay;
 
 public class Chat implements Listener {
-	@EventHandler(priority = EventPriority.LOW)
-	public void onChat(AsyncPlayerChatEvent event) {
-		if (ChatInputEvent.onChat(event)) return;
-		if (Lottery.onChat(event)) return;
-		if (PlaytimeRewards.onChat(event)) return;
+		@EventHandler(priority = EventPriority.LOW)
+		public void onChat(AsyncPlayerChatEvent event) {
+				if (ChatInputEvent.onChat(event)) return;
+				if (Lottery.onChat(event)) return;
+				if (PlaytimeRewards.onChat(event)) return;
+				
+				event.setCancelled(true);
+				var cmp = PlayerDisplay.from(event.getPlayer()).append(Component.text(": ", TextColor.color(0xcccccc)))
+								.append(Component.text(event.getMessage(), TextColor.color(0xededed)));
+				Capitalism.ADVENTURE.all().sendMessage(cmp);
+		}
 		
-		event.setCancelled(true);
-		var cmp = PlayerDisplay.from(event.getPlayer()).append(Component.text(": ", TextColor.color(0xcccccc)))
-				.append(Component.text(event.getMessage(), TextColor.color(0xededed)));
-		Capitalism.ADVENTURE.all().sendMessage(cmp);
-	}
-	
 }

@@ -13,28 +13,26 @@ import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.NumberFormatter;
 
 public class DeathTax implements Listener {
-	@EventHandler
-	public void onPlayerDeath(PlayerDeathEvent event) {
-		DatabasePlayer dbp = DatabasePlayer.from(event.getEntity());
-		if (dbp.getMoneySafe() == 0) return;
-		TaxResult tax = TaxedDeath.INSTANCE.applyTax((int) dbp.getMoneySafe());
-		if (tax.getAmountTaxed() == 0) return;
-		
-		Transaction t = new Transaction(event.getEntity().getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
-		                                (int) tax.getAmountTaxed()
-		);
-		
-		TransactionResult result = t.transact();
-		if (result.getType() == TransactionResult.TransactionResultType.ERROR) {
-			new MessageBuilder("Death Tax").appendCaption("Failed to apply death tax. You've gotten lucky this time >:(")
-					.send(event.getEntity());
-			return;
+		@EventHandler
+		public void onPlayerDeath(PlayerDeathEvent event) {
+				DatabasePlayer dbp = DatabasePlayer.from(event.getEntity());
+				if (dbp.getMoneySafe() == 0) return;
+				TaxResult tax = TaxedDeath.INSTANCE.applyTax((int) dbp.getMoneySafe());
+				if (tax.getAmountTaxed() == 0) return;
+				
+				Transaction t = new Transaction(event.getEntity().getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
+				                                (int) tax.getAmountTaxed()
+				);
+				
+				TransactionResult result = t.transact();
+				if (result.getType() == TransactionResult.TransactionResultType.ERROR) {
+						new MessageBuilder("Death Tax").appendCaption("Failed to apply death tax. You've gotten lucky this time >:(").send(event.getEntity());
+						return;
+				}
+				dbp.getJsonPlayer().getData().stats.amountTaxed += tax.getAmountTaxed();
+				dbp.getJsonPlayer().save();
+				new MessageBuilder("Death Tax").appendVariable("$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
+								.appendCaption("has been deducted from your account. This was").appendVariable(( Math.ceil(tax.getTaxAmount() * 100) ) + "%")
+								.appendCaption("of your account's balance").send(event.getEntity());
 		}
-		dbp.getJsonPlayer().getData().stats.amountTaxed += tax.getAmountTaxed();
-		dbp.getJsonPlayer().save();
-		new MessageBuilder("Death Tax").appendVariable("$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
-				.appendCaption("has been deducted from your account. This was")
-				.appendVariable(( Math.ceil(tax.getTaxAmount() * 100) ) + "%").appendCaption("of your account's balance")
-				.send(event.getEntity());
-	}
 }
