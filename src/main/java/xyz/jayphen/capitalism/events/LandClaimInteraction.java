@@ -33,7 +33,9 @@ import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimItemShop;
 import xyz.jayphen.capitalism.claims.ClaimManager;
 import xyz.jayphen.capitalism.claims.region.RegionManager;
+import xyz.jayphen.capitalism.database.Database;
 import xyz.jayphen.capitalism.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 import xyz.jayphen.capitalism.helpers.ShopHelper;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.NumberFormatter;
@@ -95,6 +97,25 @@ public class LandClaimInteraction implements Listener {
 								.appendVariable("$" + NumberFormatter.addCommas(price)).make());
 			}
 		}.runTaskLater(Capitalism.plugin, 1);
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void playerBedInteraction(PlayerInteractEvent event) {
+		if(event.isCancelled()) return;
+		int numberOfClaims = DatabasePlayer.from(event.getPlayer()).getJsonPlayer().getData().claims.size();
+		if(numberOfClaims == 0) return;
+		if(event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+		if(!(event.getClickedBlock().getBlockData() instanceof Bed)) return;
+		Claim c = ClaimManager.getCachedClaim(event.getClickedBlock().getLocation()).orElse(null);
+		if(!c.owner.equals(event.getPlayer().getUniqueId().toString())) return;
+		if(PlaytimeRewards.redeemedPlayers.contains(event.getPlayer().getUniqueId())) return;
+		if(!PlaytimeRewards.eligiblePlayers.contains(event.getPlayer().getUniqueId())) return;
+		PlaytimeRewards.redeemedPlayers.add(event.getPlayer().getUniqueId());
+		PlaytimeRewards.eligiblePlayers.remove(event.getPlayer().getUniqueId());
+		if (Database.injector.inject(event.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
+			new MessageBuilder("Reward").appendVariable("$100,000")
+					.appendCaption("has been added to your balance").send(event.getPlayer());
+		}
 	}
 	
 	@EventHandler
