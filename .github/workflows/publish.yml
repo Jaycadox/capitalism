@@ -1,9 +1,8 @@
 name: Publish
-
 on:
-  - push:
-      branches:
-        - main
+  push:
+    branches:
+      - dev
 
 jobs:
   publish:
