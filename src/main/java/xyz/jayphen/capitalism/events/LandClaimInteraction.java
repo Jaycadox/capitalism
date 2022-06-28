@@ -125,10 +125,10 @@ public class LandClaimInteraction implements Listener {
 		
 		var region = RegionManager.getRegion(new Location(Bukkit.getWorld(claim.location.world), claim.location.startX, 0, claim.location.startZ));
 		boolean wasBedClicked = region == RegionManager.Region.COMMERCIAL &&
-		                        ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed );
+		                        ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed ) && event.getAction() == Action.RIGHT_CLICK_BLOCK;
 		if (wasBedClicked && claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) {
 			Capitalism.ADVENTURE.player(event.getPlayer())
-					.sendActionBar(Component.text("Beds cannot be placed in commercial plots of land", NamedTextColor.GRAY));
+					.sendActionBar(Component.text("Beds cannot be used in commercial plots of land", NamedTextColor.GRAY));
 			event.setCancelled(true);
 			return;
 		}
