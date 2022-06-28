@@ -61,7 +61,31 @@ public class BanManager {
 		if (!( reason.equals("[ac]") )) return reason;
 		return "Unfair advantage";
 	}
-	
+	public static int getAnticheatInfractions(DatabasePlayer p) {
+		return p.getJsonPlayer().getBanRecord().stream().filter(x -> x.contains("[ac]")).toList().size();
+	}
+	public static long getAutobanTime(OfflinePlayer p) {
+		var infractionCount = getAnticheatInfractions(DatabasePlayer.from(p));
+		if(infractionCount == 0) {
+			return TimeHelper.toTime("1d");
+		}
+		if(infractionCount == 1) {
+			return TimeHelper.toTime("3d");
+		}
+		if(infractionCount == 2) {
+			return TimeHelper.toTime("7d");
+		}
+		if(infractionCount == 3) {
+			return TimeHelper.toTime("14d");
+		}
+		if(infractionCount == 4) {
+			return TimeHelper.toTime("30d");
+		}
+		if(infractionCount == 5) {
+			return TimeHelper.toTime("99999d");
+		}
+		return 0;
+	}
 	@NotNull
 	public static Component getBanMessage(DatabasePlayer dbp, long timeLeft) {
 		String formattedTimeLeft = TimeHelper.timeToString(timeLeft);

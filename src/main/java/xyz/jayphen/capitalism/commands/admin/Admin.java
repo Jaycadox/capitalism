@@ -189,28 +189,28 @@ public class Admin implements CommandExecutor, TabCompleter {
 				String reason    = dbp.getJsonPlayer().getBanReason();
 				commandSender.sendMessage(
 						ChatColor.YELLOW + "Ban status: " + ChatColor.RED + "Banned. Expires in " + timeUntil + ". Reason: " + reason);
-				
 			}
 			int banIndex = 0;
 			commandSender.sendMessage(ChatColor.YELLOW + "Ban record:");
 			
 			for (String ban : dbp.getJsonPlayer().getBanRecord()) {
-				
 				try {
 					String banLength = TimeHelper.timeToString(Long.parseUnsignedLong(ban.split("###")[0]));
 					String banReason = ban.split("###")[1];
-					if (banReason.contains("s")) continue;
+					boolean anticheatIssued = banReason.equals("[ac]");
+					if(anticheatIssued) banReason = ChatColor.GREEN + "Anticheat Issued";
+					
 					String banIssued = TimeHelper.timeToString(System.currentTimeMillis() - Long.parseUnsignedLong(ban.split("###")[2]));
 					commandSender.sendMessage(ChatColor.GOLD + "  " + ++banIndex + ChatColor.WHITE + ": " + banReason);
 					commandSender.sendMessage("    " + ChatColor.WHITE + "Ban length: " + ChatColor.YELLOW + banLength);
 					commandSender.sendMessage("    " + ChatColor.WHITE + "Time since issued: " + ChatColor.YELLOW + banIssued);
-					commandSender.sendMessage(
-							"    " + ChatColor.WHITE + "AntiCheat issued: " + ChatColor.YELLOW + ( banReason.equals("[ac]") ? "Yes" : "No" ));
 				} catch (Exception ignored) {
 				}
 				
 			}
-			
+			int acBanCount = BanManager.getAnticheatInfractions(dbp);
+			commandSender.sendMessage(
+					ChatColor.YELLOW + "Anticheat bans: " + ChatColor.RED + acBanCount);
 			commandSender.sendMessage(ChatColor.YELLOW + "Account balance: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getMoneySafe()));
 			commandSender.sendMessage(ChatColor.YELLOW + "Amount sent: " + ChatColor.GREEN + "$" +
 			                          NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneySent));
