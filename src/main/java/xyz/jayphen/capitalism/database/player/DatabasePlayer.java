@@ -263,7 +263,10 @@ public class DatabasePlayer {
 	}
 	
 	public void delete(boolean giveStartingBonus) {
-		ArrayList<String> banHistory = this.getJsonPlayer().getBanRecord();
+		var    banHistory     = this.getJsonPlayer().getBanRecord();
+		var    banRetractions = this.getJsonPlayer().getRetractedBans();
+		long   banUntil       = this.getJsonPlayer().getBannedUntil();
+		String banReason      = this.getJsonPlayer().getBanReason();
 		Transaction transaction = new Transaction(Bukkit.getOfflinePlayer(getUuid()).getUniqueId(),
 		                                          DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), (int) getMoneySafe()
 		);
@@ -278,7 +281,10 @@ public class DatabasePlayer {
 		cache.remove(uuid);
 		DatabasePlayer.from(uuid, giveStartingBonus ? 1000000 : 0).getJsonPlayer()
 				.queueMessage(new MessageBuilder("Capitalism").appendCaption("Your player data has been reset by an administrator").make());
-		DatabasePlayer.from(uuid).getJsonPlayer().getData().banRecord = banHistory;
+		DatabasePlayer.from(uuid).getJsonPlayer().getData().banRecord     = banHistory;
+		DatabasePlayer.from(uuid).getJsonPlayer().getData().retractedBans = banRetractions;
+		DatabasePlayer.from(uuid).getJsonPlayer().getData().banReason     = banReason;
+		DatabasePlayer.from(uuid).getJsonPlayer().getData().bannedUntil   = banUntil;
 		DatabasePlayer.from(uuid).getJsonPlayer().save();
 		
 	}

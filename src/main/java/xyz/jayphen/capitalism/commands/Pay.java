@@ -61,7 +61,9 @@ public class Pay implements CommandExecutor {
 		}
 		
 		
-		Transaction tax_t = new Transaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), (int) tax.getAmountTaxed());
+		Transaction       tax_t   = new Transaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
+		                                            (int) tax.getAmountTaxed()
+		);
 		TransactionResult tax_res = tax_t.transact();
 		
 		if (tax_res.getType() != TransactionResult.TransactionResultType.SUCCESS) {

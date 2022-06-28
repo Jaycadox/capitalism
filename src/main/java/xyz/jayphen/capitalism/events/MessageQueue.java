@@ -22,6 +22,7 @@ public class MessageQueue {
 			var dbp = DatabasePlayer.from(p);
 			for (Component cmp : dbp.getJsonPlayer().getMessageQueue()) {
 				Capitalism.ADVENTURE.player(p).sendMessage(cmp);
+				Capitalism.ADVENTURE.player(p).sendActionBar(Component.empty());
 			}
 			dbp.getJsonPlayer().getData().messageQueue.clear();
 			dbp.getJsonPlayer().save();
