@@ -79,6 +79,7 @@ public class LandClaimInteraction implements Listener {
 	public void onSignEdit(SignChangeEvent event) {
 		Claim c = DatabasePlayer.from(event.getPlayer()).getJsonPlayer().getClaim(ClaimManager.getCachedClaim(event.getBlock().getLocation()).orElse(null));
 		if(c == null) return;
+		if(c.getRegion() != RegionManager.Region.COMMERCIAL) return;
 		new BukkitRunnable() {
 			@Override
 			public void run () {

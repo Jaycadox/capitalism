@@ -1,6 +1,7 @@
 package xyz.jayphen.capitalism.claims;
 
 import org.bukkit.*;
+import xyz.jayphen.capitalism.claims.region.RegionManager;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 
 import java.awt.geom.Point2D;
@@ -35,7 +36,9 @@ public class Claim {
 
 	public ArrayList<ClaimItemShop> signs = new ArrayList<>();
 
-
+	public RegionManager.Region getRegion() {
+		return RegionManager.getRegion(new Location(Bukkit.getWorld(location.world), location.startX, 0, location.startZ));
+	}
 
 	public ArrayList<String> getTrusted() {
 		if(trusted == null) {
