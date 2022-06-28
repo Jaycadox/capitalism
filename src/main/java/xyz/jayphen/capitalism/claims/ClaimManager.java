@@ -1,8 +1,8 @@
 package xyz.jayphen.capitalism.claims;
 
 import org.bukkit.Location;
-import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
-import xyz.jayphen.capitalism.commands.database.player.JSONPlayerData;
+import xyz.jayphen.capitalism.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.database.player.JSONPlayerData;
 
 import java.util.ArrayList;
 import java.util.HashMap;

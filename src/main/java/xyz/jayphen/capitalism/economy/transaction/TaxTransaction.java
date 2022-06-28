@@ -2,7 +2,7 @@ package xyz.jayphen.capitalism.economy.transaction;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
 import xyz.jayphen.capitalism.events.tax.ITax;
 import xyz.jayphen.capitalism.events.tax.TaxResult;

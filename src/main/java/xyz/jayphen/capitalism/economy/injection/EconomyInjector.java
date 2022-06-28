@@ -1,7 +1,7 @@
 package xyz.jayphen.capitalism.economy.injection;
 
-import xyz.jayphen.capitalism.commands.database.Database;
-import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.database.Database;
+import xyz.jayphen.capitalism.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.economy.transaction.Transaction;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 

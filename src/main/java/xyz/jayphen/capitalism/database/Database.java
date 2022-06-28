@@ -1,4 +1,4 @@
-package xyz.jayphen.capitalism.commands.database;
+package xyz.jayphen.capitalism.database;
 
 import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.economy.injection.EconomyInjector;

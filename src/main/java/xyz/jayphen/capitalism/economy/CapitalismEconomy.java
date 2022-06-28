@@ -3,7 +3,7 @@ package xyz.jayphen.capitalism.economy;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
-import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.database.player.DatabasePlayer;
 
 import java.util.List;
 

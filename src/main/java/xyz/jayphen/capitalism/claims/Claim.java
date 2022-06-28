@@ -2,7 +2,7 @@ package xyz.jayphen.capitalism.claims;
 
 import org.bukkit.*;
 import xyz.jayphen.capitalism.claims.region.RegionManager;
-import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.database.player.DatabasePlayer;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;

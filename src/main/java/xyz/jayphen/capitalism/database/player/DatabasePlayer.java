@@ -1,4 +1,4 @@
-package xyz.jayphen.capitalism.commands.database.player;
+package xyz.jayphen.capitalism.database.player;
 
 import com.google.gson.Gson;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -7,7 +7,7 @@ import org.bukkit.OfflinePlayer;
 import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimOffer;
-import xyz.jayphen.capitalism.commands.database.Database;
+import xyz.jayphen.capitalism.database.Database;
 import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
 import xyz.jayphen.capitalism.economy.transaction.Transaction;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;

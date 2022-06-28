@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.jayphen.capitalism.Capitalism;
-import xyz.jayphen.capitalism.commands.database.Database;
+import xyz.jayphen.capitalism.database.Database;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.Token;

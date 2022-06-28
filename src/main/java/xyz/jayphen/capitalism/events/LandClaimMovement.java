@@ -16,7 +16,7 @@ import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimManager;
 import xyz.jayphen.capitalism.claims.region.RegionManager;
-import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 
 import java.util.HashMap;

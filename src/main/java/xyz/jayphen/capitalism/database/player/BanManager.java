@@ -1,4 +1,4 @@
-package xyz.jayphen.capitalism.commands.database.player;
+package xyz.jayphen.capitalism.database.player;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

@@ -4,7 +4,7 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import xyz.jayphen.capitalism.Capitalism;
-import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 
 import java.util.UUID;

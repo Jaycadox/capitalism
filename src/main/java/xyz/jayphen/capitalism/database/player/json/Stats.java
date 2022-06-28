@@ -1,4 +1,4 @@
-package xyz.jayphen.capitalism.commands.database.player.json;
+package xyz.jayphen.capitalism.database.player.json;
 
 public class Stats {
 	public long moneyRecieved = 0;

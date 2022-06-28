@@ -5,7 +5,7 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import xyz.jayphen.capitalism.commands.database.Database;
+import xyz.jayphen.capitalism.database.Database;
 import xyz.jayphen.capitalism.commands.handler.CommandRegister;
 import xyz.jayphen.capitalism.economy.CapitalismEconomy;
 import xyz.jayphen.capitalism.events.InventoryHelperEvent;
