@@ -14,9 +14,9 @@ public class JSONPlayerData {
 	public ArrayList<String> messageQueue = new ArrayList<>();
 	public Long bannedUntil = (long) -1;
 	public String banReason = "";
-
+	
 	public ArrayList<String> banRecord = new ArrayList<>();
 	public boolean seenLandlordTip = false;
-
-
+	
+	
 }

@@ -10,8 +10,8 @@ public class Database {
 	public static String dbPath = new File(Capitalism.plugin.getDataFolder() + "\\database.db").getAbsolutePath();
 	public static Connection ctn;
 	public static EconomyInjector injector = null;
-
-	public Database () {
+	
+	public Database() {
 		if (!exists()) generate();
 		if (ctn == null) {
 			try {
@@ -20,19 +20,14 @@ public class Database {
 				throw new RuntimeException(e);
 			}
 		}
-
+		
 		injector = new EconomyInjector();
 	}
-
-	public void createNewTable (Connection cnt) {
+	
+	public void createNewTable(Connection cnt) {
 		// SQL statement for creating a new table
-		String sql = "CREATE TABLE `players` (\n"
-				+ "\t`uuid` TEXT(32),\n"
-				+ "\t`money` INT(32),\n"
-				+ "\t`joined_lottery` INT(32),\n"
-				+  "\t`json` TEXT(32),\n"
-				+ "\tPRIMARY KEY (`uuid`));";
-
+		String sql = "CREATE TABLE `players` (\n" + "\t`uuid` TEXT(32),\n" + "\t`money` INT(32),\n" + "\t`joined_lottery` INT(32),\n" + "\t`json` TEXT(32),\n" + "\tPRIMARY KEY (`uuid`));";
+		
 		try {
 			Statement stmt = cnt.createStatement();
 			stmt.execute(sql);
@@ -40,13 +35,13 @@ public class Database {
 			e.printStackTrace();
 		}
 	}
-
-	public Connection connect () {
+	
+	public Connection connect() {
 		return ctn;
 	}
-
-	private void generate () {
-
+	
+	private void generate() {
+		
 		String url = "jdbc:sqlite:" + dbPath;
 		try {
 			new File(Capitalism.plugin.getDataFolder() + "\\").mkdir();
@@ -60,16 +55,16 @@ public class Database {
 				Capitalism.LOG.info("[SQLITE] Database generated.");
 			}
 			createNewTable(conn);
-
-
+			
+			
 		} catch (Exception e) {
 			Capitalism.LOG.warning("[SQLITE] Failed to generate database.");
 			e.printStackTrace();
-
+			
 		}
 	}
-
-	private boolean exists () {
+	
+	private boolean exists() {
 		return new File(Capitalism.plugin.getDataFolder() + "\\database.db").exists();
 	}
 }

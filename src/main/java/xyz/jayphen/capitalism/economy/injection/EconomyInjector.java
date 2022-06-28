@@ -12,13 +12,15 @@ import java.sql.Statement;
 import java.util.UUID;
 
 public class EconomyInjector {
-	public EconomyInjector () {
+	public static final String SERVER = "11111111";
+	
+	public EconomyInjector() {
 		if (!exists()) generate();
 	}
-	public static final String SERVER = "11111111";
-	public void generate () {
+	
+	public void generate() {
 		String sql = "CREATE TABLE `meta` (\n" + "\t`total_money` INT(32));";
-
+		
 		try {
 			Statement stmt = Database.ctn.createStatement();
 			stmt.execute(sql);
@@ -28,8 +30,8 @@ public class EconomyInjector {
 		} catch (SQLException ignored) {
 		}
 	}
-
-	public long getMoney () {
+	
+	public long getMoney() {
 		try {
 			Statement stmt = null;
 			stmt = Database.ctn.createStatement();
@@ -41,31 +43,33 @@ public class EconomyInjector {
 		}
 		return 0;
 	}
-
-	private void setMoney (double v) throws SQLException {
+	
+	private void setMoney(double v) throws SQLException {
 		Statement stmt = Database.ctn.createStatement();
 		stmt.execute("UPDATE meta\n" + "SET total_money = " + v + ";");
 	}
-
-	private void addMoney (int amt) {
+	
+	private void addMoney(int amt) {
 		try {
 			setMoney(getMoney() + amt);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
 	public DatabasePlayer getInjector() {
 		return DatabasePlayer.nonPlayer(SERVER);
 	}
-	public TransactionResult inject (UUID player, int amount) {
+	
+	public TransactionResult inject(UUID player, int amount) {
 		DatabasePlayer injector = DatabasePlayer.nonPlayer(SERVER);
-		if (injector.setMoneySafe((int) (injector.getMoneySafe() + amount))) {
+		if (injector.setMoneySafe((int) ( injector.getMoneySafe() + amount ))) {
 			addMoney(amount);
 		}
 		return new Transaction(injector.getUuid(), player, amount).transact();
 	}
-
-	public boolean exists () {
+	
+	public boolean exists() {
 		try {
 			DatabaseMetaData dbm = Database.ctn.getMetaData();
 			return dbm.getTables(null, null, "meta", null).next();

@@ -1,16 +1,11 @@
 package xyz.jayphen.capitalism.events.register;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.jayphen.capitalism.Capitalism;
-import xyz.jayphen.capitalism.claims.Claim;
-import xyz.jayphen.capitalism.claims.ClaimItemShop;
-import xyz.jayphen.capitalism.claims.ClaimManager;
 import xyz.jayphen.capitalism.events.*;
 
 public class EventRegister {
-	public static void registerAll () {
+	public static void registerAll() {
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new PlayerJoin(), Capitalism.plugin);
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new PlayerLeave(), Capitalism.plugin);
 		Capitalism.plugin.getServer().getPluginManager().registerEvents(new PlaytimeRewards(), Capitalism.plugin);
@@ -25,11 +20,11 @@ public class EventRegister {
 		ClaimVisualizer.register();
 		Lottery.register();
 		MessageQueue.register();
-
-
+		
+		
 		new BukkitRunnable() {
 			@Override
-			public void run () {
+			public void run() {
 				LandClaimInteraction.monitorSignLoop();
 			}
 		}.runTaskTimer(Capitalism.plugin, 25, 25);

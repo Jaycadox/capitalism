@@ -1,7 +1,6 @@
 package xyz.jayphen.capitalism;
 
 import com.sk89q.worldedit.WorldEdit;
-import net.kyori.adventure.Adventure;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -18,17 +17,17 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public final class Capitalism extends JavaPlugin {
-
+	
 	public static Logger LOG = null;
 	public static Plugin plugin = null;
 	public static Database db = null;
 	public static CapitalismEconomy eco = new CapitalismEconomy();
-	public final EconomyHook HOOK = new EconomyHook(this);
 	public static BlueMapIntergration BLUEMAP = null;
 	public static BukkitAudiences ADVENTURE = null;
-
+	public final EconomyHook HOOK = new EconomyHook(this);
+	
 	@Override
-	public void onEnable () {
+	public void onEnable() {
 		ADVENTURE = BukkitAudiences.create(this);
 		plugin = this;
 		LOG = this.getLogger();
@@ -41,23 +40,23 @@ public final class Capitalism extends JavaPlugin {
 		LOG.info("Loaded database.");
 		EventRegister.registerAll();
 		LOG.info("Registered events.");
-
-		if(!Bukkit.getPluginManager().isPluginEnabled("BlueMap")) {
+		
+		if (!Bukkit.getPluginManager().isPluginEnabled("BlueMap")) {
 			LOG.warning("BlueMap not found.");
 		} else {
 			BLUEMAP = new BlueMapIntergration();
 		}
-
-		if(!Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
+		
+		if (!Bukkit.getPluginManager().isPluginEnabled("WorldEdit")) {
 			LOG.warning("WorldEdit not found.");
 		} else {
 			WorldEdit.getInstance().getItemFactory();
 		}
 	}
-
-
+	
+	
 	@Override
-	public void onDisable () {
+	public void onDisable() {
 		try {
 			Database.ctn.close();
 		} catch (SQLException e) {

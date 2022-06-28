@@ -8,13 +8,13 @@ import xyz.jayphen.capitalism.economy.CapitalismEconomy;
 
 public class EconomyHook {
 	Plugin p = null;
-
-	public EconomyHook (Plugin pl) {
+	
+	public EconomyHook(Plugin pl) {
 		p = pl;
 	}
-
-
-	public boolean vault (CapitalismEconomy eco) {
+	
+	
+	public boolean vault(CapitalismEconomy eco) {
 		if (Bukkit.getServer().getPluginManager().getPlugin("Vault") == null) {
 			return false;
 		}

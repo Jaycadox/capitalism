@@ -4,18 +4,19 @@ public class TransactionResult {
 	TransactionResultType type = null;
 	String hash = null;
 	String errorReason = "no error reason provided";
-	public TransactionResult (TransactionResultType type, String hash) {
+	
+	public TransactionResult(TransactionResultType type, String hash) {
 		this.type = type;
 		this.hash = hash;
 	}
-
-	public TransactionResult (TransactionResultType type, String hash, String error) {
+	
+	public TransactionResult(TransactionResultType type, String hash, String error) {
 		this.type = type;
 		this.hash = hash;
 		this.errorReason = error;
 	}
-
-	public static String getLangFromResult (TransactionResultType res) {
+	
+	public static String getLangFromResult(TransactionResultType res) {
 		switch (res) {
 			case SUCCESS:
 				return "success";
@@ -25,19 +26,19 @@ public class TransactionResult {
 				return "error";
 		}
 	}
-
-	public String getErrorReason () {
+	
+	public String getErrorReason() {
 		return errorReason;
 	}
-
-	public TransactionResultType getType () {
+	
+	public TransactionResultType getType() {
 		return type;
 	}
-
-	public String getHash () {
+	
+	public String getHash() {
 		return hash;
 	}
-
+	
 	public enum TransactionResultType {
 		SUCCESS, FAIL, ERROR
 	}

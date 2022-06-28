@@ -2,7 +2,6 @@ package xyz.jayphen.capitalism.events;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -18,28 +17,26 @@ import java.util.UUID;
 public class PlaytimeRewards implements Listener {
 	public static ArrayList<UUID> eligiblePlayers = new ArrayList<>();
 	public static ArrayList<UUID> redeemedPlayers = new ArrayList<>();
-
-
-	public static void register () {
+	
+	
+	public static void register() {
 		new BukkitRunnable() {
 			@Override
-			public void run () {
+			public void run() {
 				showReward();
 			}
 		}.runTaskTimer(Capitalism.plugin, 60 * 25 * 20, 60 * 25 * 20);
 	}
-
-	private static void showReward () {
-
+	
+	private static void showReward() {
+		
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			eligiblePlayers.add(p.getUniqueId());
-			new MessageBuilder("Reward")
-					.appendData(Token.TokenType.CHAT, "Click here", "__I_REDEEM_REWARD__")
-					.appendCaption("to redeem your playtime reward. This will expire in 30 seconds").send(p);
+			new MessageBuilder("Reward").appendData(Token.TokenType.CHAT, "Click here", "__I_REDEEM_REWARD__").appendCaption("to redeem your playtime reward. This will expire in 30 seconds").send(p);
 		}
 		new BukkitRunnable() {
 			@Override
-			public void run () {
+			public void run() {
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					if (!redeemedPlayers.contains(p.getUniqueId()) && eligiblePlayers.contains(p.getUniqueId())) {
 						new MessageBuilder("Reward").appendCaption("Your playtime reward has expired").send(p);
@@ -50,9 +47,9 @@ public class PlaytimeRewards implements Listener {
 			}
 		}.runTaskLater(Capitalism.plugin, 30 * 20);
 	}
-
-
-	public static boolean onChat (AsyncPlayerChatEvent e) {
+	
+	
+	public static boolean onChat(AsyncPlayerChatEvent e) {
 		if (e.getMessage().equals("__I_REDEEM_REWARD__")) {
 			e.setCancelled(true);
 			if (!redeemedPlayers.contains(e.getPlayer().getUniqueId()) && eligiblePlayers.contains(e.getPlayer().getUniqueId())) {
@@ -60,12 +57,12 @@ public class PlaytimeRewards implements Listener {
 				redeemedPlayers.add(e.getPlayer().getUniqueId());
 				if (Database.injector.inject(e.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
 					new MessageBuilder("Reward").appendVariable("$100,000").appendCaption("has been added to your balance").send(e.getPlayer());
-
+					
 				}
 			}
 			return true;
 		}
 		return false;
 	}
-
+	
 }
