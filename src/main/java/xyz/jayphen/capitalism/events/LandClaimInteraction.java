@@ -1,6 +1,8 @@
 package xyz.jayphen.capitalism.events;
 
 import com.google.gson.Gson;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -12,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -34,6 +37,7 @@ import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimItemShop;
 import xyz.jayphen.capitalism.claims.ClaimManager;
+import xyz.jayphen.capitalism.claims.region.RegionManager;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.helpers.ShopHelper;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
@@ -52,7 +56,9 @@ public class LandClaimInteraction implements Listener {
 	);
 	public static void monitorSignLoop() {
 		for(Claim c : ClaimManager.getAllClaims()) {
+			if(c == null) continue;
 			c = DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().getClaim(c);
+			if(c == null) continue;
 			for(ClaimItemShop shop : c.getSigns()) {
 				Location loc = new Location(Bukkit.getWorld(c.location.world), shop.getX(), shop.getY(), shop.getZ());
 				if(!(loc.getBlock().getState() instanceof Sign)) {
@@ -104,10 +110,10 @@ public class LandClaimInteraction implements Listener {
 			return;
 		}
 		Claim claim = optClaim.get();
-		if(true) { //!claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)
+		if(!claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) {
 			if(event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				if(event.getClickedBlock().getState() instanceof Chest) {
-					for(ClaimItemShop shop : ClaimManager.getDatabaseClaim(claim).getSigns()) {
+					for(ClaimItemShop shop : Objects.requireNonNull(ClaimManager.getDatabaseClaim(claim)).getSigns()) {
 						if(ShopHelper.getChestFromSign(claim.getSignLocation(shop)) != null) {
 							event.setCancelled(true);
 							ShopHelper.openShop(event.getPlayer(), shop, (Chest) event.getClickedBlock().getState(), claim);
@@ -117,10 +123,21 @@ public class LandClaimInteraction implements Listener {
 				}
 			}
 		}
-		if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) return;
-		if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.OWNER)) return;
+
+		var region = RegionManager.getRegion(
+				new Location(Bukkit.getWorld(claim.location.world), claim.location.startX, 0, claim.location.startZ)
+		);
+		boolean wasBedClicked = region == RegionManager.Region.COMMERCIAL && (event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed);
+		if(wasBedClicked && claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) {
+			Capitalism.ADVENTURE.player(event.getPlayer()).sendActionBar(Component.text("Beds cannot be placed in commercial plots of land", NamedTextColor.GRAY));
+			event.setCancelled(true);
+			return;
+		}
+
+		if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL) && !wasBedClicked) return;
+		if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.OWNER) && !wasBedClicked) return;
 		if(event.getClickedBlock() != null && (WOODEN_DOORS.contains(event.getClickedBlock().getType()) || WOODEN_TRAPDOORS.contains(event.getClickedBlock().getType()))) {
-			if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.WOOD)) return;
+			if(claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.WOOD) && !wasBedClicked) return;
 		}
 
 		event.setCancelled(true);

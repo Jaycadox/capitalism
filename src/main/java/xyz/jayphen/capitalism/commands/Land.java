@@ -3,6 +3,7 @@ package xyz.jayphen.capitalism.commands;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.logging.log4j.message.Message;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -16,6 +17,7 @@ import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimLocation;
 import xyz.jayphen.capitalism.claims.ClaimManager;
 import xyz.jayphen.capitalism.claims.ClaimOffer;
+import xyz.jayphen.capitalism.claims.region.RegionManager;
 import xyz.jayphen.capitalism.commands.database.player.DatabasePlayer;
 import xyz.jayphen.capitalism.commands.database.player.JSONPlayer;
 import xyz.jayphen.capitalism.helpers.ChatInput;
@@ -261,7 +263,12 @@ public class Land implements CommandExecutor, TabCompleter {
 				if(ctx.equals("info")) {
 					inv.setMargin(1, 0);
 					inv.setItem(0, 0, ChatColor.YELLOW + "Claim Area", Material.GRASS_BLOCK, () -> {},
-					            Stream.of("&7This claim's area is: &e" + c.getArea() + " blocks", "&7Location: &e" + c.getMidpointX() + ", " + c.getMidpointZ())
+					            Stream.of("&7This claim's area is: &e" + c.getArea() + " blocks",
+					                      "&7Location: &e" + c.getMidpointX() + ", " + c.getMidpointZ(),
+					                      "&7Type: &e" + RegionManager.getRegion(
+												  new Location(Bukkit.getWorld(c.location.world), c.location.startX, 0, c.location.startZ)
+					                      ).toString().toLowerCase()
+							            )
 							            .map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
 
 					inv.setItem(0, 5, ChatColor.RED + "Destroy Claim", Material.TNT, () -> {

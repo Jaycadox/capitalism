@@ -32,7 +32,14 @@ public class BlueMapIntergration {
 				new BukkitRunnable() {
 					@Override
 					public void run () {
+						markerAPI.getMarkerSets().forEach(x -> markerAPI.removeMarkerSet(x.getId()));
+						try {
+							markerAPI.save();
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
 						for(Claim c : ClaimManager.getAllClaims()) {
+							if(c == null) continue;
 							tick(c, api);
 						}
 					}
@@ -46,6 +53,7 @@ public class BlueMapIntergration {
 		var map = api.getWorlds().stream().filter(x -> c.location.world.toLowerCase().contains(x.getMaps().stream().findFirst().get().getName().toLowerCase())).findFirst().get().getMaps().stream().findFirst().get();
 		var world = Bukkit.getWorld(c.location.world);
 		MarkerSet marker = markerAPI.createMarkerSet(c.location.hashCode() + "");
+
 		marker.setLabel(c.getName());
 		int centerX = c.getMidpointX();
 		int centerZ = c.getMidpointZ();

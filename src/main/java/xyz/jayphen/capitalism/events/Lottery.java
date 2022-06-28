@@ -84,11 +84,13 @@ public class Lottery implements Listener {
 			amount = 0;
 			return;
 		}
-		new MessageBuilder("Lottery")
+		var msg = new MessageBuilder("Lottery")
 				.appendData(Token.TokenType.CHAT, "Click here", "__I_JOIN_LOTTERY__")
 				.appendCaption("to join lottery for")
 				.appendVariable("$" + NumberFormatter.addCommas(amount) + ".")
-				.appendCaption("Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.").broadcast();
+				.appendCaption("Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.");
+		Bukkit.getOnlinePlayers().stream().filter(x -> !DatabasePlayer.from(x).getJoinedLottery()).forEach(msg::send);
+
 	}
 	private static void handleWin() {
 		ArrayList<UUID> entered = DatabasePlayer.allLotteryEnteredPeople();
