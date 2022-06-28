@@ -33,7 +33,9 @@ import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimItemShop;
 import xyz.jayphen.capitalism.claims.ClaimManager;
 import xyz.jayphen.capitalism.claims.region.RegionManager;
+import xyz.jayphen.capitalism.database.Database;
 import xyz.jayphen.capitalism.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 import xyz.jayphen.capitalism.helpers.ShopHelper;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.NumberFormatter;
@@ -97,6 +99,25 @@ public class LandClaimInteraction implements Listener {
 		}.runTaskLater(Capitalism.plugin, 1);
 	}
 	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void playerBedInteraction(PlayerInteractEvent event) {
+		if (event.isCancelled()) return;
+		int numberOfClaims = DatabasePlayer.from(event.getPlayer()).getJsonPlayer().getData().claims.size();
+		if (numberOfClaims == 0) return;
+		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+		if (!( event.getClickedBlock().getBlockData() instanceof Bed )) return;
+		Claim c = ClaimManager.getCachedClaim(event.getClickedBlock().getLocation()).orElse(null);
+		if (!c.owner.equals(event.getPlayer().getUniqueId().toString())) return;
+		if (PlaytimeRewards.redeemedPlayers.contains(event.getPlayer().getUniqueId())) return;
+		if (!PlaytimeRewards.eligiblePlayers.contains(event.getPlayer().getUniqueId())) return;
+		PlaytimeRewards.redeemedPlayers.add(event.getPlayer().getUniqueId());
+		PlaytimeRewards.eligiblePlayers.remove(event.getPlayer().getUniqueId());
+		if (Database.injector.inject(event.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
+			new MessageBuilder("Reward").appendVariable("$100,000")
+					.appendCaption("has been added to your balance").send(event.getPlayer());
+		}
+	}
+	
 	@EventHandler
 	public void onInteraction(PlayerInteractEvent event) {
 		if (( event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ) && event.getPlayer().isSneaking()) {
@@ -125,10 +146,11 @@ public class LandClaimInteraction implements Listener {
 		
 		var region = RegionManager.getRegion(new Location(Bukkit.getWorld(claim.location.world), claim.location.startX, 0, claim.location.startZ));
 		boolean wasBedClicked = region == RegionManager.Region.COMMERCIAL &&
-		                        ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed );
+		                        ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed ) &&
+		                        event.getAction() == Action.RIGHT_CLICK_BLOCK;
 		if (wasBedClicked && claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) {
 			Capitalism.ADVENTURE.player(event.getPlayer())
-					.sendActionBar(Component.text("Beds cannot be placed in commercial plots of land", NamedTextColor.GRAY));
+					.sendActionBar(Component.text("Beds cannot be used in commercial plots of land", NamedTextColor.GRAY));
 			event.setCancelled(true);
 			return;
 		}
@@ -201,9 +223,8 @@ public class LandClaimInteraction implements Listener {
 			return;
 		}
 		event.setCancelled(true);
-		Optional<Claim> optClaim   = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
-		String          claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName()
-		                                                  : "a nearby claim border";
+		Optional<Claim> optClaim = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
+		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() : "a nearby claim border";
 		
 		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
 				ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));
