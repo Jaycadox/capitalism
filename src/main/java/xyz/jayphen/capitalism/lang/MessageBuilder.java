@@ -16,14 +16,14 @@ import java.util.List;
 
 public class MessageBuilder {
 	protected ArrayList<Token> message = new ArrayList<>();
-	private String prefix = "";
+	private   String           prefix  = "";
 	
 	public MessageBuilder(String prefix) {
 		this.prefix = prefix;
 	}
 	
 	protected MessageBuilder(String prefix, ArrayList<Token> message) {
-		this.prefix = prefix;
+		this.prefix  = prefix;
 		this.message = message;
 	}
 	
@@ -112,7 +112,8 @@ public class MessageBuilder {
 			}
 			Component raw = Component.text(tok.content + " ", defaultColor);
 			if (tok.token == Token.TokenType.CHAT || tok.token == Token.TokenType.COMMAND) {
-				raw = raw.clickEvent(ClickEvent.runCommand(tok.getExtraData())).hoverEvent(HoverEvent.showText(Component.text("Clickable action...")));
+				raw = raw.clickEvent(ClickEvent.runCommand(tok.getExtraData()))
+						.hoverEvent(HoverEvent.showText(Component.text("Clickable action...")));
 			}
 			if (tok.token == Token.TokenType.COMPONENT) {
 				raw = tok.getComponent().append(Component.text(" "));

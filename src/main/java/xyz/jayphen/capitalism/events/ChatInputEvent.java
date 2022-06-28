@@ -18,7 +18,8 @@ public class ChatInputEvent implements Listener {
 			if (q.player() == event.getPlayer().getUniqueId()) {
 				event.setCancelled(true);
 				ChatInput.OPEN_QUERIES.removeIf(x -> x.player() == event.getPlayer().getUniqueId());
-				new MessageBuilder("Query").appendCaption("Running query for:").appendVariable(q.query()).appendCaption("with value:").appendVariable(event.getMessage()).send(event.getPlayer());
+				new MessageBuilder("Query").appendCaption("Running query for:").appendVariable(q.query()).appendCaption("with value:")
+						.appendVariable(event.getMessage()).send(event.getPlayer());
 				try {
 					new BukkitRunnable() {
 						@Override
@@ -51,7 +52,8 @@ public class ChatInputEvent implements Listener {
 					for (ChatInput.Query q : ChatInput.getOpenQueries()) {
 						if (q.player() == event.getPlayer().getUniqueId()) {
 							ChatInput.getOpenQueries().removeIf(x -> x.player() == event.getPlayer().getUniqueId());
-							new MessageBuilder("Query").appendCaption("Canceled query with name:").appendVariable(q.query()).send(event.getPlayer());
+							new MessageBuilder("Query").appendCaption("Canceled query with name:").appendVariable(q.query())
+									.send(event.getPlayer());
 						}
 					}
 				} catch (Exception ignored) {

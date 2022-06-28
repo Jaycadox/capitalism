@@ -8,9 +8,9 @@ public class ClaimItemShop {
 	
 	public ClaimItemShop(int price, int x, int y, int z) {
 		this.price = price;
-		this.x = x;
-		this.y = y;
-		this.z = z;
+		this.x     = x;
+		this.y     = y;
+		this.z     = z;
 	}
 	
 	public int getPrice() {

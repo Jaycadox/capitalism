@@ -3,14 +3,14 @@ package xyz.jayphen.capitalism.lang;
 import net.kyori.adventure.text.Component;
 
 public class Token {
-	String content = "";
-	TokenType token = null;
+	String    content   = "";
+	TokenType token     = null;
 	Component component = null;
-	String extraData = "";
+	String    extraData = "";
 	
 	public Token(String cnt, TokenType tok) {
 		this.content = cnt;
-		this.token = tok;
+		this.token   = tok;
 	}
 	
 	public Component getComponent() {

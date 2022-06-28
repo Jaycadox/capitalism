@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ClaimManager {
-	private static final ArrayList<Claim> claimCache = new ArrayList<>();
-	public static HashMap<UUID, Claim> adminDrafts = new HashMap<>();
-	private static long lastCacheMiss = 0;
+	private static final ArrayList<Claim>     claimCache    = new ArrayList<>();
+	public static        HashMap<UUID, Claim> adminDrafts   = new HashMap<>();
+	private static       long                 lastCacheMiss = 0;
 	
 	public static ArrayList<Claim> getAllClaims() {
 		if (System.currentTimeMillis() - lastCacheMiss > 8000) {

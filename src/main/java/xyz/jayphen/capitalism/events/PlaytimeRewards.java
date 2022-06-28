@@ -32,7 +32,8 @@ public class PlaytimeRewards implements Listener {
 		
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			eligiblePlayers.add(p.getUniqueId());
-			new MessageBuilder("Reward").appendData(Token.TokenType.CHAT, "Click here", "__I_REDEEM_REWARD__").appendCaption("to redeem your playtime reward. This will expire in 30 seconds").send(p);
+			new MessageBuilder("Reward").appendData(Token.TokenType.CHAT, "Click here", "__I_REDEEM_REWARD__")
+					.appendCaption("to redeem your playtime reward. This will expire in 30 seconds").send(p);
 		}
 		new BukkitRunnable() {
 			@Override
@@ -55,8 +56,11 @@ public class PlaytimeRewards implements Listener {
 			if (!redeemedPlayers.contains(e.getPlayer().getUniqueId()) && eligiblePlayers.contains(e.getPlayer().getUniqueId())) {
 				eligiblePlayers.remove(e.getPlayer().getUniqueId());
 				redeemedPlayers.add(e.getPlayer().getUniqueId());
-				if (Database.injector.inject(e.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
-					new MessageBuilder("Reward").appendVariable("$100,000").appendCaption("has been added to your balance").send(e.getPlayer());
+				if (Database.injector.inject(e.getPlayer().getUniqueId(), 100000).getType() ==
+				    TransactionResult.TransactionResultType.SUCCESS)
+				{
+					new MessageBuilder("Reward").appendVariable("$100,000").appendCaption("has been added to your balance")
+							.send(e.getPlayer());
 					
 				}
 			}

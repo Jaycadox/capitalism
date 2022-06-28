@@ -18,7 +18,8 @@ public class Balance implements CommandExecutor {
 			return true;
 		}
 		Player p = (Player) commandSender;
-		new MessageBuilder("Economy").appendCaption("You have").appendVariable("$" + NumberFormatter.addCommas(DatabasePlayer.from(p).getMoneySafe())).send(p);
+		new MessageBuilder("Economy").appendCaption("You have")
+				.appendVariable("$" + NumberFormatter.addCommas(DatabasePlayer.from(p).getMoneySafe())).send(p);
 		return true;
 	}
 }

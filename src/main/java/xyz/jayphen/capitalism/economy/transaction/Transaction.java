@@ -10,20 +10,20 @@ import xyz.jayphen.capitalism.lang.MessageBuilder;
 import java.util.UUID;
 
 public class Transaction {
-	UUID from = null;
-	UUID to = null;
-	int amount = 0;
+	UUID from   = null;
+	UUID to     = null;
+	int  amount = 0;
 	
 	
 	public Transaction(OfflinePlayer from, OfflinePlayer to, int amount) {
-		this.from = from.getUniqueId();
-		this.to = to.getUniqueId();
+		this.from   = from.getUniqueId();
+		this.to     = to.getUniqueId();
 		this.amount = amount;
 	}
 	
 	public Transaction(UUID from, UUID to, int amount) {
-		this.from = from;
-		this.to = to;
+		this.from   = from;
+		this.to     = to;
 		this.amount = amount;
 	}
 	

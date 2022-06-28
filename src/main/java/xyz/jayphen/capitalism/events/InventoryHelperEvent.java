@@ -29,7 +29,7 @@ public class InventoryHelperEvent implements Listener {
 		if (!InventoryHelper.isInventory(event.getInventory())) return;
 		event.setCancelled(true);
 		if (event.getClickedInventory() == null || !InventoryHelper.isInventory(event.getClickedInventory())) return;
-		int slot = event.getSlot();
+		int       slot = event.getSlot();
 		ItemStack item = event.getClickedInventory().getItem(slot);
 		CLICK_TYPES.put(event.getWhoClicked().getUniqueId(), event.getClick().isLeftClick());
 		if (item == null) return;

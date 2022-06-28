@@ -54,18 +54,28 @@ public class BlueMapIntergration {
 	}
 	
 	private void tick(Claim c, BlueMapAPI api) {
-		var map = api.getWorlds().stream().filter(x -> c.location.world.toLowerCase().contains(x.getMaps().stream().findFirst().get().getName().toLowerCase())).findFirst().get().getMaps().stream().findFirst().get();
-		var world = Bukkit.getWorld(c.location.world);
+		var       map    = api.getWorlds().stream()
+				.filter(x -> c.location.world.toLowerCase().contains(x.getMaps().stream().findFirst().get().getName().toLowerCase()))
+				.findFirst().get().getMaps().stream().findFirst().get();
+		var       world  = Bukkit.getWorld(c.location.world);
 		MarkerSet marker = markerAPI.createMarkerSet(c.location.hashCode() + "");
 		
 		marker.setLabel(c.getName());
 		int centerX = c.getMidpointX();
 		int centerZ = c.getMidpointZ();
 		
-		POIMarker poiMarker = marker.createPOIMarker(c.location.hashCode() + "_marker", map, new Vector3d(centerX, Claim.getTallestEmptyYAtLocation(world, centerX, centerZ) + 5, centerZ));
+		POIMarker poiMarker = marker.createPOIMarker(c.location.hashCode() + "_marker", map,
+		                                             new Vector3d(centerX, Claim.getTallestEmptyYAtLocation(world, centerX, centerZ) + 5,
+		                                                          centerZ
+		                                             )
+		);
 		poiMarker.setLabel(c.getName());
 		
-		var shapeMarker = marker.createExtrudeMarker(c.location.hashCode() + "_shape", map, new Vector3d(centerX, -64, centerZ), Shape.createRect(new Vector2d(c.location.startX, c.location.startZ), new Vector2d(c.location.endX, c.location.endZ)), -64, 319);
+		var shapeMarker = marker.createExtrudeMarker(c.location.hashCode() + "_shape", map, new Vector3d(centerX, -64, centerZ),
+		                                             Shape.createRect(new Vector2d(c.location.startX, c.location.startZ),
+		                                                              new Vector2d(c.location.endX, c.location.endZ)
+		                                             ), -64, 319
+		);
 		shapeMarker.setFillColor(new Color(255, 0, 0, 50));
 		shapeMarker.setLineWidth(2);
 		shapeMarker.setLabel(c.getName());

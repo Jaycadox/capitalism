@@ -22,22 +22,30 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class DatabasePlayer {
-	public static Gson gson = new Gson();
+	public static  Gson                          gson  = new Gson();
 	private static HashMap<UUID, DatabasePlayer> cache = new HashMap<>();
 	Connection connection = null;
-	UUID uuid = null;
+	UUID       uuid       = null;
 	JSONPlayer jsonPlayer = null;
+	
 	public DatabasePlayer(Connection c, UUID uuid, int amount) {
 		this.connection = c;
-		this.uuid = uuid;
+		this.uuid       = uuid;
 		boolean didExist = exists();
 		if (!didExist) generate(amount);
 		try {
-			jsonPlayer = loadJsonPlayer();
+			jsonPlayer                = loadJsonPlayer();
 			jsonPlayer.getData().uuid = uuid.toString();
 			jsonPlayer.save();
 			if (!didExist) {
-				this.getJsonPlayer().queueMessage(new MessageBuilder("Welcome").appendCaption("Hello,").appendVariable(Bukkit.getOfflinePlayer(uuid).getName() + ".").appendCaption("Welcome to Capitalism. The goal is to reach $1,000,000,000. You have been awarded").appendVariable("$" + NumberFormatter.addCommas(amount)).appendCaption("as a starting bonus. For more information regarding how to play,").appendComponent(MiniMessage.miniMessage().deserialize("<click:open_url:https://capitalism.jayphen.xyz><yellow>click here</yellow></click>")).appendCaption("to view the 'Quick start guide' and documentation").make());
+				this.getJsonPlayer().queueMessage(
+						new MessageBuilder("Welcome").appendCaption("Hello,").appendVariable(Bukkit.getOfflinePlayer(uuid).getName() + ".")
+								.appendCaption("Welcome to Capitalism. The goal is to reach $1,000,000,000. You have been awarded")
+								.appendVariable("$" + NumberFormatter.addCommas(amount))
+								.appendCaption("as a starting bonus. For more information regarding how to play,").appendComponent(
+										MiniMessage.miniMessage()
+												.deserialize("<click:open_url:https://capitalism.jayphen.xyz><yellow>click here</yellow></click>"))
+								.appendCaption("to view the 'Quick start guide' and documentation").make());
 			}
 			
 		} catch (Exception e) {
@@ -70,8 +78,8 @@ public class DatabasePlayer {
 		try {
 			Statement stmt = null;
 			stmt = Database.ctn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT money FROM players");
-			long sum = 0;
+			ResultSet rs  = stmt.executeQuery("SELECT money FROM players");
+			long      sum = 0;
 			while (rs.next()) {
 				sum += rs.getInt("money");
 			}
@@ -118,7 +126,8 @@ public class DatabasePlayer {
 		if (!offer.valid) return null;
 		for (JSONPlayerData data : allJsonPlayerData()) {
 			if (data.claims == null) continue;
-			Optional<Claim> optClaim = data.claims.stream().filter(x -> x.location.hashCode() == offer.locationOffer.hashCode()).findFirst();
+			Optional<Claim> optClaim = data.claims.stream().filter(x -> x.location.hashCode() == offer.locationOffer.hashCode())
+					.findFirst();
 			if (optClaim.isPresent()) return optClaim.get();
 		}
 		return null;
@@ -128,7 +137,9 @@ public class DatabasePlayer {
 		ArrayList<ClaimOffer> offers = new ArrayList<>();
 		for (JSONPlayerData data : allJsonPlayerData()) {
 			if (data.claimOffers == null) continue;
-			offers.addAll(data.claimOffers.stream().filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode()).toList());
+			offers.addAll(data.claimOffers.stream()
+					              .filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode())
+					              .toList());
 		}
 		return offers;
 	}
@@ -137,7 +148,9 @@ public class DatabasePlayer {
 		Claim claim = getClaimFromClaimOffer(offer);
 		for (JSONPlayerData data : allJsonPlayerData()) {
 			if (DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers == null) continue;
-			ClaimOffer optOffer = DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers.stream().filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode()).findFirst().orElse(null);
+			ClaimOffer optOffer = DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers.stream()
+					.filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode()).findFirst()
+					.orElse(null);
 			if (optOffer != null) return UUID.fromString(data.uuid);
 		}
 		return null;
@@ -151,7 +164,9 @@ public class DatabasePlayer {
 		this.getJsonPlayer().getClaimOffers();
 		for (JSONPlayerData data : allJsonPlayerData()) {
 			if (DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers == null) continue;
-			DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers = new ArrayList<>(DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers.stream().filter(x -> x.locationOffer.hashCode() != claim.location.hashCode()).collect(Collectors.toList()));
+			DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers = new ArrayList<>(
+					DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers.stream()
+							.filter(x -> x.locationOffer.hashCode() != claim.location.hashCode()).collect(Collectors.toList()));
 			DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().save();
 		}
 	}
@@ -162,7 +177,7 @@ public class DatabasePlayer {
 	
 	private JSONPlayer loadJsonPlayer() throws SQLException {
 		Statement stmt = Database.ctn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT json FROM players WHERE uuid = '" + uuid.toString() + "'");
+		ResultSet rs   = stmt.executeQuery("SELECT json FROM players WHERE uuid = '" + uuid.toString() + "'");
 		rs.next();
 		JSONPlayer jpl = new JSONPlayer();
 		jpl.setDbp(this);
@@ -172,7 +187,8 @@ public class DatabasePlayer {
 	
 	protected void saveJsonPlayer() {
 		try {
-			PreparedStatement stmt = Database.ctn.prepareStatement("UPDATE players\n" + "SET json=? WHERE uuid = '" + uuid.toString() + "';");
+			PreparedStatement stmt = Database.ctn.prepareStatement(
+					"UPDATE players\n" + "SET json=? WHERE uuid = '" + uuid.toString() + "';");
 			stmt.setString(1, gson.toJson(jsonPlayer.getData()));
 			stmt.execute();
 		} catch (Exception e) {
@@ -238,8 +254,8 @@ public class DatabasePlayer {
 		Statement stmt = null;
 		try {
 			stmt = Database.ctn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT uuid FROM players WHERE uuid = '" + uuid.toString() + "'");
-			int count = 0;
+			ResultSet rs    = stmt.executeQuery("SELECT uuid FROM players WHERE uuid = '" + uuid.toString() + "'");
+			int       count = 0;
 			while (rs.next()) {
 				count++;
 			}
@@ -250,8 +266,10 @@ public class DatabasePlayer {
 	}
 	
 	public void delete(boolean giveStartingBonus) {
-		ArrayList<String> banHistory = this.getJsonPlayer().getBanRecord();
-		Transaction transaction = new Transaction(Bukkit.getOfflinePlayer(getUuid()).getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), (int) getMoneySafe());
+		ArrayList<String> banHistory  = this.getJsonPlayer().getBanRecord();
+		Transaction       transaction = new Transaction(Bukkit.getOfflinePlayer(getUuid()).getUniqueId(),
+		                                                DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), (int) getMoneySafe()
+		);
 		transaction.transact();
 		try {
 			Statement stmt = Database.ctn.createStatement();
@@ -261,7 +279,8 @@ public class DatabasePlayer {
 		}
 		UUID uuid = getUuid();
 		cache.remove(uuid);
-		DatabasePlayer.from(uuid, giveStartingBonus ? 1000000 : 0).getJsonPlayer().queueMessage(new MessageBuilder("Capitalism").appendCaption("Your player data has been reset by an administrator").make());
+		DatabasePlayer.from(uuid, giveStartingBonus ? 1000000 : 0).getJsonPlayer()
+				.queueMessage(new MessageBuilder("Capitalism").appendCaption("Your player data has been reset by an administrator").make());
 		DatabasePlayer.from(uuid).getJsonPlayer().getData().banRecord = banHistory;
 		DatabasePlayer.from(uuid).getJsonPlayer().save();
 		

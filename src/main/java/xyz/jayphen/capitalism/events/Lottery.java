@@ -26,7 +26,7 @@ public class Lottery implements Listener {
 	private static boolean exists() {
 		try {
 			DatabaseMetaData md = Capitalism.db.connect().getMetaData();
-			ResultSet rs = md.getColumns(null, null, "players", "joined_lottery");
+			ResultSet        rs = md.getColumns(null, null, "players", "joined_lottery");
 			return rs.next();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -36,8 +36,8 @@ public class Lottery implements Listener {
 	
 	private static void generate() {
 		try {
-			Connection ctn = Capitalism.db.connect();
-			Statement statement = ctn.createStatement();
+			Connection ctn       = Capitalism.db.connect();
+			Statement  statement = ctn.createStatement();
 			statement.execute("ALTER TABLE players ADD joined_lottery INT(1);");
 			statement.execute("UPDATE players SET joined_lottery = 0;");
 		} catch (Exception e) {
@@ -49,7 +49,9 @@ public class Lottery implements Listener {
 	public static void nag(Player p) {
 		if (amount == 0) return;
 		if (DatabasePlayer.from(p).getJoinedLottery()) return;
-		new MessageBuilder("Lottery").appendData(Token.TokenType.CHAT, "Click here", "__I_JOIN_LOTTERY__").appendCaption("to join lottery for").appendVariable("$" + NumberFormatter.addCommas(amount) + ".").appendCaption("Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.").send(p);
+		new MessageBuilder("Lottery").appendData(Token.TokenType.CHAT, "Click here", "__I_JOIN_LOTTERY__")
+				.appendCaption("to join lottery for").appendVariable("$" + NumberFormatter.addCommas(amount) + ".")
+				.appendCaption("Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.").send(p);
 		
 	}
 	
@@ -77,7 +79,9 @@ public class Lottery implements Listener {
 			amount = 0;
 			return;
 		}
-		var msg = new MessageBuilder("Lottery").appendData(Token.TokenType.CHAT, "Click here", "__I_JOIN_LOTTERY__").appendCaption("to join lottery for").appendVariable("$" + NumberFormatter.addCommas(amount) + ".").appendCaption("Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.");
+		var msg = new MessageBuilder("Lottery").appendData(Token.TokenType.CHAT, "Click here", "__I_JOIN_LOTTERY__")
+				.appendCaption("to join lottery for").appendVariable("$" + NumberFormatter.addCommas(amount) + ".")
+				.appendCaption("Lottery's are drawn around 5-6PM Sydney time. You must be online when they're drawn.");
 		Bukkit.getOnlinePlayers().stream().filter(x -> !DatabasePlayer.from(x).getJoinedLottery()).forEach(msg::send);
 		
 	}
@@ -110,7 +114,8 @@ public class Lottery implements Listener {
 		
 		OfflinePlayer selected = Bukkit.getOfflinePlayer(random(eligible));
 		new Transaction(Database.injector.getInjector().getUuid(), selected.getUniqueId(), amount).transact();
-		new MessageBuilder("Lottery").appendVariable(selected.getName()).appendCaption("has won the lottery for").appendVariable("$" + NumberFormatter.addCommas(amount) + "!").broadcast();
+		new MessageBuilder("Lottery").appendVariable(selected.getName()).appendCaption("has won the lottery for")
+				.appendVariable("$" + NumberFormatter.addCommas(amount) + "!").broadcast();
 		amount = 0;
 	}
 	
@@ -120,7 +125,7 @@ public class Lottery implements Listener {
 	
 	private static boolean checkForLottery() {
 		Calendar rightNow = Calendar.getInstance();
-		int hour = rightNow.get(Calendar.HOUR_OF_DAY);
+		int      hour     = rightNow.get(Calendar.HOUR_OF_DAY);
 		return hour == ( 0 );
 	}
 	
@@ -133,7 +138,8 @@ public class Lottery implements Listener {
 				return true;
 			}
 			DatabasePlayer.from(e.getPlayer()).setJoinedLottery(true);
-			new MessageBuilder("Lottery").appendCaption("You've entered the lottery, tune in at around 5-6PM AEST for the roll!").send(e.getPlayer());
+			new MessageBuilder("Lottery").appendCaption("You've entered the lottery, tune in at around 5-6PM AEST for the roll!")
+					.send(e.getPlayer());
 			return true;
 			
 		}

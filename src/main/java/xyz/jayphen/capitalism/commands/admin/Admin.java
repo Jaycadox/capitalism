@@ -41,7 +41,7 @@ public class Admin implements CommandExecutor, TabCompleter {
 		if (!commandSender.isOp()) return true;
 		if (args[0].equals("draftclaim")) {
 			LocalSession localSession = WorldEditHelper.getLocalSession((Player) commandSender);
-			Region region;
+			Region       region;
 			try {
 				World selectionWorld = localSession.getSelectionWorld();
 				if (selectionWorld == null) {
@@ -54,15 +54,23 @@ public class Admin implements CommandExecutor, TabCompleter {
 				return true;
 			}
 			
-			ClaimManager.adminDrafts.put(( (Player) commandSender ).getUniqueId(), new Claim(new Location(( (Player) commandSender ).getWorld(), region.getBoundingBox().getMinimumPoint().getBlockX(), 0, region.getBoundingBox().getMinimumPoint().getBlockZ()), new Location(( (Player) commandSender ).getWorld(), region.getBoundingBox().getMaximumPoint().getBlockX(), 0, region.getBoundingBox().getMaximumPoint().getBlockZ()), ( (Player) commandSender ).getUniqueId()));
+			ClaimManager.adminDrafts.put(( (Player) commandSender ).getUniqueId(), new Claim(
+					new Location(( (Player) commandSender ).getWorld(), region.getBoundingBox().getMinimumPoint().getBlockX(), 0,
+					             region.getBoundingBox().getMinimumPoint().getBlockZ()
+					), new Location(( (Player) commandSender ).getWorld(), region.getBoundingBox().getMaximumPoint().getBlockX(), 0,
+					                region.getBoundingBox().getMaximumPoint().getBlockZ()
+			), ( (Player) commandSender ).getUniqueId()));
 			Claim claim = ClaimManager.adminDrafts.get(( (Player) commandSender ).getUniqueId());
 			
 			for (Location loc : claim.getBorderBlocks()) {
 				for (int i = 0; i < 255; i++) {
-					( (Player) commandSender ).spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, i + 0.1, loc.getBlockZ() + 0.5, 1, new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1));
+					( (Player) commandSender ).spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, i + 0.1, loc.getBlockZ() + 0.5, 1,
+					                                         new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1)
+					);
 				}
 			}
-			commandSender.sendMessage("Claim should cost around " + ChatColor.GREEN + "$" + claim.getEstWorth() + ChatColor.WHITE + " assuming a base cost of $200 per block with $1 added every 30 blocks away it is from spawn.");
+			commandSender.sendMessage("Claim should cost around " + ChatColor.GREEN + "$" + claim.getEstWorth() + ChatColor.WHITE +
+			                          " assuming a base cost of $200 per block with $1 added every 30 blocks away it is from spawn.");
 			Location loc = new Location(Bukkit.getWorld(claim.location.world), claim.getMidpointX(), 0, claim.getMidpointZ());
 			commandSender.sendMessage("Claim is in region: " + RegionManager.getRegion(loc));
 		} else if (args[0].equals("removedraft")) {
@@ -124,8 +132,10 @@ public class Admin implements CommandExecutor, TabCompleter {
 				commandSender.sendMessage(ChatColor.RED + "Invalid amount of money");
 				return true;
 			}
-			TaxTransaction trans = new TaxTransaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), amount);
-			TransactionResult res = trans.transact(TaxedTransaction.INSTANCE, true);
+			TaxTransaction    trans = new TaxTransaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
+			                                             amount
+			);
+			TransactionResult res   = trans.transact(TaxedTransaction.INSTANCE, true);
 			if (res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
 				commandSender.sendMessage(ChatColor.RED + "Transaction failed. Reason given: " + ChatColor.YELLOW + res.getErrorReason());
 				return true;
@@ -136,7 +146,9 @@ public class Admin implements CommandExecutor, TabCompleter {
 			DatabasePlayer.from(p).getJsonPlayer().getData().claims.add(c);
 			DatabasePlayer.from(p).getJsonPlayer().save();
 			
-			new MessageBuilder("Land").appendCaption("You now own the land at").appendVariable(area + ".").appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount())).appendCaption("has been deducted from your account.").send(p);
+			new MessageBuilder("Land").appendCaption("You now own the land at").appendVariable(area + ".")
+					.appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount()))
+					.appendCaption("has been deducted from your account.").send(p);
 		} else if (args[0].equals("destroyclaim")) {
 			Optional<Claim> optClaim = ClaimManager.getCachedClaim(( (Player) commandSender ).getLocation());
 			if (optClaim.isEmpty()) {
@@ -144,7 +156,9 @@ public class Admin implements CommandExecutor, TabCompleter {
 				return true;
 			}
 			Claim claim = optClaim.get();
-			commandSender.sendMessage(ChatColor.GREEN + "Claim owned by " + ChatColor.YELLOW + Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName() + ChatColor.GREEN + " has been destroyed. Please wait up to 8 seconds for claim cache to update.");
+			commandSender.sendMessage(ChatColor.GREEN + "Claim owned by " + ChatColor.YELLOW +
+			                          Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName() + ChatColor.GREEN +
+			                          " has been destroyed. Please wait up to 8 seconds for claim cache to update.");
 			claim.destroy();
 			
 		} else if (args[0].equals("stats")) {
@@ -153,7 +167,7 @@ public class Admin implements CommandExecutor, TabCompleter {
 				return true;
 			}
 			DatabasePlayer dbp;
-			String name = "Server";
+			String         name = "Server";
 			if (args[1].equals("#server")) {
 				dbp = DatabasePlayer.nonPlayer(EconomyInjector.SERVER);
 			} else {
@@ -162,7 +176,7 @@ public class Admin implements CommandExecutor, TabCompleter {
 					commandSender.sendMessage(ChatColor.RED + "Invalid player");
 					return true;
 				}
-				dbp = DatabasePlayer.from(offlinePlayer);
+				dbp  = DatabasePlayer.from(offlinePlayer);
 				name = offlinePlayer.getName();
 			}
 			
@@ -173,8 +187,9 @@ public class Admin implements CommandExecutor, TabCompleter {
 				
 			} else {
 				String timeUntil = TimeHelper.timeToString(dbp.getJsonPlayer().getBannedUntil() - System.currentTimeMillis());
-				String reason = dbp.getJsonPlayer().getBanReason();
-				commandSender.sendMessage(ChatColor.YELLOW + "Ban status: " + ChatColor.RED + "Banned. Expires in " + timeUntil + ". Reason: " + reason);
+				String reason    = dbp.getJsonPlayer().getBanReason();
+				commandSender.sendMessage(
+						ChatColor.YELLOW + "Ban status: " + ChatColor.RED + "Banned. Expires in " + timeUntil + ". Reason: " + reason);
 				
 			}
 			int banIndex = 0;
@@ -190,24 +205,35 @@ public class Admin implements CommandExecutor, TabCompleter {
 					commandSender.sendMessage(ChatColor.GOLD + "  " + ++banIndex + ChatColor.WHITE + ": " + banReason);
 					commandSender.sendMessage("    " + ChatColor.WHITE + "Ban length: " + ChatColor.YELLOW + banLength);
 					commandSender.sendMessage("    " + ChatColor.WHITE + "Time since issued: " + ChatColor.YELLOW + banIssued);
-					commandSender.sendMessage("    " + ChatColor.WHITE + "AntiCheat issued: " + ChatColor.YELLOW + ( banReason.equals("[ac]") ? "Yes" : "No" ));
+					commandSender.sendMessage("    " + ChatColor.WHITE + "AntiCheat issued: " + ChatColor.YELLOW +
+					                          ( banReason.equals("[ac]") ? "Yes" : "No" ));
 				} catch (Exception ignored) {
 				}
 				
 			}
 			
-			commandSender.sendMessage(ChatColor.YELLOW + "Account balance: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getMoneySafe()));
-			commandSender.sendMessage(ChatColor.YELLOW + "Amount sent: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneySent));
-			commandSender.sendMessage(ChatColor.YELLOW + "Amount received: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneyRecieved));
-			commandSender.sendMessage(ChatColor.YELLOW + "Amount taxed: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.amountTaxed));
+			commandSender.sendMessage(
+					ChatColor.YELLOW + "Account balance: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getMoneySafe()));
+			commandSender.sendMessage(ChatColor.YELLOW + "Amount sent: " + ChatColor.GREEN + "$" +
+			                          NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneySent));
+			commandSender.sendMessage(ChatColor.YELLOW + "Amount received: " + ChatColor.GREEN + "$" +
+			                          NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneyRecieved));
+			commandSender.sendMessage(ChatColor.YELLOW + "Amount taxed: " + ChatColor.GREEN + "$" +
+			                          NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.amountTaxed));
 			commandSender.sendMessage(ChatColor.YELLOW + "Claims:");
 			int id = 0;
 			for (Claim c : dbp.getJsonPlayer().getData().claims) {
-				commandSender.sendMessage(ChatColor.GOLD + "  " + ++id + ChatColor.WHITE + ": Location: " + c.getMidpointX() + ", " + c.getMidpointZ());
+				commandSender.sendMessage(
+						ChatColor.GOLD + "  " + ++id + ChatColor.WHITE + ": Location: " + c.getMidpointX() + ", " + c.getMidpointZ());
 				commandSender.sendMessage("    " + ChatColor.WHITE + "Area: " + ChatColor.YELLOW + c.getArea());
-				commandSender.sendMessage("    " + ChatColor.WHITE + "Est. Worth: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(c.getEstWorth()));
+				commandSender.sendMessage(
+						"    " + ChatColor.WHITE + "Est. Worth: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(c.getEstWorth()));
 				if (commandSender instanceof Player p) {
-					p.spigot().sendMessage(new ComponentBuilder(ChatColor.YELLOW + "    [Teleport] ").event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + c.getMidpointX() + " ~ " + c.getMidpointZ())).append(new ComponentBuilder(ChatColor.RED + "[Destroy]").event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin destroyclaim")).create()).create());
+					p.spigot().sendMessage(new ComponentBuilder(ChatColor.YELLOW + "    [Teleport] ").event(
+									new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + c.getMidpointX() + " ~ " + c.getMidpointZ()))
+							                       .append(new ComponentBuilder(ChatColor.RED + "[Destroy]").event(
+									                       new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin destroyclaim")).create())
+							                       .create());
 					
 				}
 			}

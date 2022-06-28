@@ -56,7 +56,9 @@ public class JSONPlayer {
 	}
 	
 	public void removeMessageFromQueue(Component cmp) {
-		data.messageQueue = data.messageQueue.stream().filter(x -> cmp.hashCode() == GsonComponentSerializer.gson().deserialize(x).hashCode()).collect(Collectors.toCollection(ArrayList::new));
+		data.messageQueue = data.messageQueue.stream()
+				.filter(x -> cmp.hashCode() == GsonComponentSerializer.gson().deserialize(x).hashCode())
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	
 	private void addMessageQueue(Component cmp) {

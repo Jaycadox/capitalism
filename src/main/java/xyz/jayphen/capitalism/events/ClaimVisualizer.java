@@ -31,7 +31,9 @@ public class ClaimVisualizer {
 					public void run() {
 						for (Location loc : claim.getBorderBlocks()) {
 							for (int i = p.getLocation().getBlockY() - 2; i < p.getLocation().getBlockY() + 2; i++) {
-								p.spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, i + 0.1, loc.getBlockZ() + 0.5, 1, new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1));
+								p.spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, i + 0.1, loc.getBlockZ() + 0.5, 1,
+								                new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1)
+								);
 							}
 						}
 					}

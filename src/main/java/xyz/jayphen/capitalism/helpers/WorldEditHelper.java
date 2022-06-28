@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 
 public class WorldEditHelper {
 	public static LocalSession getLocalSession(Player player) {
-		com.sk89q.worldedit.entity.Player actor = BukkitAdapter.adapt(player);
-		SessionManager manager = WorldEdit.getInstance().getSessionManager();
+		com.sk89q.worldedit.entity.Player actor   = BukkitAdapter.adapt(player);
+		SessionManager                    manager = WorldEdit.getInstance().getSessionManager();
 		return manager.get(actor);
 	}
 }

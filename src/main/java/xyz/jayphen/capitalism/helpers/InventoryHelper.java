@@ -20,17 +20,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class InventoryHelper {
-	public static final HashMap<String, Runnable> SPECIAL_ITEMS = new HashMap<>();
-	private static final ArrayList<InventoryHelper> INVENTORIES = new ArrayList<>();
-	public final HashMap<ItemStack, Runnable> ITEMS = new HashMap<>();
-	private final ArrayList<String> inventoryNameStack = new ArrayList<>();
-	private Inventory inventory = null;
-	private InventoryHelperRunnable onRender = null;
-	private String title = null;
-	private int marginHorizontal = 0;
-	private boolean wasRightClick = false;
-	private int marginVertical = 0;
-	private ItemStack lastItemAdded = null;
+	public static final  HashMap<String, Runnable>    SPECIAL_ITEMS      = new HashMap<>();
+	private static final ArrayList<InventoryHelper>   INVENTORIES        = new ArrayList<>();
+	public final         HashMap<ItemStack, Runnable> ITEMS              = new HashMap<>();
+	private final        ArrayList<String>            inventoryNameStack = new ArrayList<>();
+	private              Inventory                    inventory          = null;
+	private              InventoryHelperRunnable      onRender           = null;
+	private              String                       title              = null;
+	private              int                          marginHorizontal   = 0;
+	private              boolean                      wasRightClick      = false;
+	private              int                          marginVertical     = 0;
+	private              ItemStack                    lastItemAdded      = null;
 	
 	public InventoryHelper(String title, int rows, InventoryHelperRunnable render) {
 		this.inventory = Bukkit.createInventory(null, 9 * rows, title);
@@ -40,7 +40,7 @@ public class InventoryHelper {
 		render.run(this, "root");
 		this.onRender = render;
 	}
-
+	
 	public static void close(Player p) {
 		new BukkitRunnable() {
 			@Override
@@ -55,8 +55,7 @@ public class InventoryHelper {
 		SkullMeta meta = (SkullMeta) item.getItemMeta();
 		meta.setOwningPlayer(player);
 		meta.setDisplayName(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', name));
-		if (lore != null)
-			meta.setLore(lore.stream().map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
+		if (lore != null) meta.setLore(lore.stream().map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -77,8 +76,7 @@ public class InventoryHelper {
 		}
 		
 		meta.setDisplayName(ChatColor.RESET + ChatColor.translateAlternateColorCodes('&', name));
-		if (lore != null)
-			meta.setLore(lore.stream().map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
+		if (lore != null) meta.setLore(lore.stream().map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
 		item.setItemMeta(meta);
 		SPECIAL_ITEMS.put(name, onClick);
 		return item;
@@ -122,12 +120,12 @@ public class InventoryHelper {
 	
 	public void setMargin(int horiz, int vert) {
 		this.marginHorizontal = horiz;
-		this.marginVertical = vert;
+		this.marginVertical   = vert;
 	}
 	
 	private ItemStack marginItem() {
 		ItemStack iStack = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-		ItemMeta meta = iStack.getItemMeta();
+		ItemMeta  meta   = iStack.getItemMeta();
 		meta.setDisplayName(ChatColor.RESET + "" + ChatColor.DARK_GRAY + "" + ChatColor.BOLD + "EMPTY");
 		iStack.setItemMeta(meta);
 		return iStack;
@@ -138,8 +136,9 @@ public class InventoryHelper {
 		onRender.run(this, inventoryNameStack.get(inventoryNameStack.size() - 1));
 		renderMargin();
 		;
-		if (inventoryNameStack.size() > 1)
-			setItem(0, getColumnCount() - 1 - ( marginHorizontal * 2 ), ChatColor.RED + "" + ChatColor.BOLD + "BACK", Material.COMPASS, this::pop);
+		if (inventoryNameStack.size() > 1) setItem(0, getColumnCount() - 1 - ( marginHorizontal * 2 ),
+		                                           ChatColor.RED + "" + ChatColor.BOLD + "BACK", Material.COMPASS, this::pop
+		);
 		
 		p.updateInventory();
 	}
@@ -179,7 +178,7 @@ public class InventoryHelper {
 	
 	public void setItem(int row, int column, String name, Material mat, Runnable onClick, List<String> lore) {
 		ItemStack iStack = new ItemStack(mat);
-		ItemMeta meta = iStack.getItemMeta();
+		ItemMeta  meta   = iStack.getItemMeta();
 		if (lore == null) {
 			meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
 		} else {

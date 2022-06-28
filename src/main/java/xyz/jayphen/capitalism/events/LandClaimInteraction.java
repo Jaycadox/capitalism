@@ -42,11 +42,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class LandClaimInteraction implements Listener {
-	private static final List<Material> WOODEN_DOORS = Arrays.asList(Material.DARK_OAK_DOOR, Material.ACACIA_DOOR, Material.BIRCH_DOOR, Material.OAK_DOOR, Material.JUNGLE_DOOR, Material.CRIMSON_DOOR, Material.SPRUCE_DOOR, Material.WARPED_DOOR);
+	private static final List<Material> WOODEN_DOORS = Arrays.asList(Material.DARK_OAK_DOOR, Material.ACACIA_DOOR, Material.BIRCH_DOOR,
+	                                                                 Material.OAK_DOOR, Material.JUNGLE_DOOR, Material.CRIMSON_DOOR,
+	                                                                 Material.SPRUCE_DOOR, Material.WARPED_DOOR
+	);
 	
-	private static final List<Material> WOODEN_TRAPDOORS = Arrays.asList(Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR, Material.CRIMSON_TRAPDOOR, Material.JUNGLE_TRAPDOOR, Material.DARK_OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR, Material.OAK_TRAPDOOR, Material.WARPED_TRAPDOOR);
-	int tntCount = 0;
-	long lastReset = 0;
+	private static final List<Material> WOODEN_TRAPDOORS = Arrays.asList(Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR,
+	                                                                     Material.CRIMSON_TRAPDOOR, Material.JUNGLE_TRAPDOOR,
+	                                                                     Material.DARK_OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR,
+	                                                                     Material.OAK_TRAPDOOR, Material.WARPED_TRAPDOOR
+	);
+	int                 tntCount                 = 0;
+	long                lastReset                = 0;
 	ArrayList<Location> knownUnclaimedTNTEmiters = new ArrayList<>();
 	
 	public static void monitorSignLoop() {
@@ -58,9 +65,11 @@ public class LandClaimInteraction implements Listener {
 				Location loc = new Location(Bukkit.getWorld(c.location.world), shop.getX(), shop.getY(), shop.getZ());
 				if (!( loc.getBlock().getState() instanceof Sign )) {
 					Claim finalC = c;
-					c.signs = c.getSigns().stream().filter(x -> !x.equals(finalC.getShopFromCoords(shop.getX(), shop.getY(), shop.getZ()))).collect(Collectors.toCollection(ArrayList::new));
+					c.signs = c.getSigns().stream().filter(x -> !x.equals(finalC.getShopFromCoords(shop.getX(), shop.getY(), shop.getZ())))
+							.collect(Collectors.toCollection(ArrayList::new));
 					DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().save();
-					DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().queueMessage(new MessageBuilder("Shop").appendCaption("One of the signs in your shop has been broken").make());
+					DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer()
+							.queueMessage(new MessageBuilder("Shop").appendCaption("One of the signs in your shop has been broken").make());
 				}
 			}
 		}
@@ -68,7 +77,8 @@ public class LandClaimInteraction implements Listener {
 	
 	@EventHandler
 	public void onSignEdit(SignChangeEvent event) {
-		Claim c = DatabasePlayer.from(event.getPlayer()).getJsonPlayer().getClaim(ClaimManager.getCachedClaim(event.getBlock().getLocation()).orElse(null));
+		Claim c = DatabasePlayer.from(event.getPlayer()).getJsonPlayer()
+				.getClaim(ClaimManager.getCachedClaim(event.getBlock().getLocation()).orElse(null));
 		if (c == null) return;
 		if (c.getRegion() != RegionManager.Region.COMMERCIAL) return;
 		new BukkitRunnable() {
@@ -81,17 +91,22 @@ public class LandClaimInteraction implements Listener {
 				c.getSigns();
 				c.signs.add(new ClaimItemShop(price, event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
 				DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().save();
-				DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().queueMessage(new MessageBuilder("Shop").appendCaption("A sign has been registered for").appendVariable("$" + NumberFormatter.addCommas(price)).make());
+				DatabasePlayer.from(UUID.fromString(c.owner)).getJsonPlayer().queueMessage(
+						new MessageBuilder("Shop").appendCaption("A sign has been registered for")
+								.appendVariable("$" + NumberFormatter.addCommas(price)).make());
 			}
 		}.runTaskLater(Capitalism.plugin, 1);
 	}
 	
 	@EventHandler
 	public void onInteraction(PlayerInteractEvent event) {
-		if (( event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ) && event.getPlayer().isSneaking()) {
+		if (( event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ) &&
+		    event.getPlayer().isSneaking())
+		{
 			if (event.getItem() != null && event.getItem().getType().isEdible()) return;
 		}
-		Optional<Claim> optClaim = ClaimManager.getCachedClaim(( event.getClickedBlock() != null ) ? event.getClickedBlock().getLocation() : event.getPlayer().getLocation());
+		Optional<Claim> optClaim = ClaimManager.getCachedClaim(
+				( event.getClickedBlock() != null ) ? event.getClickedBlock().getLocation() : event.getPlayer().getLocation());
 		
 		if (optClaim.isEmpty()) {
 			return;
@@ -111,22 +126,29 @@ public class LandClaimInteraction implements Listener {
 			}
 		}
 		
-		var region = RegionManager.getRegion(new Location(Bukkit.getWorld(claim.location.world), claim.location.startX, 0, claim.location.startZ));
-		boolean wasBedClicked = region == RegionManager.Region.COMMERCIAL && ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed );
+		var     region        = RegionManager.getRegion(
+				new Location(Bukkit.getWorld(claim.location.world), claim.location.startX, 0, claim.location.startZ));
+		boolean wasBedClicked = region == RegionManager.Region.COMMERCIAL &&
+		                        ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed );
 		if (wasBedClicked && claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) {
-			Capitalism.ADVENTURE.player(event.getPlayer()).sendActionBar(Component.text("Beds cannot be placed in commercial plots of land", NamedTextColor.GRAY));
+			Capitalism.ADVENTURE.player(event.getPlayer())
+					.sendActionBar(Component.text("Beds cannot be placed in commercial plots of land", NamedTextColor.GRAY));
 			event.setCancelled(true);
 			return;
 		}
 		
 		if (claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL) && !wasBedClicked) return;
 		if (claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.OWNER) && !wasBedClicked) return;
-		if (event.getClickedBlock() != null && ( WOODEN_DOORS.contains(event.getClickedBlock().getType()) || WOODEN_TRAPDOORS.contains(event.getClickedBlock().getType()) )) {
+		if (event.getClickedBlock() != null &&
+		    ( WOODEN_DOORS.contains(event.getClickedBlock().getType()) || WOODEN_TRAPDOORS.contains(event.getClickedBlock().getType()) ))
+		{
 			if (claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.WOOD) && !wasBedClicked) return;
 		}
 		
 		event.setCancelled(true);
-		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName()));
+		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
+				ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW +
+				Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName()));
 	}
 	
 	@EventHandler
@@ -146,8 +168,7 @@ public class LandClaimInteraction implements Listener {
 		for (int i = -4; i < 4; i++) {
 			for (int j = -4; j < 4; j++) {
 				Location localLocation = new Location(loc.getWorld(), loc.getX() + i, loc.getY(), loc.getBlockZ() + j);
-				if (localLocation.getBlock().getType() != Material.WATER && localLocation.getBlock().getType() != Material.LAVA)
-					continue;
+				if (localLocation.getBlock().getType() != Material.WATER && localLocation.getBlock().getType() != Material.LAVA) continue;
 				boolean localIsInClaimedLand = isInClaimedLand(localLocation);
 				if (localIsInClaimedLand != inClaimedLand) {
 					return false;
@@ -159,15 +180,15 @@ public class LandClaimInteraction implements Listener {
 	
 	@EventHandler
 	public void pistonExtendEvent(BlockPistonExtendEvent event) {
-		Location loc = event.getBlock().getLocation();
-		boolean inClaimedLand = isInClaimedLand(loc);
+		Location loc           = event.getBlock().getLocation();
+		boolean  inClaimedLand = isInClaimedLand(loc);
 		
 		for (Block b : event.getBlocks()) {
 			loc = b.getLocation();
 			for (int i = -3; i < 3; i++) {
 				for (int j = -3; j < 3; j++) {
-					Location localLocation = new Location(loc.getWorld(), loc.getX() + i, loc.getY(), loc.getBlockZ() + j);
-					boolean localIsInClaimedLand = isInClaimedLand(localLocation);
+					Location localLocation        = new Location(loc.getWorld(), loc.getX() + i, loc.getY(), loc.getBlockZ() + j);
+					boolean  localIsInClaimedLand = isInClaimedLand(localLocation);
 					if (localIsInClaimedLand != inClaimedLand) {
 						event.setCancelled(true);
 						return;
@@ -184,10 +205,12 @@ public class LandClaimInteraction implements Listener {
 			return;
 		}
 		event.setCancelled(true);
-		Optional<Claim> optClaim = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
-		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() : "a nearby claim border";
+		Optional<Claim> optClaim   = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
+		String          claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName()
+		                                                  : "a nearby claim border";
 		
-		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));
+		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
+				ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));
 	}
 	
 	@EventHandler
@@ -198,11 +221,13 @@ public class LandClaimInteraction implements Listener {
 		event.setCancelled(true);
 		Optional<Claim> optClaim = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
 		
-		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() : "a nearby claim border";
+		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName()
+		                                         : "a nearby claim border";
 		
-		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));
+		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
+				ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));
 	}
-
+	
 	private boolean blockEventHandler(BlockEvent event, Player p) {
 		Location loc = event.getBlock().getLocation();
 		if (isInClaimedLandAndNotTheOwner(loc, p)) {
@@ -227,8 +252,7 @@ public class LandClaimInteraction implements Listener {
 		for (int i = -1; i < 1; i++) {
 			for (int j = -1; j < 1; j++) {
 				Location localLocation = new Location(loc.getWorld(), loc.getX() + i, loc.getY(), loc.getBlockZ() + j);
-				if (localLocation.getBlock().getType() != Material.WATER && localLocation.getBlock().getType() != Material.LAVA)
-					continue;
+				if (localLocation.getBlock().getType() != Material.WATER && localLocation.getBlock().getType() != Material.LAVA) continue;
 				localLocation.getBlock().setType(Material.AIR);
 				clearStream(localLocation, depth + 1);
 				
@@ -240,7 +264,7 @@ public class LandClaimInteraction implements Listener {
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onTntExplosion(EntityExplodeEvent event) {
 		if (System.currentTimeMillis() - lastReset > 1000) {
-			tntCount = 0;
+			tntCount  = 0;
 			lastReset = System.currentTimeMillis();
 		}
 		if (++tntCount > 20) {
@@ -286,7 +310,7 @@ public class LandClaimInteraction implements Listener {
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onTntExplosion(BlockExplodeEvent event) {
 		if (System.currentTimeMillis() - lastReset > 1000) {
-			tntCount = 0;
+			tntCount  = 0;
 			lastReset = System.currentTimeMillis();
 		}
 		if (++tntCount > 20) {
@@ -355,7 +379,7 @@ public class LandClaimInteraction implements Listener {
 			}
 		}
 		Optional<Claim> optSaplingClaim = ClaimManager.getCachedClaim(lowestLocation);
-		boolean saplingInClaim = optSaplingClaim.isPresent();
+		boolean         saplingInClaim  = optSaplingClaim.isPresent();
 		for (BlockState bs : event.getBlocks()) {
 			Optional<Claim> optBlockClaim = ClaimManager.getCachedClaim(bs.getLocation());
 			if (saplingInClaim == optBlockClaim.isPresent()) continue;

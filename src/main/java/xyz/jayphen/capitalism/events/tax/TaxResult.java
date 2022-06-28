@@ -6,9 +6,9 @@ public class TaxResult {
 	double taxAmount;
 	
 	public TaxResult(double amountLeft, double amountTaxed, double taxAmount) {
-		this.amountLeft = amountLeft;
+		this.amountLeft  = amountLeft;
 		this.amountTaxed = amountTaxed;
-		this.taxAmount = taxAmount;
+		this.taxAmount   = taxAmount;
 	}
 	
 	public double getTaxAmount() {

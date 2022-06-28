@@ -25,7 +25,7 @@ public class EconomyInjector {
 			Statement stmt = Database.ctn.createStatement();
 			stmt.execute(sql);
 			stmt = Database.ctn.createStatement();
-			sql = "INSERT INTO meta VALUES(0);";
+			sql  = "INSERT INTO meta VALUES(0);";
 			stmt.execute(sql);
 		} catch (SQLException ignored) {
 		}

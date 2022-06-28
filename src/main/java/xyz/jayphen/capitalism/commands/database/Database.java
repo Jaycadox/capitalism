@@ -7,8 +7,8 @@ import java.io.File;
 import java.sql.*;
 
 public class Database {
-	public static String dbPath = new File(Capitalism.plugin.getDataFolder() + "\\database.db").getAbsolutePath();
-	public static Connection ctn;
+	public static String          dbPath   = new File(Capitalism.plugin.getDataFolder() + "\\database.db").getAbsolutePath();
+	public static Connection      ctn;
 	public static EconomyInjector injector = null;
 	
 	public Database() {
@@ -26,7 +26,8 @@ public class Database {
 	
 	public void createNewTable(Connection cnt) {
 		// SQL statement for creating a new table
-		String sql = "CREATE TABLE `players` (\n" + "\t`uuid` TEXT(32),\n" + "\t`money` INT(32),\n" + "\t`joined_lottery` INT(32),\n" + "\t`json` TEXT(32),\n" + "\tPRIMARY KEY (`uuid`));";
+		String sql = "CREATE TABLE `players` (\n" + "\t`uuid` TEXT(32),\n" + "\t`money` INT(32),\n" + "\t`joined_lottery` INT(32),\n" +
+		             "\t`json` TEXT(32),\n" + "\tPRIMARY KEY (`uuid`));";
 		
 		try {
 			Statement stmt = cnt.createStatement();

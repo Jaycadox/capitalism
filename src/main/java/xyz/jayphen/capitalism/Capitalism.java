@@ -18,19 +18,19 @@ import java.util.logging.Logger;
 
 public final class Capitalism extends JavaPlugin {
 	
-	public static Logger LOG = null;
-	public static Plugin plugin = null;
-	public static Database db = null;
-	public static CapitalismEconomy eco = new CapitalismEconomy();
-	public static BlueMapIntergration BLUEMAP = null;
-	public static BukkitAudiences ADVENTURE = null;
-	public final EconomyHook HOOK = new EconomyHook(this);
+	public static Logger              LOG       = null;
+	public static Plugin              plugin    = null;
+	public static Database            db        = null;
+	public static CapitalismEconomy   eco       = new CapitalismEconomy();
+	public static BlueMapIntergration BLUEMAP   = null;
+	public static BukkitAudiences     ADVENTURE = null;
+	public final  EconomyHook         HOOK      = new EconomyHook(this);
 	
 	@Override
 	public void onEnable() {
 		ADVENTURE = BukkitAudiences.create(this);
-		plugin = this;
-		LOG = this.getLogger();
+		plugin    = this;
+		LOG       = this.getLogger();
 		CommandRegister.registerAllCommands(this);
 		LOG.info("Registered commands.");
 		if (HOOK.vault(eco)) {

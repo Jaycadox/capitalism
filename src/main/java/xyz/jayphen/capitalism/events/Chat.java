@@ -17,7 +17,8 @@ public class Chat implements Listener {
 		if (PlaytimeRewards.onChat(event)) return;
 		
 		event.setCancelled(true);
-		var cmp = PlayerDisplay.from(event.getPlayer()).append(Component.text(": ", TextColor.color(0xcccccc))).append(Component.text(event.getMessage(), TextColor.color(0xededed)));
+		var cmp = PlayerDisplay.from(event.getPlayer()).append(Component.text(": ", TextColor.color(0xcccccc)))
+				.append(Component.text(event.getMessage(), TextColor.color(0xededed)));
 		Capitalism.ADVENTURE.all().sendMessage(cmp);
 	}
 	

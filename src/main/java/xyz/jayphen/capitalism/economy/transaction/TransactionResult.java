@@ -1,9 +1,9 @@
 package xyz.jayphen.capitalism.economy.transaction;
 
 public class TransactionResult {
-	TransactionResultType type = null;
-	String hash = null;
-	String errorReason = "no error reason provided";
+	TransactionResultType type        = null;
+	String                hash        = null;
+	String                errorReason = "no error reason provided";
 	
 	public TransactionResult(TransactionResultType type, String hash) {
 		this.type = type;
@@ -11,8 +11,8 @@ public class TransactionResult {
 	}
 	
 	public TransactionResult(TransactionResultType type, String hash, String error) {
-		this.type = type;
-		this.hash = hash;
+		this.type        = type;
+		this.hash        = hash;
 		this.errorReason = error;
 	}
 	
