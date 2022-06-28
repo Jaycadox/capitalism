@@ -23,6 +23,4 @@ jobs:
           automatic_release_tag: "latest"
           prerelease: true
           title: "Automatic release"
-          files: |
-            LICENSE.txt
-            *.jar
+          files: './target/*.jar'
