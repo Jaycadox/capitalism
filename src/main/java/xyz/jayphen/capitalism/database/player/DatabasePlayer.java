@@ -42,9 +42,9 @@ public class DatabasePlayer {
 						new MessageBuilder("Welcome").appendCaption("Hello,").appendVariable(Bukkit.getOfflinePlayer(uuid).getName() + ".")
 								.appendCaption("Welcome to Capitalism. The goal is to reach $1,000,000,000. You have been awarded")
 								.appendVariable("$" + NumberFormatter.addCommas(amount))
-								.appendCaption("as a starting bonus. For more information regarding how to play,").appendComponent(
-										MiniMessage.miniMessage()
-												.deserialize("<click:open_url:https://capitalism.jayphen.xyz><yellow>click here</yellow></click>"))
+								.appendCaption("as a starting bonus. For more information regarding how to play,")
+								.appendComponent(MiniMessage.miniMessage().deserialize(
+										"<click:open_url:https://capitalism.jayphen.xyz><yellow>click here</yellow></click>"))
 								.appendCaption("to view the 'Quick start guide' and documentation").make());
 			}
 			

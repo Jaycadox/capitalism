@@ -201,8 +201,9 @@ public class LandClaimInteraction implements Listener {
 			return;
 		}
 		event.setCancelled(true);
-		Optional<Claim> optClaim = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
-		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() : "a nearby claim border";
+		Optional<Claim> optClaim   = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
+		String          claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName()
+		                                                  : "a nearby claim border";
 		
 		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
 				ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));

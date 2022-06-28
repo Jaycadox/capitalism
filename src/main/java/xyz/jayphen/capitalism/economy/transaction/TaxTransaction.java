@@ -65,16 +65,16 @@ public class TaxTransaction {
 		DatabasePlayer.from(from).getJsonPlayer().getData().stats.amountTaxed += tax.getAmountTaxed();
 		DatabasePlayer.from(from).getJsonPlayer().save();
 		if (!silent) new MessageBuilder("Transaction Tax").appendVariable("$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
-				.appendCaption("has been removed from your account following a").appendVariable(tax.getTaxAmount() * 100 + "%").appendCaption("tax")
-				.send(Bukkit.getPlayer(from));
+				.appendCaption("has been removed from your account following a").appendVariable(tax.getTaxAmount() * 100 + "%")
+				.appendCaption("tax").send(Bukkit.getPlayer(from));
 		
 		Transaction       t   = new Transaction(from, to, amount);
 		TransactionResult res = t.transact();
 		
 		if (res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
 			if (!silent) new MessageBuilder("Transaction").appendVariable("$" + NumberFormatter.addCommas(amount))
-					.appendCaption("could not be transferred to").appendVariable(Bukkit.getOfflinePlayer(to).getName()).appendCaption("due to")
-					.appendVariable(res.getErrorReason()).send(Bukkit.getPlayer(from));
+					.appendCaption("could not be transferred to").appendVariable(Bukkit.getOfflinePlayer(to).getName())
+					.appendCaption("due to").appendVariable(res.getErrorReason()).send(Bukkit.getPlayer(from));
 			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, res.getErrorReason());
 		}
 		return new TransactionResult(TransactionResult.TransactionResultType.SUCCESS, tag, "");

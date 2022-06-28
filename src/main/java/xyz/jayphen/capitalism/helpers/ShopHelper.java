@@ -130,13 +130,15 @@ public class ShopHelper {
 								
 								new MessageBuilder("Shop").appendCaption("Purchased")
 										.appendComponent(itemMap.get(displayItems.get(finalI)).displayName().color(NamedTextColor.YELLOW))
-										.appendVariable("x" + amount).appendCaption("for")
+										.appendVariable("x" + amount)
+										.appendCaption("for")
 										.appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount(TaxedTransaction.INSTANCE))).send(p);
 								DatabasePlayer.from(UUID.fromString(claim.owner)).getJsonPlayer().queueMessage(
-										new MessageBuilder("Purchase Notification").appendVariable(p.getName()).appendCaption("has purchased")
+										new MessageBuilder("Purchase Notification").appendVariable(p.getName())
+												.appendCaption("has purchased")
 												.appendComponent(itemMap.get(displayItems.get(finalI)).displayName().color(NamedTextColor.YELLOW))
-												.appendVariable("x" + amount).appendCaption("for").appendVariable("$" + amount * shop.getPrice())
-												.make());
+												.appendVariable("x" + amount)
+												.appendCaption("for").appendVariable("$" + amount * shop.getPrice()).make());
 								for (var kp : removeAmounts.entrySet()) {
 									rawItems.get(kp.getKey()).setAmount(rawItems.get(kp.getKey()).getAmount() - kp.getValue());
 								}

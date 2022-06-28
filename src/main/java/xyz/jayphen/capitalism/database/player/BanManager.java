@@ -34,7 +34,8 @@ public class BanManager {
 		}
 		var message = Component.text("Applied account ban to ", NamedTextColor.GREEN)
 				.append(Component.text(Objects.requireNonNull(p.getName()), NamedTextColor.YELLOW))
-				.append(Component.text(". Reason given: ", NamedTextColor.GREEN)).append(Component.text(reason, NamedTextColor.YELLOW))
+				.append(Component.text(". Reason given: ", NamedTextColor.GREEN))
+				.append(Component.text(reason, NamedTextColor.YELLOW))
 				.append(Component.text(". Time until unban: ", NamedTextColor.GREEN))
 				.append(Component.text(TimeHelper.timeToString(length), NamedTextColor.YELLOW));
 		

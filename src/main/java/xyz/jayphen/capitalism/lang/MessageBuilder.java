@@ -73,24 +73,33 @@ public class MessageBuilder {
 	
 	public String build(boolean deprecated) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(ChatColor.BLUE).append(prefix).append(" > ");
+		sb.append(ChatColor.BLUE)
+				.append(prefix)
+				.append(" > ");
 		for (Token tok : message) {
 			boolean endsWithNormalChar = !( sb.toString().endsWith(".") || sb.toString().endsWith(",") || sb.toString().endsWith("[") );
 			switch (tok.token) {
 				case CAPTION -> {
-					sb.append(ChatColor.GRAY).append(tok.content);
+					sb.append(ChatColor.GRAY)
+							.append(tok.content);
 					if (endsWithNormalChar) {
 						sb.append(' ');
 					}
 				}
 				case VARIABLE -> {
-					sb.append(ChatColor.YELLOW).append(tok.content);
+					sb.append(ChatColor.YELLOW)
+							.append(tok.content);
 					if (endsWithNormalChar) {
 						sb.append(' ');
 					}
 				}
 				case BRACKET -> {
-					sb.append(ChatColor.GRAY).append('(').append(ChatColor.YELLOW).append(tok.content).append(ChatColor.GRAY).append(')');
+					sb.append(ChatColor.GRAY)
+							.append('(')
+							.append(ChatColor.YELLOW)
+							.append(tok.content)
+							.append(ChatColor.GRAY)
+							.append(')');
 					if (endsWithNormalChar) {
 						sb.append(' ');
 					}
@@ -116,7 +125,8 @@ public class MessageBuilder {
 						.hoverEvent(HoverEvent.showText(Component.text("Clickable action...")));
 			}
 			if (tok.token == Token.TokenType.COMPONENT) {
-				raw = tok.getComponent().append(Component.text(" "));
+				raw = tok.getComponent()
+						.append(Component.text(" "));
 			}
 			textComponent = textComponent.append(raw);
 			

@@ -12,7 +12,8 @@ public class PlayerListManager {
 		if (hover == null) {
 			p.playerListName(PlayerDisplay.from(p));
 		} else {
-			p.playerListName(( (Component) hover.value() ).append(Component.text(" ")).append(PlayerDisplay.from(p)));
+			p.playerListName(( (Component) hover.value() ).append(Component.text(" "))
+					                 .append(PlayerDisplay.from(p)));
 		}
 		
 		final Component header = MiniMessage.miniMessage().deserialize("<color:#d34aff><bold>CAPITALISM SMP</bold></color><newline>");

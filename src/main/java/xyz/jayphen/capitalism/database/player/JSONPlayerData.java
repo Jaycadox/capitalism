@@ -7,8 +7,8 @@ import xyz.jayphen.capitalism.database.player.json.Stats;
 import java.util.ArrayList;
 
 public class JSONPlayerData {
-	public Stats  stats = new Stats();
-	public String uuid  = "";
+	public Stats                 stats        = new Stats();
+	public String                uuid         = "";
 	public ArrayList<Claim>      claims       = new ArrayList<>();
 	public ArrayList<ClaimOffer> claimOffers  = new ArrayList<>();
 	public ArrayList<String>     messageQueue = new ArrayList<>();

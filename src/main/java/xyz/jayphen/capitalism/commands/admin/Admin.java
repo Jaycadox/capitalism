@@ -93,7 +93,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 			}
 			StringBuilder fArgs = new StringBuilder();
 			for (int i = 2; i < args.length; i++) {
-				fArgs.append(args[i]).append(" ");
+				fArgs.append(args[i])
+						.append(" ");
 			}
 			var times = TimeHelper.splitTime(fArgs.toString().trim());
 			if (times.size() != 2) {
@@ -145,8 +146,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 			DatabasePlayer.from(p).getJsonPlayer().save();
 			
 			new MessageBuilder("Land").appendCaption("You now own the land at").appendVariable(area + ".")
-					.appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount())).appendCaption("has been deducted from your account.")
-					.send(p);
+					.appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount()))
+					.appendCaption("has been deducted from your account.").send(p);
 		} else if (args[0].equals("destroyclaim")) {
 			Optional<Claim> optClaim = ClaimManager.getCachedClaim(( (Player) commandSender ).getLocation());
 			if (optClaim.isEmpty()) {

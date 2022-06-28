@@ -190,8 +190,8 @@ public class Land implements CommandExecutor, TabCompleter {
 								}
 								DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().add(offlinePlayer.getUniqueId().toString());
 								DatabasePlayer.from(p).getJsonPlayer().save();
-								new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been added to the trust list")
-										.send(p);
+								new MessageBuilder("Land").appendVariable(offlinePlayer.getName())
+										.appendCaption("has been added to the trust list").send(p);
 								inv.show(p, "trusted");
 							}, p);
 						});
@@ -227,8 +227,8 @@ public class Land implements CommandExecutor, TabCompleter {
 											), finalAmount));
 									DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().save();
 									new MessageBuilder("Land").appendCaption("Created offer for")
-											.appendVariable("$" + NumberFormatter.addCommas(finalAmount)).appendCaption("to")
-											.appendVariable(tPlayer.getName()).send(p);
+											.appendVariable("$" + NumberFormatter.addCommas(finalAmount))
+											.appendCaption("to").appendVariable(tPlayer.getName()).send(p);
 									DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().queueMessage(
 											new MessageBuilder("Land").appendVariable(p.getName())
 													.appendCaption("is offering to sell you a land claim, type").appendVariable("/profile")
@@ -359,8 +359,8 @@ public class Land implements CommandExecutor, TabCompleter {
 				return;
 			}
 			table.get(preferenceName).run(p, preferenceToggle);
-			new MessageBuilder("Land").appendVariable(preferenceName).appendCaption("has been")
-					.appendVariable(preferenceToggle ? "enabled" : "disabled").send(p);
+			new MessageBuilder("Land").appendVariable(preferenceName)
+					.appendCaption("has been").appendVariable(preferenceToggle ? "enabled" : "disabled").send(p);
 			DatabasePlayer.from(p).getJsonPlayer().save();
 		}
 		if (args.length >= 1 && args[0].equals("trusted")) {
@@ -392,12 +392,14 @@ public class Land implements CommandExecutor, TabCompleter {
 				List<OfflinePlayer> trusted = ClaimManager.getDatabaseClaim(c).getTrusted().stream()
 						.map(x -> Bukkit.getOfflinePlayer(UUID.fromString(x))).toList();
 				if (trusted.contains(offlinePlayer) || offlinePlayer.getUniqueId() == p.getUniqueId()) {
-					new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("is on the trust list").send(p);
+					new MessageBuilder("Land").appendVariable(offlinePlayer.getName())
+							.appendCaption("is on the trust list").send(p);
 					return;
 				}
 				DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().add(offlinePlayer.getUniqueId().toString());
 				DatabasePlayer.from(p).getJsonPlayer().save();
-				new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been added to the trust list").send(p);
+				new MessageBuilder("Land").appendVariable(offlinePlayer.getName())
+						.appendCaption("has been added to the trust list").send(p);
 			}
 			if (args[1].equals("remove")) {
 				if (args.length == 2) {
@@ -412,12 +414,14 @@ public class Land implements CommandExecutor, TabCompleter {
 				List<OfflinePlayer> trusted = ClaimManager.getDatabaseClaim(c).getTrusted().stream()
 						.map(x -> Bukkit.getOfflinePlayer(UUID.fromString(x))).toList();
 				if (!trusted.contains(offlinePlayer)) {
-					new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("is not on the trust list").send(p);
+					new MessageBuilder("Land").appendVariable(offlinePlayer.getName())
+							.appendCaption("is not on the trust list").send(p);
 					return;
 				}
 				DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().removeIf(x -> x.equals(offlinePlayer.getUniqueId().toString()));
 				DatabasePlayer.from(p).getJsonPlayer().save();
-				new MessageBuilder("Land").appendVariable(offlinePlayer.getName()).appendCaption("has been removed from the trust list").send(p);
+				new MessageBuilder("Land").appendVariable(offlinePlayer.getName())
+						.appendCaption("has been removed from the trust list").send(p);
 			}
 			
 		}
