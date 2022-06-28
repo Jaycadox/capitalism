@@ -13,7 +13,11 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
       - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots package
+        run: mvn package
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - name: Push as release
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
