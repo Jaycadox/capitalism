@@ -26,6 +26,7 @@ public class ClaimVisualizer {
 				if (claim == null) continue;
 				if (!claim.owner.equals(p.getUniqueId().toString())) continue;
 				if (!claim.getPermissions().visualize) continue;
+				
 				new BukkitRunnable() {
 					@Override
 					public void run() {
