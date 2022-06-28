@@ -41,6 +41,13 @@ public class JSONPlayer {
 		return data.bannedUntil;
 	}
 	
+	public ArrayList<RetractedBan> getRetractedBans() {
+		if (data.retractedBans == null) {
+			data.retractedBans = new ArrayList<>();
+		}
+		return data.retractedBans;
+	}
+	
 	public ArrayList<String> getBanRecord() {
 		if (data.banRecord == null) {
 			data.banRecord = new ArrayList<>();

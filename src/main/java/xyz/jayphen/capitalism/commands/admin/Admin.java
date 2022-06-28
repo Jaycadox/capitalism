@@ -4,6 +4,8 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.world.World;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.*;
@@ -14,6 +16,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.Claim;
 import xyz.jayphen.capitalism.claims.ClaimManager;
 import xyz.jayphen.capitalism.claims.region.RegionManager;
@@ -23,6 +26,7 @@ import xyz.jayphen.capitalism.economy.injection.EconomyInjector;
 import xyz.jayphen.capitalism.economy.transaction.TaxTransaction;
 import xyz.jayphen.capitalism.economy.transaction.TransactionResult;
 import xyz.jayphen.capitalism.events.tax.TaxedTransaction;
+import xyz.jayphen.capitalism.helpers.ChatInput;
 import xyz.jayphen.capitalism.helpers.TimeHelper;
 import xyz.jayphen.capitalism.helpers.WorldEditHelper;
 import xyz.jayphen.capitalism.lang.MessageBuilder;
@@ -113,6 +117,17 @@ public class Admin implements CommandExecutor, TabCompleter {
 			} else {
 				commandSender.sendMessage(ChatColor.GREEN + "The player " + p.getName() + " isn't banned.");
 			}
+		} else if (args[0].equals("retract") && args.length == 3) {
+			OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
+			if (!p.hasPlayedBefore()) {
+				commandSender.sendMessage(ChatColor.RED + "Invalid player");
+				return true;
+			}
+			ChatInput.createQuery("ban retraction reason", response -> {
+				BanManager.retractBan(p, Integer.parseInt(args[2]), response);
+				commandSender.sendMessage("Retracted ban with id: " + Integer.parseInt(args[2]) + " and reason: " + response);
+			}, (Player) commandSender);
+			
 		} else if (args[0].equals("sell") && args.length == 3) {
 			if (!ClaimManager.adminDrafts.containsKey(( (Player) commandSender ).getUniqueId())) {
 				commandSender.sendMessage(ChatColor.RED + "No active draft");
@@ -189,28 +204,37 @@ public class Admin implements CommandExecutor, TabCompleter {
 				String reason    = dbp.getJsonPlayer().getBanReason();
 				commandSender.sendMessage(
 						ChatColor.YELLOW + "Ban status: " + ChatColor.RED + "Banned. Expires in " + timeUntil + ". Reason: " + reason);
-				
 			}
 			int banIndex = 0;
 			commandSender.sendMessage(ChatColor.YELLOW + "Ban record:");
 			
 			for (String ban : dbp.getJsonPlayer().getBanRecord()) {
-				
 				try {
-					String banLength = TimeHelper.timeToString(Long.parseUnsignedLong(ban.split("###")[0]));
-					String banReason = ban.split("###")[1];
-					if (banReason.contains("s")) continue;
+					String  banLength       = TimeHelper.timeToString(Long.parseUnsignedLong(ban.split("###")[0]));
+					String  banReason       = ban.split("###")[1];
+					boolean anticheatIssued = banReason.equals("[ac]");
+					if (anticheatIssued) banReason = ChatColor.GREEN + "Anticheat Issued";
 					String banIssued = TimeHelper.timeToString(System.currentTimeMillis() - Long.parseUnsignedLong(ban.split("###")[2]));
 					commandSender.sendMessage(ChatColor.GOLD + "  " + ++banIndex + ChatColor.WHITE + ": " + banReason);
 					commandSender.sendMessage("    " + ChatColor.WHITE + "Ban length: " + ChatColor.YELLOW + banLength);
 					commandSender.sendMessage("    " + ChatColor.WHITE + "Time since issued: " + ChatColor.YELLOW + banIssued);
-					commandSender.sendMessage(
-							"    " + ChatColor.WHITE + "AntiCheat issued: " + ChatColor.YELLOW + ( banReason.equals("[ac]") ? "Yes" : "No" ));
+					String retractReason = BanManager.getBanRetractionReason(dbp, banIndex - 1);
+					if (retractReason == null) {
+						var cmp = Component.text("    [Retract Ban]", NamedTextColor.RED)
+								.clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/admin retract " + name + " " + ( banIndex - 1 )));
+						Capitalism.ADVENTURE.sender(commandSender).sendMessage(cmp);
+					} else {
+						var cmp = Component.text("    Ban has been retracted: ", NamedTextColor.WHITE)
+								.append(Component.text(retractReason, NamedTextColor.YELLOW));
+						Capitalism.ADVENTURE.sender(commandSender).sendMessage(cmp);
+					}
+					
 				} catch (Exception ignored) {
 				}
 				
 			}
-			
+			int acBanCount = BanManager.getAnticheatInfractions(dbp);
+			commandSender.sendMessage(ChatColor.YELLOW + "Anticheat bans: " + ChatColor.RED + acBanCount);
 			commandSender.sendMessage(ChatColor.YELLOW + "Account balance: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getMoneySafe()));
 			commandSender.sendMessage(ChatColor.YELLOW + "Amount sent: " + ChatColor.GREEN + "$" +
 			                          NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneySent));
@@ -242,9 +266,11 @@ public class Admin implements CommandExecutor, TabCompleter {
 	public List<String> onTabComplete(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
 		if (!sender.isOp()) return new ArrayList<>();
 		if (args.length == 1) {
-			return List.of("draftclaim", "stats", "removedraft", "sell", "destroyclaim", "delete", "ban", "unban");
+			return List.of("draftclaim", "stats", "removedraft", "sell", "destroyclaim", "delete", "ban", "unban", "retract");
 		}
-		if (args.length == 2 && ( args[0].equals("stats") || args[0].equals("sell") || args[0].equals("ban") || args[0].equals("unban") )) {
+		if (args.length == 2 &&
+		    ( args[0].equals("stats") || args[0].equals("sell") || args[0].equals("ban") || args[0].equals("unban") || args[0].equals("retract") ))
+		{
 			return Bukkit.getServer().getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
 		}
 		if (args.length == 3 && args[0].equals("ban")) {
