@@ -34,15 +34,15 @@ public class PlaytimeRewards implements Listener {
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			eligiblePlayers.add(p.getUniqueId());
 			int numberOfClaims = DatabasePlayer.from(p).getJsonPlayer().getData().claims.size();
-			if(numberOfClaims == 0) {
+			if (numberOfClaims == 0) {
 				new MessageBuilder("Reward").appendData(Token.TokenType.CHAT, "Click here", "__I_REDEEM_REWARD__")
 						.appendCaption("to redeem your playtime reward. This will expire in 2 minutes").send(p);
 			} else {
-				new MessageBuilder("Reward")
-						.appendCaption("Right-click a bed inside a residential " +
-						               "land claim that you own to redeem your playtime reward. This will expire in 2 minutes").send(p);
+				new MessageBuilder("Reward").appendCaption("Right-click a bed inside a residential " +
+				                                           "land claim that you own to redeem your playtime reward. This will expire in 2 minutes")
+						.send(p);
 			}
-
+			
 		}
 		new BukkitRunnable() {
 			@Override
@@ -63,7 +63,7 @@ public class PlaytimeRewards implements Listener {
 		if (e.getMessage().equals("__I_REDEEM_REWARD__")) {
 			int numberOfClaims = DatabasePlayer.from(e.getPlayer()).getJsonPlayer().getData().claims.size();
 			e.setCancelled(true);
-			if(numberOfClaims != 0) return true;
+			if (numberOfClaims != 0) return true;
 			if (!redeemedPlayers.contains(e.getPlayer().getUniqueId()) && eligiblePlayers.contains(e.getPlayer().getUniqueId())) {
 				eligiblePlayers.remove(e.getPlayer().getUniqueId());
 				redeemedPlayers.add(e.getPlayer().getUniqueId());

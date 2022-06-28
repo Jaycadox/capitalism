@@ -1,8 +1,6 @@
 package xyz.jayphen.capitalism;
 
 import com.sk89q.worldedit.WorldEdit;
-import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;

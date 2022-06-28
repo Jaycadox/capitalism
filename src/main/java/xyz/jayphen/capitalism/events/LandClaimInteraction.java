@@ -101,15 +101,15 @@ public class LandClaimInteraction implements Listener {
 	
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void playerBedInteraction(PlayerInteractEvent event) {
-		if(event.isCancelled()) return;
+		if (event.isCancelled()) return;
 		int numberOfClaims = DatabasePlayer.from(event.getPlayer()).getJsonPlayer().getData().claims.size();
-		if(numberOfClaims == 0) return;
-		if(event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-		if(!(event.getClickedBlock().getBlockData() instanceof Bed)) return;
+		if (numberOfClaims == 0) return;
+		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+		if (!( event.getClickedBlock().getBlockData() instanceof Bed )) return;
 		Claim c = ClaimManager.getCachedClaim(event.getClickedBlock().getLocation()).orElse(null);
-		if(!c.owner.equals(event.getPlayer().getUniqueId().toString())) return;
-		if(PlaytimeRewards.redeemedPlayers.contains(event.getPlayer().getUniqueId())) return;
-		if(!PlaytimeRewards.eligiblePlayers.contains(event.getPlayer().getUniqueId())) return;
+		if (!c.owner.equals(event.getPlayer().getUniqueId().toString())) return;
+		if (PlaytimeRewards.redeemedPlayers.contains(event.getPlayer().getUniqueId())) return;
+		if (!PlaytimeRewards.eligiblePlayers.contains(event.getPlayer().getUniqueId())) return;
 		PlaytimeRewards.redeemedPlayers.add(event.getPlayer().getUniqueId());
 		PlaytimeRewards.eligiblePlayers.remove(event.getPlayer().getUniqueId());
 		if (Database.injector.inject(event.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
@@ -146,7 +146,8 @@ public class LandClaimInteraction implements Listener {
 		
 		var region = RegionManager.getRegion(new Location(Bukkit.getWorld(claim.location.world), claim.location.startX, 0, claim.location.startZ));
 		boolean wasBedClicked = region == RegionManager.Region.COMMERCIAL &&
-		                        ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed ) && event.getAction() == Action.RIGHT_CLICK_BLOCK;
+		                        ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed ) &&
+		                        event.getAction() == Action.RIGHT_CLICK_BLOCK;
 		if (wasBedClicked && claim.hasPermission(event.getPlayer(), Claim.ClaimInteractionType.GENERAL)) {
 			Capitalism.ADVENTURE.player(event.getPlayer())
 					.sendActionBar(Component.text("Beds cannot be used in commercial plots of land", NamedTextColor.GRAY));
@@ -222,9 +223,8 @@ public class LandClaimInteraction implements Listener {
 			return;
 		}
 		event.setCancelled(true);
-		Optional<Claim> optClaim   = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
-		String          claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName()
-		                                                  : "a nearby claim border";
+		Optional<Claim> optClaim = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
+		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() : "a nearby claim border";
 		
 		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
 				ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));
