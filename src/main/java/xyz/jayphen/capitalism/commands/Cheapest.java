@@ -71,7 +71,7 @@ public class Cheapest implements CommandExecutor {
 			}
 		}
 		if (shops.isEmpty()) {
-			new MessageBuilder("Shop").appendCaption("Couldn't find any shops that sells").appendVariable(mat.toString()).send(p);
+			new MessageBuilder("Shop").appendCaption("Couldn't find any shops that sell").appendVariable(mat.toString()).send(p);
 			return true;
 		}
 		shops = shops.stream().sorted(Comparator.comparingInt(x -> x.price)).collect(Collectors.toCollection(ArrayList::new));

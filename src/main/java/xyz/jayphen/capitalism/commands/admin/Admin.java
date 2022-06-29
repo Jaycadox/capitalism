@@ -157,7 +157,12 @@ public class Admin implements CommandExecutor, TabCompleter {
 			String area = "(" + c.location.startX + ", " + c.location.startZ + " -> " + c.location.endX + ", " + c.location.endZ + ")";
 			commandSender.sendMessage(ChatColor.GREEN + "Sold area " + area + " to " + p.getName() + " for $" + ChatColor.YELLOW + amount);
 			c.owner = p.getUniqueId().toString();
-			DatabasePlayer.from(p).getJsonPlayer().getData().claims.add(c);
+			DatabasePlayer.from(p).getJsonPlayer().getData().claims.add(new Claim(
+					new Location(Bukkit.getWorld(c.location.world), c.location.startX, 0, c.location.startZ),
+					new Location(Bukkit.getWorld(c.location.world), c.location.endX, 0, c.location.endZ),
+					p.getUniqueId()
+			));
+			ClaimManager.adminDrafts.remove(((Player)commandSender).getUniqueId());
 			DatabasePlayer.from(p).getJsonPlayer().save();
 			
 			new MessageBuilder("Land").appendCaption("You now own the land at").appendVariable(area + ".")
