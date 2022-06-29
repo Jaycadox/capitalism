@@ -67,7 +67,9 @@ public class PlaytimeRewards implements Listener {
 			if (!redeemedPlayers.contains(e.getPlayer().getUniqueId()) && eligiblePlayers.contains(e.getPlayer().getUniqueId())) {
 				eligiblePlayers.remove(e.getPlayer().getUniqueId());
 				redeemedPlayers.add(e.getPlayer().getUniqueId());
-				if (Database.injector.inject(e.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
+				if (Database.injector.inject(e.getPlayer().getUniqueId(), 100000).getType() ==
+				    TransactionResult.TransactionResultType.SUCCESS)
+				{
 					new MessageBuilder("Reward").appendVariable("$100,000")
 							.appendCaption("has been added to your balance").send(e.getPlayer());
 				}

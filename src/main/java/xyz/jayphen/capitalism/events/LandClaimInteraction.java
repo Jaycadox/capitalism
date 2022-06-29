@@ -49,9 +49,10 @@ public class LandClaimInteraction implements Listener {
 	                                                                 Material.SPRUCE_DOOR, Material.WARPED_DOOR
 	);
 	
-	private static final List<Material> WOODEN_TRAPDOORS = Arrays.asList(Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR, Material.CRIMSON_TRAPDOOR,
-	                                                                     Material.JUNGLE_TRAPDOOR, Material.DARK_OAK_TRAPDOOR,
-	                                                                     Material.SPRUCE_TRAPDOOR, Material.OAK_TRAPDOOR, Material.WARPED_TRAPDOOR
+	private static final List<Material> WOODEN_TRAPDOORS = Arrays.asList(Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR,
+	                                                                     Material.CRIMSON_TRAPDOOR, Material.JUNGLE_TRAPDOOR,
+	                                                                     Material.DARK_OAK_TRAPDOOR, Material.SPRUCE_TRAPDOOR,
+	                                                                     Material.OAK_TRAPDOOR, Material.WARPED_TRAPDOOR
 	);
 	int                 tntCount                 = 0;
 	long                lastReset                = 0;
@@ -112,7 +113,9 @@ public class LandClaimInteraction implements Listener {
 		if (!PlaytimeRewards.eligiblePlayers.contains(event.getPlayer().getUniqueId())) return;
 		PlaytimeRewards.redeemedPlayers.add(event.getPlayer().getUniqueId());
 		PlaytimeRewards.eligiblePlayers.remove(event.getPlayer().getUniqueId());
-		if (Database.injector.inject(event.getPlayer().getUniqueId(), 100000).getType() == TransactionResult.TransactionResultType.SUCCESS) {
+		if (Database.injector.inject(event.getPlayer().getUniqueId(), 100000).getType() ==
+		    TransactionResult.TransactionResultType.SUCCESS)
+		{
 			new MessageBuilder("Reward").appendVariable("$100,000")
 					.appendCaption("has been added to your balance").send(event.getPlayer());
 		}
@@ -120,7 +123,9 @@ public class LandClaimInteraction implements Listener {
 	
 	@EventHandler
 	public void onInteraction(PlayerInteractEvent event) {
-		if (( event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ) && event.getPlayer().isSneaking()) {
+		if (( event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK ) &&
+		    event.getPlayer().isSneaking())
+		{
 			if (event.getItem() != null && event.getItem().getType().isEdible()) return;
 		}
 		Optional<Claim> optClaim = ClaimManager.getCachedClaim(
@@ -144,7 +149,8 @@ public class LandClaimInteraction implements Listener {
 			}
 		}
 		
-		var region = RegionManager.getRegion(new Location(Bukkit.getWorld(claim.location.world), claim.location.startX, 0, claim.location.startZ));
+		var region = RegionManager.getRegion(
+				new Location(Bukkit.getWorld(claim.location.world), claim.location.startX, 0, claim.location.startZ));
 		boolean wasBedClicked = region == RegionManager.Region.COMMERCIAL &&
 		                        ( event.getClickedBlock() != null && event.getClickedBlock().getBlockData() instanceof Bed ) &&
 		                        event.getAction() == Action.RIGHT_CLICK_BLOCK;
@@ -224,7 +230,8 @@ public class LandClaimInteraction implements Listener {
 		}
 		event.setCancelled(true);
 		Optional<Claim> optClaim = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
-		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() : "a nearby claim border";
+		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName()
+		                                         : "a nearby claim border";
 		
 		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
 				ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));
@@ -238,7 +245,8 @@ public class LandClaimInteraction implements Listener {
 		event.setCancelled(true);
 		Optional<Claim> optClaim = ClaimManager.getCachedClaim(( event.getBlock().getLocation() ));
 		
-		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName() : "a nearby claim border";
+		String claimOwner = optClaim.isPresent() ? Bukkit.getOfflinePlayer(UUID.fromString(optClaim.get().owner)).getName()
+		                                         : "a nearby claim border";
 		
 		event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
 				ChatColor.GRAY + "Interaction blocked as the land is claimed by: " + ChatColor.YELLOW + claimOwner));

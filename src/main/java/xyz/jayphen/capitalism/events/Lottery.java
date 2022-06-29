@@ -138,7 +138,8 @@ public class Lottery implements Listener {
 				return true;
 			}
 			DatabasePlayer.from(e.getPlayer()).setJoinedLottery(true);
-			new MessageBuilder("Lottery").appendCaption("You've entered the lottery, tune in at around 5-6PM AEST for the roll!").send(e.getPlayer());
+			new MessageBuilder("Lottery").appendCaption("You've entered the lottery, tune in at around 5-6PM AEST for the roll!")
+					.send(e.getPlayer());
 			return true;
 			
 		}

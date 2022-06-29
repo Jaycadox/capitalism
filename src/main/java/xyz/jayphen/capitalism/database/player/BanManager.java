@@ -65,7 +65,8 @@ public class BanManager {
 	}
 	
 	public static boolean isNotBanned(DatabasePlayer p) {
-		return p.getJsonPlayer().getData().bannedUntil == -1 || ( p.getJsonPlayer().getData().bannedUntil - System.currentTimeMillis() ) < 0;
+		return p.getJsonPlayer().getData().bannedUntil == -1 ||
+		       ( p.getJsonPlayer().getData().bannedUntil - System.currentTimeMillis() ) < 0;
 	}
 	
 	public static String getFormalBanReason(DatabasePlayer dbp) {
@@ -109,8 +110,8 @@ public class BanManager {
 	public static Component getBanMessage(DatabasePlayer dbp, long timeLeft) {
 		String formattedTimeLeft = TimeHelper.timeToString(timeLeft);
 		return MiniMessage.miniMessage().deserialize(
-				"[CAPITALISM SMP]<newline><color:red><bold>INFRACTION NOTICE</bold></color><newline><newline><yellow>\"" + getFormalBanReason(dbp) +
-				"\"<newline><newline><reset>Expires in <yellow>" + formattedTimeLeft + "<newline><newline>" +
+				"[CAPITALISM SMP]<newline><color:red><bold>INFRACTION NOTICE</bold></color><newline><newline><yellow>\"" +
+				getFormalBanReason(dbp) + "\"<newline><newline><reset>Expires in <yellow>" + formattedTimeLeft + "<newline><newline>" +
 				( dbp.getJsonPlayer().getBanReason().contains("[wipe]")
 				  ? "<grey>In addition, your player data has been reset<newline><newline><reset>" : "" ) +
 				( dbp.getJsonPlayer().getBanReason().equals("[ac]")

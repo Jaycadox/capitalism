@@ -10,6 +10,14 @@ commands:
     usage: /<command>
     aliases:
       - bal
+  cheapest:
+    description: Find the cheapest shop selling a specific item
+    permission: core.cheapest
+    usage: /<command> <item_name>
+    aliases:
+      - find
+      - cheap
+      - searchfor
   pay:
     description: Pay a player a certain amount of cash.
     permission: core.pay

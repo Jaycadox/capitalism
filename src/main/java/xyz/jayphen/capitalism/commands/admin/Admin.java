@@ -148,8 +148,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 				commandSender.sendMessage(ChatColor.RED + "Invalid amount of money");
 				return true;
 			}
-			TaxTransaction    trans = new TaxTransaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), amount);
-			TransactionResult res   = trans.transact(TaxedTransaction.INSTANCE, true);
+			TaxTransaction trans = new TaxTransaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), amount);
+			TransactionResult res = trans.transact(TaxedTransaction.INSTANCE, true);
 			if (res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
 				commandSender.sendMessage(ChatColor.RED + "Transaction failed. Reason given: " + ChatColor.YELLOW + res.getErrorReason());
 				return true;
@@ -170,9 +170,9 @@ public class Admin implements CommandExecutor, TabCompleter {
 				return true;
 			}
 			Claim claim = optClaim.get();
-			commandSender.sendMessage(
-					ChatColor.GREEN + "Claim owned by " + ChatColor.YELLOW + Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName() +
-					ChatColor.GREEN + " has been destroyed. Please wait up to 8 seconds for claim cache to update.");
+			commandSender.sendMessage(ChatColor.GREEN + "Claim owned by " + ChatColor.YELLOW +
+			                          Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName() + ChatColor.GREEN +
+			                          " has been destroyed. Please wait up to 8 seconds for claim cache to update.");
 			claim.destroy();
 			
 		} else if (args[0].equals("stats")) {
@@ -220,8 +220,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 					commandSender.sendMessage("    " + ChatColor.WHITE + "Time since issued: " + ChatColor.YELLOW + banIssued);
 					String retractReason = BanManager.getBanRetractionReason(dbp, banIndex - 1);
 					if (retractReason == null) {
-						var cmp = Component.text("    [Retract Ban]", NamedTextColor.RED)
-								.clickEvent(net.kyori.adventure.text.event.ClickEvent.runCommand("/admin retract " + name + " " + ( banIndex - 1 )));
+						var cmp = Component.text("    [Retract Ban]", NamedTextColor.RED).clickEvent(
+								net.kyori.adventure.text.event.ClickEvent.runCommand("/admin retract " + name + " " + ( banIndex - 1 )));
 						Capitalism.ADVENTURE.sender(commandSender).sendMessage(cmp);
 					} else {
 						var cmp = Component.text("    Ban has been retracted: ", NamedTextColor.WHITE)
@@ -235,7 +235,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 			}
 			int acBanCount = BanManager.getAnticheatInfractions(dbp);
 			commandSender.sendMessage(ChatColor.YELLOW + "Anticheat bans: " + ChatColor.RED + acBanCount);
-			commandSender.sendMessage(ChatColor.YELLOW + "Account balance: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getMoneySafe()));
+			commandSender.sendMessage(
+					ChatColor.YELLOW + "Account balance: " + ChatColor.GREEN + "$" + NumberFormatter.addCommas(dbp.getMoneySafe()));
 			commandSender.sendMessage(ChatColor.YELLOW + "Amount sent: " + ChatColor.GREEN + "$" +
 			                          NumberFormatter.addCommas(dbp.getJsonPlayer().getData().stats.moneySent));
 			commandSender.sendMessage(ChatColor.YELLOW + "Amount received: " + ChatColor.GREEN + "$" +
@@ -254,7 +255,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 					p.spigot().sendMessage(new ComponentBuilder(ChatColor.YELLOW + "    [Teleport] ").event(
 									new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + c.getMidpointX() + " ~ " + c.getMidpointZ()))
 							                       .append(new ComponentBuilder(ChatColor.RED + "[Destroy]").event(
-									                       new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin destroyclaim")).create()).create());
+									                       new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin destroyclaim")).create())
+							                       .create());
 					
 				}
 			}
@@ -268,8 +270,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 		if (args.length == 1) {
 			return List.of("draftclaim", "stats", "removedraft", "sell", "destroyclaim", "delete", "ban", "unban", "retract");
 		}
-		if (args.length == 2 &&
-		    ( args[0].equals("stats") || args[0].equals("sell") || args[0].equals("ban") || args[0].equals("unban") || args[0].equals("retract") ))
+		if (args.length == 2 && ( args[0].equals("stats") || args[0].equals("sell") || args[0].equals("ban") || args[0].equals("unban") ||
+		                          args[0].equals("retract") ))
 		{
 			return Bukkit.getServer().getOnlinePlayers().stream().map(HumanEntity::getName).collect(Collectors.toList());
 		}

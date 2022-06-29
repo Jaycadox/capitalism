@@ -25,7 +25,8 @@ public class ClaimLocation {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ClaimLocation that = (ClaimLocation) o;
-		return startX == that.startX && startZ == that.startZ && endX == that.endX && endZ == that.endZ && Objects.equals(world, that.world);
+		return startX == that.startX && startZ == that.startZ && endX == that.endX && endZ == that.endZ &&
+		       Objects.equals(world, that.world);
 	}
 	
 	@Override

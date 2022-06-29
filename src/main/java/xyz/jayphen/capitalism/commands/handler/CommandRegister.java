@@ -1,10 +1,7 @@
 package xyz.jayphen.capitalism.commands.handler;
 
 import xyz.jayphen.capitalism.Capitalism;
-import xyz.jayphen.capitalism.commands.Balance;
-import xyz.jayphen.capitalism.commands.Land;
-import xyz.jayphen.capitalism.commands.Pay;
-import xyz.jayphen.capitalism.commands.Profile;
+import xyz.jayphen.capitalism.commands.*;
 import xyz.jayphen.capitalism.commands.admin.Admin;
 
 public class CommandRegister {
@@ -14,7 +11,7 @@ public class CommandRegister {
 		p.getCommand("profile").setExecutor(new Profile());
 		p.getCommand("admin").setExecutor(new Admin());
 		p.getCommand("admin").setTabCompleter(new Admin());
-		
+		p.getCommand("cheapest").setExecutor(new Cheapest());
 		p.getCommand("land").setExecutor(new Land());
 		p.getCommand("land").setTabCompleter(new Land());
 		

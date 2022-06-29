@@ -143,7 +143,8 @@ public class Land implements CommandExecutor, TabCompleter {
 						inv.setMargin(3, 0);
 						inv.setItem(0, 0, ChatColor.GREEN + "" + ChatColor.BOLD + "CONFIRM", Material.GREEN_WOOL, () -> {
 							ClaimManager.getDatabaseClaim(c).destroy();
-							new MessageBuilder("Land").appendCaption("Land claim has been destroyed. Please allow up to").appendVariable("8 seconds")
+							new MessageBuilder("Land").appendCaption("Land claim has been destroyed. Please allow up to")
+									.appendVariable("8 seconds")
 									.appendCaption("for changes to take effect").send(p);
 							InventoryHelper.close(p);
 						});
@@ -153,16 +154,15 @@ public class Land implements CommandExecutor, TabCompleter {
 						inv.setMargin(1, 0);
 						var list = ClaimManager.getDatabaseClaim(c).getTrusted().stream().map(x -> {
 							OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(x));
-							return new InventoryScroll.ItemRunnable(
-									InventoryHelper.getHead(player, ChatColor.YELLOW + player.getName(), List.of("&7Click to: &c&lUN-TRUST PLAYER")),
-									() -> {
-										DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted()
-												.removeIf(pl -> x.equals(player.getUniqueId().toString()));
-										DatabasePlayer.from(p).getJsonPlayer().save();
-										new MessageBuilder("Land").appendVariable(player.getName())
-												.appendCaption("has been removed from the trust list").send(p);
-									}
-							);
+							return new InventoryScroll.ItemRunnable(InventoryHelper.getHead(player, ChatColor.YELLOW + player.getName(),
+							                                                                List.of("&7Click to: &c&lUN-TRUST PLAYER")
+							), () -> {
+								DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted()
+										.removeIf(pl -> x.equals(player.getUniqueId().toString()));
+								DatabasePlayer.from(p).getJsonPlayer().save();
+								new MessageBuilder("Land").appendVariable(player.getName())
+										.appendCaption("has been removed from the trust list").send(p);
+							});
 						}).collect(Collectors.toList());
 						if (scroll[0] == null) {
 							scroll[0] = new InventoryScroll(0, 4, inv, list, ctx, p.getUniqueId());
@@ -245,15 +245,16 @@ public class Land implements CommandExecutor, TabCompleter {
 									new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").send(p);
 									return;
 								}
-								String area = "(" + c.location.startX + ", " + c.location.startZ + " -> " + c.location.endX + ", " + c.location.endZ +
-								              ")";
+								String area = "(" + c.location.startX + ", " + c.location.startZ + " -> " + c.location.endX + ", " +
+								              c.location.endZ + ")";
 								ClaimManager.getDatabaseClaim(c).transfer(tPlayer.getUniqueId());
 								new MessageBuilder("Land").appendCaption("You no longer own the land at").appendVariable(area + ".")
-										.appendCaption("This is because ownership has been transferred to").appendVariable(tPlayer.getName()).send(p);
+										.appendCaption("This is because ownership has been transferred to")
+										.appendVariable(tPlayer.getName()).send(p);
 								DatabasePlayer.from(tPlayer.getUniqueId()).getJsonPlayer().queueMessage(
 										new MessageBuilder("Land").appendCaption("You now own the land at").appendVariable(area + ".")
-												.appendCaption("This was free as it has been transferred to you by").appendVariable(p.getName())
-												.make());
+												.appendCaption("This was free as it has been transferred to you by")
+												.appendVariable(p.getName()).make());
 								
 							}, p);
 						});
@@ -262,9 +263,16 @@ public class Land implements CommandExecutor, TabCompleter {
 						inv.setMargin(1, 0);
 						inv.setItem(0, 0, ChatColor.YELLOW + "Claim Area", Material.GRASS_BLOCK, () -> {},
 						            Stream.of("&7This claim's area is: &e" + c.getArea() + " blocks",
-						                      "&7Location: &e" + c.getMidpointX() + ", " + c.getMidpointZ(), "&7Type: &e" + RegionManager.getRegion(
-												            new Location(Bukkit.getWorld(c.location.world), c.location.startX, 0, c.location.startZ))
-										            .toString().toLowerCase()
+						                      "&7Location: &e" + c.getMidpointX() + ", " + c.getMidpointZ(), "&7Type: &e" +
+						                                                                                     RegionManager.getRegion(
+										                                                                                     new Location(
+												                                                                                     Bukkit.getWorld(
+														                                                                                     c.location.world),
+												                                                                                     c.location.startX,
+												                                                                                     0,
+												                                                                                     c.location.startZ
+										                                                                                     )).toString()
+								                                                                                     .toLowerCase()
 						            ).map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList())
 						);
 						
@@ -280,7 +288,8 @@ public class Land implements CommandExecutor, TabCompleter {
 							ClaimOffer offer = DatabasePlayer.from(p).getClaimOffersFromClaim(c).get(0);
 							inv.setItem(0, 4, ChatColor.RED + "Cancel ongoing offer", Material.ENDER_EYE, () -> {
 								DatabasePlayer.from(p).deleteAllOffersForClaim(c);
-							}, List.of("&7Offer to player: &e" + Bukkit.getOfflinePlayer(DatabasePlayer.getRecipientOfClaimOffer(offer)).getName(),
+							}, List.of("&7Offer to player: &e" +
+							           Bukkit.getOfflinePlayer(DatabasePlayer.getRecipientOfClaimOffer(offer)).getName(),
 							           "&7Offered for: &e$" + NumberFormatter.addCommas(offer.price)
 							));
 						}
@@ -314,7 +323,8 @@ public class Land implements CommandExecutor, TabCompleter {
 								DatabasePlayer.from(p).getJsonPlayer().save();
 								p.performCommand("land id=" + finalId);
 								
-								new MessageBuilder("Land").appendCaption("Land claim's name has been set to:").appendVariable(response).send(p);
+								new MessageBuilder("Land").appendCaption("Land claim's name has been set to:").appendVariable(response)
+										.send(p);
 							}, p);
 						}, List.of());
 					}
@@ -326,8 +336,9 @@ public class Land implements CommandExecutor, TabCompleter {
 							boolean value = entry.getValue().run(p, null);
 							inv.setItem(0, index++, entry.getKey(), value ? Material.GREEN_WOOL : Material.RED_WOOL, () -> {
 								entry.getValue().run(p, !value);
-							}, Stream.of("&7Current value: " + ( value ? "&a&lENABLED" : "&c&lDISABLED" ), "", "&e" + getDescription(entry.getKey()))
-									            .map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
+							}, Stream.of("&7Current value: " + ( value ? "&a&lENABLED" : "&c&lDISABLED" ), "",
+							             "&e" + getDescription(entry.getKey())
+							).map(x -> ChatColor.translateAlternateColorCodes('&', x)).collect(Collectors.toList()));
 							
 						}
 						
@@ -351,8 +362,8 @@ public class Land implements CommandExecutor, TabCompleter {
 				return;
 			}
 			String preferenceName = args[1];
-			boolean preferenceToggle = args[2].equalsIgnoreCase("true") || args[2].equalsIgnoreCase("yes") || args[2].equalsIgnoreCase("enable") ||
-			                           args[2].equalsIgnoreCase("on");
+			boolean preferenceToggle = args[2].equalsIgnoreCase("true") || args[2].equalsIgnoreCase("yes") ||
+			                           args[2].equalsIgnoreCase("enable") || args[2].equalsIgnoreCase("on");
 			HashMap<String, BooleanRunnable> table = generatePreferenceTable(c);
 			if (!table.containsKey(preferenceName)) {
 				new MessageBuilder("Land").appendCaption("Could not find preference with name:").appendVariable(preferenceName).send(p);
@@ -374,8 +385,8 @@ public class Land implements CommandExecutor, TabCompleter {
 					return;
 				} else {
 					new MessageBuilder("Land").appendCaption("These players have general trust permissions on this claim:").appendList(
-							ClaimManager.getDatabaseClaim(c).getTrusted().stream().map(x -> Bukkit.getOfflinePlayer(UUID.fromString(x)).getName())
-									.collect(Collectors.toList())).send(p);
+							ClaimManager.getDatabaseClaim(c).getTrusted().stream()
+									.map(x -> Bukkit.getOfflinePlayer(UUID.fromString(x)).getName()).collect(Collectors.toList())).send(p);
 					return;
 				}
 			}
@@ -418,7 +429,8 @@ public class Land implements CommandExecutor, TabCompleter {
 							.appendCaption("is not on the trust list").send(p);
 					return;
 				}
-				DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted().removeIf(x -> x.equals(offlinePlayer.getUniqueId().toString()));
+				DatabasePlayer.from(p).getJsonPlayer().getClaim(c).getTrusted()
+						.removeIf(x -> x.equals(offlinePlayer.getUniqueId().toString()));
 				DatabasePlayer.from(p).getJsonPlayer().save();
 				new MessageBuilder("Land").appendVariable(offlinePlayer.getName())
 						.appendCaption("has been removed from the trust list").send(p);

@@ -26,13 +26,15 @@ public class DeathTax implements Listener {
 		
 		TransactionResult result = t.transact();
 		if (result.getType() == TransactionResult.TransactionResultType.ERROR) {
-			new MessageBuilder("Death Tax").appendCaption("Failed to apply death tax. You've gotten lucky this time >:(").send(event.getEntity());
+			new MessageBuilder("Death Tax").appendCaption("Failed to apply death tax. You've gotten lucky this time >:(")
+					.send(event.getEntity());
 			return;
 		}
 		dbp.getJsonPlayer().getData().stats.amountTaxed += tax.getAmountTaxed();
 		dbp.getJsonPlayer().save();
 		new MessageBuilder("Death Tax").appendVariable("$" + NumberFormatter.addCommas(tax.getAmountTaxed()))
-				.appendCaption("has been deducted from your account. This was").appendVariable(( Math.ceil(tax.getTaxAmount() * 100) ) + "%")
+				.appendCaption("has been deducted from your account. This was")
+				.appendVariable(( Math.ceil(tax.getTaxAmount() * 100) ) + "%")
 				.appendCaption("of your account's balance").send(event.getEntity());
 	}
 }

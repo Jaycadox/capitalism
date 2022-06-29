@@ -63,7 +63,8 @@ public class JSONPlayer {
 	}
 	
 	public void removeMessageFromQueue(Component cmp) {
-		data.messageQueue = data.messageQueue.stream().filter(x -> cmp.hashCode() == GsonComponentSerializer.gson().deserialize(x).hashCode())
+		data.messageQueue = data.messageQueue.stream()
+				.filter(x -> cmp.hashCode() == GsonComponentSerializer.gson().deserialize(x).hashCode())
 				.collect(Collectors.toCollection(ArrayList::new));
 	}
 	
@@ -93,7 +94,7 @@ public class JSONPlayer {
 	}
 	
 	public Claim getClaim(Claim c) {
-		if(c == null) return null;
+		if (c == null) return null;
 		for (int i = 0; i < data.claims.size(); i++) {
 			if (data.claims.get(i).location.hashCode() == c.location.hashCode()) {
 				return data.claims.get(i);
