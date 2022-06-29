@@ -98,8 +98,8 @@ public class ShopHelper {
 				int finalI = i;
 				helper.setItem(i, displayItems.get(i), () -> {
 					ChatInput.createQuery(
-							"quantity of " + displayItems.get(finalI).getType().name().toLowerCase(Locale.ROOT).replace("_", " ") + " to purchase",
-							response -> {
+							"quantity of " + displayItems.get(finalI).getType().name().toLowerCase(Locale.ROOT).replace("_", " ") +
+							" to purchase", response -> {
 								int amount = 0;
 								try {
 									amount = Integer.parseInt(response);
@@ -108,23 +108,25 @@ public class ShopHelper {
 								if (amount <= 0) return;
 								int quantity = getQuantity(items, itemMap.get(displayItems.get(finalI)));
 								if (quantity < amount) {
-									new MessageBuilder("Shop").appendCaption("There isn't enough of that specific item in stock to sell").send(p);
+									new MessageBuilder("Shop").appendCaption("There isn't enough of that specific item in stock to sell")
+											.send(p);
 									return;
 								}
 								var removeAmounts = getRemoveAmounts(rawItems, itemMap.get(displayItems.get(finalI)), amount);
 								if (removeAmounts == null) {
 									new MessageBuilder("Shop").appendCaption(
-											"An error occurred whilst attempting to calculate placements. This is most likely a bug").send(p);
+													"An error occurred whilst attempting to calculate placements. This is most likely a bug")
+											.send(p);
 									return;
 								}
 								TaxTransaction trans = new TaxTransaction(p.getUniqueId(),
-								                                          Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getUniqueId(),
-								                                          amount * shop.getPrice()
+								                                          Bukkit.getOfflinePlayer(UUID.fromString(claim.owner))
+										                                          .getUniqueId(), amount * shop.getPrice()
 								);
 								var res = trans.transact(TaxedTransaction.INSTANCE, true);
 								if (res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
-									new MessageBuilder("Shop").appendCaption("Transaction failed due to").appendVariable(res.getErrorReason())
-											.send(p);
+									new MessageBuilder("Shop").appendCaption("Transaction failed due to")
+											.appendVariable(res.getErrorReason()).send(p);
 									return;
 								}
 								
@@ -132,11 +134,13 @@ public class ShopHelper {
 										.appendComponent(itemMap.get(displayItems.get(finalI)).displayName().color(NamedTextColor.YELLOW))
 										.appendVariable("x" + amount)
 										.appendCaption("for")
-										.appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount(TaxedTransaction.INSTANCE))).send(p);
+										.appendVariable("$" + NumberFormatter.addCommas(trans.getTotalAmount(TaxedTransaction.INSTANCE)))
+										.send(p);
 								DatabasePlayer.from(UUID.fromString(claim.owner)).getJsonPlayer().queueMessage(
 										new MessageBuilder("Purchase Notification").appendVariable(p.getName())
 												.appendCaption("has purchased")
-												.appendComponent(itemMap.get(displayItems.get(finalI)).displayName().color(NamedTextColor.YELLOW))
+												.appendComponent(
+														itemMap.get(displayItems.get(finalI)).displayName().color(NamedTextColor.YELLOW))
 												.appendVariable("x" + amount)
 												.appendCaption("for").appendVariable("$" + amount * shop.getPrice()).make());
 								for (var kp : removeAmounts.entrySet()) {
@@ -148,8 +152,7 @@ public class ShopHelper {
 									p.getInventory().addItem(finalStack);
 								}
 								
-							}, p
-					);
+							}, p);
 				});
 			}
 		}
@@ -177,7 +180,7 @@ public class ShopHelper {
 		return amts;
 	}
 	
-	private static int getQuantity(ArrayList<ItemStack> items, ItemStack item) {
+	public static int getQuantity(ArrayList<ItemStack> items, ItemStack item) {
 		ItemStack temp = new ItemStack(item);
 		temp.setAmount(1);
 		

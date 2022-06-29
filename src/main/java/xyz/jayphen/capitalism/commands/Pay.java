@@ -62,8 +62,8 @@ public class Pay implements CommandExecutor {
 		}
 		
 		
-		Transaction       tax_t   = new Transaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
-		                                            (int) tax.getAmountTaxed()
+		Transaction tax_t = new Transaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
+		                                    (int) tax.getAmountTaxed()
 		);
 		TransactionResult tax_res = tax_t.transact();
 		
@@ -96,7 +96,8 @@ public class Pay implements CommandExecutor {
 			new MessageBuilder("Transaction").appendVariable("$" + NumberFormatter.addCommas(amount))
 					.append(Token.TokenType.BRACKET, res.getHash())
 					.appendCaption("has been transferred to your balance. You how have")
-					.appendVariable("$" + NumberFormatter.addCommas(DatabasePlayer.from(otherPlayer).getMoneySafe())).send(otherPlayer.getPlayer());
+					.appendVariable("$" + NumberFormatter.addCommas(DatabasePlayer.from(otherPlayer).getMoneySafe()))
+					.send(otherPlayer.getPlayer());
 		}
 		
 		

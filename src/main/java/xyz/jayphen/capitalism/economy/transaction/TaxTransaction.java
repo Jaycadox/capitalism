@@ -44,7 +44,8 @@ public class TaxTransaction {
 	}
 	
 	public TransactionResult transact(ITax taxProvider, boolean silent) {
-		if (Bukkit.getPlayer(from) == null) return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "invalid player");
+		if (Bukkit.getPlayer(from) == null)
+			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "invalid player");
 		TaxResult tax = taxProvider.applyTax(amount);
 		totalAmount = (int) ( tax.getAmountTaxed() + amount );
 		if ((int) tax.getAmountTaxed() + amount > DatabasePlayer.from(from).getMoneySafe()) {
@@ -54,12 +55,14 @@ public class TaxTransaction {
 		}
 		
 		
-		Transaction       tax_t   = new Transaction(from, DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), (int) tax.getAmountTaxed());
+		Transaction tax_t = new Transaction(from, DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), (int) tax.getAmountTaxed());
 		TransactionResult tax_res = tax_t.transact();
 		
 		if (tax_res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
-			if (!silent) new MessageBuilder("Transaction").appendVariable("$" + NumberFormatter.addCommas(amount + (int) tax.getAmountTaxed()))
-					.appendCaption("(after tax) could not be sent due to").appendVariable(tax_res.getErrorReason()).send(Bukkit.getPlayer(from));
+			if (!silent) new MessageBuilder("Transaction").appendVariable(
+							"$" + NumberFormatter.addCommas(amount + (int) tax.getAmountTaxed()))
+					.appendCaption("(after tax) could not be sent due to").appendVariable(tax_res.getErrorReason())
+					.send(Bukkit.getPlayer(from));
 			return new TransactionResult(TransactionResult.TransactionResultType.FAIL, tag, "insufficient funds (after tax)");
 		}
 		DatabasePlayer.from(from).getJsonPlayer().getData().stats.amountTaxed += tax.getAmountTaxed();

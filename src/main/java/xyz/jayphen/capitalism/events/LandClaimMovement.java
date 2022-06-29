@@ -72,12 +72,14 @@ public class LandClaimMovement implements Listener {
 			insideLandClaim.put(event.getPlayer().getUniqueId(), UUID.fromString(claim.owner));
 			onEnter.onEnterLand(event.getPlayer(), claim);
 			event.getPlayer().spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(
-					ChatColor.GRAY + "Land owned by: " + ChatColor.YELLOW + Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName()));
+					ChatColor.GRAY + "Land owned by: " + ChatColor.YELLOW +
+					Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName()));
 			new BukkitRunnable() {
 				@Override
 				public void run() {
 					for (Location loc : claim.getBorderBlocks()) {
-						for (int i = event.getPlayer().getLocation().getBlockY(); i < event.getPlayer().getLocation().getBlockY() + 40; i++) {
+						for (int i = event.getPlayer().getLocation().getBlockY(); i < event.getPlayer().getLocation().getBlockY() + 40; i++)
+						{
 							event.getPlayer().spawnParticle(Particle.REDSTONE, loc.getBlockX() + 0.5, i + 0.1, loc.getBlockZ() + 0.5, 1,
 							                                new Particle.DustOptions(Color.fromBGR(0, 0, 255), 1)
 							);

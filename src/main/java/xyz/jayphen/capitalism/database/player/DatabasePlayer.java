@@ -126,7 +126,8 @@ public class DatabasePlayer {
 		if (!offer.valid) return null;
 		for (JSONPlayerData data : allJsonPlayerData()) {
 			if (data.claims == null) continue;
-			Optional<Claim> optClaim = data.claims.stream().filter(x -> x.location.hashCode() == offer.locationOffer.hashCode()).findFirst();
+			Optional<Claim> optClaim = data.claims.stream().filter(x -> x.location.hashCode() == offer.locationOffer.hashCode())
+					.findFirst();
 			if (optClaim.isPresent()) return optClaim.get();
 		}
 		return null;
@@ -136,9 +137,9 @@ public class DatabasePlayer {
 		ArrayList<ClaimOffer> offers = new ArrayList<>();
 		for (JSONPlayerData data : allJsonPlayerData()) {
 			if (data.claimOffers == null) continue;
-			offers.addAll(
-					data.claimOffers.stream().filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode())
-							.toList());
+			offers.addAll(data.claimOffers.stream()
+					              .filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode())
+					              .toList());
 		}
 		return offers;
 	}
@@ -148,7 +149,8 @@ public class DatabasePlayer {
 		for (JSONPlayerData data : allJsonPlayerData()) {
 			if (DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers == null) continue;
 			ClaimOffer optOffer = DatabasePlayer.from(UUID.fromString(data.uuid)).getJsonPlayer().getData().claimOffers.stream()
-					.filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode()).findFirst().orElse(null);
+					.filter(x -> JSONPlayer.isClaimOfferValid(x) && x.locationOffer.hashCode() == claim.location.hashCode()).findFirst()
+					.orElse(null);
 			if (optOffer != null) return UUID.fromString(data.uuid);
 		}
 		return null;
@@ -185,7 +187,8 @@ public class DatabasePlayer {
 	
 	protected void saveJsonPlayer() {
 		try {
-			PreparedStatement stmt = Database.ctn.prepareStatement("UPDATE players\n" + "SET json=? WHERE uuid = '" + uuid.toString() + "';");
+			PreparedStatement stmt = Database.ctn.prepareStatement(
+					"UPDATE players\n" + "SET json=? WHERE uuid = '" + uuid.toString() + "';");
 			stmt.setString(1, gson.toJson(jsonPlayer.getData()));
 			stmt.execute();
 		} catch (Exception e) {

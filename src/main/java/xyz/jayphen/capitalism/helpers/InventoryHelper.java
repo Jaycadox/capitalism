@@ -136,8 +136,8 @@ public class InventoryHelper {
 		onRender.run(this, inventoryNameStack.get(inventoryNameStack.size() - 1));
 		renderMargin();
 		;
-		if (inventoryNameStack.size() > 1) setItem(0, getColumnCount() - 1 - ( marginHorizontal * 2 ), ChatColor.RED + "" + ChatColor.BOLD + "BACK",
-		                                           Material.COMPASS, this::pop
+		if (inventoryNameStack.size() > 1) setItem(0, getColumnCount() - 1 - ( marginHorizontal * 2 ),
+		                                           ChatColor.RED + "" + ChatColor.BOLD + "BACK", Material.COMPASS, this::pop
 		);
 		
 		p.updateInventory();
