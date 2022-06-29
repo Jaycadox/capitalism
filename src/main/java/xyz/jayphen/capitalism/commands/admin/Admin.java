@@ -148,8 +148,10 @@ public class Admin implements CommandExecutor, TabCompleter {
 				commandSender.sendMessage(ChatColor.RED + "Invalid amount of money");
 				return true;
 			}
-			TaxTransaction trans = new TaxTransaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), amount);
-			TransactionResult res = trans.transact(TaxedTransaction.INSTANCE, true);
+			TaxTransaction    trans = new TaxTransaction(p.getUniqueId(), DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
+			                                             amount
+			);
+			TransactionResult res   = trans.transact(TaxedTransaction.INSTANCE, true);
 			if (res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
 				commandSender.sendMessage(ChatColor.RED + "Transaction failed. Reason given: " + ChatColor.YELLOW + res.getErrorReason());
 				return true;
@@ -157,12 +159,11 @@ public class Admin implements CommandExecutor, TabCompleter {
 			String area = "(" + c.location.startX + ", " + c.location.startZ + " -> " + c.location.endX + ", " + c.location.endZ + ")";
 			commandSender.sendMessage(ChatColor.GREEN + "Sold area " + area + " to " + p.getName() + " for $" + ChatColor.YELLOW + amount);
 			c.owner = p.getUniqueId().toString();
-			DatabasePlayer.from(p).getJsonPlayer().getData().claims.add(new Claim(
-					new Location(Bukkit.getWorld(c.location.world), c.location.startX, 0, c.location.startZ),
-					new Location(Bukkit.getWorld(c.location.world), c.location.endX, 0, c.location.endZ),
-					p.getUniqueId()
-			));
-			ClaimManager.adminDrafts.remove(((Player)commandSender).getUniqueId());
+			DatabasePlayer.from(p).getJsonPlayer().getData().claims.add(
+					new Claim(new Location(Bukkit.getWorld(c.location.world), c.location.startX, 0, c.location.startZ),
+					          new Location(Bukkit.getWorld(c.location.world), c.location.endX, 0, c.location.endZ), p.getUniqueId()
+					));
+			ClaimManager.adminDrafts.remove(( (Player) commandSender ).getUniqueId());
 			DatabasePlayer.from(p).getJsonPlayer().save();
 			
 			new MessageBuilder("Land").appendCaption("You now own the land at").appendVariable(area + ".")

@@ -78,7 +78,7 @@ public class Cheapest implements CommandExecutor {
 		ArrayList<InventoryScroll.ItemRunnable> itemStacks = shops.stream().map(x -> {
 			ItemStack dStack = new ItemStack(mat, x.quantity);
 			dStack.setAmount(x.quantity);
-			var       meta   = dStack.getItemMeta();
+			var meta = dStack.getItemMeta();
 			meta.displayName(Component.text("$" + x.price + "/item", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false)
 					                 .decorate(TextDecoration.BOLD));
 			meta.lore(List.of(Component.empty(), MiniMessage.miniMessage().deserialize("<reset><yellow>" + x.quantity + " in stock")

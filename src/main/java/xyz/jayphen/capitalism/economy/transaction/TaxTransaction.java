@@ -55,7 +55,9 @@ public class TaxTransaction {
 		}
 		
 		
-		Transaction tax_t = new Transaction(from, DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(), (int) tax.getAmountTaxed());
+		Transaction       tax_t   = new Transaction(from, DatabasePlayer.nonPlayer(EconomyInjector.SERVER).getUuid(),
+		                                            (int) tax.getAmountTaxed()
+		);
 		TransactionResult tax_res = tax_t.transact();
 		
 		if (tax_res.getType() != TransactionResult.TransactionResultType.SUCCESS) {
