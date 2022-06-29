@@ -81,8 +81,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 			ClaimManager.adminDrafts.remove(( (Player) commandSender ).getUniqueId());
 			commandSender.sendMessage("Draft removed");
 		} else if (args[0].equals("delete") && args.length == 2) {
-			OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-			if (!p.hasPlayedBefore()) {
+			OfflinePlayer p = Bukkit.getOfflinePlayerIfCached(args[1]);
+			if (p == null) {
 				commandSender.sendMessage(ChatColor.RED + "Invalid player");
 				return true;
 			}
@@ -90,8 +90,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 			DatabasePlayer.from(p.getUniqueId()).delete(false);
 			commandSender.sendMessage(ChatColor.GREEN + "Erased account data belonging to " + p.getName());
 		} else if (args[0].equals("ban") && args.length > 3) {
-			OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-			if (!p.hasPlayedBefore()) {
+			OfflinePlayer p = Bukkit.getOfflinePlayerIfCached(args[1]);
+			if (p == null) {
 				commandSender.sendMessage(ChatColor.RED + "Invalid player");
 				return true;
 			}
@@ -107,8 +107,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 			}
 			BanManager.applyBan(p, times.get(1), TimeHelper.toTime(times.get(0)));
 		} else if (args[0].equals("unban") && args.length == 2) {
-			OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-			if (!p.hasPlayedBefore()) {
+			OfflinePlayer p = Bukkit.getOfflinePlayerIfCached(args[1]);
+			if (p == null) {
 				commandSender.sendMessage(ChatColor.RED + "Invalid player");
 				return true;
 			}
@@ -118,8 +118,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 				commandSender.sendMessage(ChatColor.GREEN + "The player " + p.getName() + " isn't banned.");
 			}
 		} else if (args[0].equals("retract") && args.length == 3) {
-			OfflinePlayer p = Bukkit.getOfflinePlayer(args[1]);
-			if (!p.hasPlayedBefore()) {
+			OfflinePlayer p = Bukkit.getOfflinePlayerIfCached(args[1]);
+			if (p == null) {
 				commandSender.sendMessage(ChatColor.RED + "Invalid player");
 				return true;
 			}
@@ -156,7 +156,7 @@ public class Admin implements CommandExecutor, TabCompleter {
 			}
 			String area = "(" + c.location.startX + ", " + c.location.startZ + " -> " + c.location.endX + ", " + c.location.endZ + ")";
 			commandSender.sendMessage(ChatColor.GREEN + "Sold area " + area + " to " + p.getName() + " for $" + ChatColor.YELLOW + amount);
-			
+			c.owner = p.getUniqueId().toString();
 			DatabasePlayer.from(p).getJsonPlayer().getData().claims.add(c);
 			DatabasePlayer.from(p).getJsonPlayer().save();
 			
@@ -185,8 +185,8 @@ public class Admin implements CommandExecutor, TabCompleter {
 			if (args[1].equals("#server")) {
 				dbp = DatabasePlayer.nonPlayer(EconomyInjector.SERVER);
 			} else {
-				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-				if (!offlinePlayer.hasPlayedBefore()) {
+				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayerIfCached(args[1]);
+				if (offlinePlayer == null) {
 					commandSender.sendMessage(ChatColor.RED + "Invalid player");
 					return true;
 				}

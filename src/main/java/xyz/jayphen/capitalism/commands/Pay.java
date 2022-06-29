@@ -44,8 +44,9 @@ public class Pay implements CommandExecutor {
 			new MessageBuilder("Economy").appendCaption("Invalid amount of money specified").send(commandSender);
 			return true;
 		}
-		OfflinePlayer otherPlayer = Bukkit.getServer().getOfflinePlayer(args[0]);
-		if (!otherPlayer.hasPlayedBefore()) {
+		OfflinePlayer otherPlayer = Bukkit.getServer().getOfflinePlayerIfCached(args[0]);
+		
+		if (otherPlayer == null) {
 			new MessageBuilder("Economy").appendCaption("The player").appendVariable(args[0])
 					.appendCaption("could not be found").send(commandSender);
 			return true;

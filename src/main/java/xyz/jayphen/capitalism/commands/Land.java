@@ -173,8 +173,8 @@ public class Land implements CommandExecutor, TabCompleter {
 						inv.setItem(0, 5, ChatColor.GREEN + "" + ChatColor.BOLD + "ADD TRUSTED USER", Material.GREEN_WOOL, () -> {
 							InventoryHelper.close(p);
 							ChatInput.createQuery("player name to be trusted", response -> {
-								OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(response);
-								if (!offlinePlayer.hasPlayedBefore()) {
+								OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayerIfCached(response);
+								if (offlinePlayer == null) {
 									new MessageBuilder("Land").appendCaption("Could not find that player").send(p);
 									return;
 								}
@@ -216,8 +216,8 @@ public class Land implements CommandExecutor, TabCompleter {
 								int finalAmount = amount;
 								ChatInput.createQuery("player name to sell land to", name -> {
 									InventoryHelper.close(p);
-									OfflinePlayer tPlayer = Bukkit.getOfflinePlayer(name);
-									if (!tPlayer.hasPlayedBefore()) {
+									OfflinePlayer tPlayer = Bukkit.getOfflinePlayerIfCached(name);
+									if (tPlayer == null) {
 										new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").send(p);
 										return;
 									}
@@ -240,8 +240,8 @@ public class Land implements CommandExecutor, TabCompleter {
 						inv.setItem(0, 4, ChatColor.RED + "Transfer Claim", Material.REDSTONE_BLOCK, () -> {
 							InventoryHelper.close(p);
 							ChatInput.createQuery("player name to transfer claim to", response -> {
-								OfflinePlayer tPlayer = Bukkit.getOfflinePlayer(response);
-								if (!tPlayer.hasPlayedBefore()) {
+								OfflinePlayer tPlayer = Bukkit.getOfflinePlayerIfCached(response);
+								if (tPlayer == null) {
 									new MessageBuilder("Land Transfer").appendCaption("Player doesn't exist").send(p);
 									return;
 								}
@@ -384,8 +384,8 @@ public class Land implements CommandExecutor, TabCompleter {
 					new MessageBuilder("Land").appendCaption("Player to be trusted is not specified").send(p);
 					return;
 				}
-				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
-				if (!offlinePlayer.hasPlayedBefore()) {
+				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayerIfCached(args[2]);
+				if (offlinePlayer == null) {
 					new MessageBuilder("Land").appendCaption("Could not find player").appendVariable(args[2]).send(p);
 					return;
 				}
@@ -406,8 +406,8 @@ public class Land implements CommandExecutor, TabCompleter {
 					new MessageBuilder("Land").appendCaption("Player to be removed from the trust list is not specified").send(p);
 					return;
 				}
-				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
-				if (!offlinePlayer.hasPlayedBefore()) {
+				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayerIfCached(args[2]);
+				if (offlinePlayer == null) {
 					new MessageBuilder("Land").appendCaption("Could not find player").appendVariable(args[2]).send(p);
 					return;
 				}
