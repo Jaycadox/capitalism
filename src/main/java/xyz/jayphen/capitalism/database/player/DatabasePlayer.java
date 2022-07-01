@@ -74,7 +74,7 @@ public class DatabasePlayer {
 		return DatabasePlayer.from(UUID.fromString(s + "-0000-0000-0000-000000000000"));
 	}
 	
-	public static long sumMoney() {
+	public synchronized static long sumMoney() {
 		try {
 			Statement stmt = null;
 			stmt = Database.ctn.createStatement();
@@ -90,7 +90,7 @@ public class DatabasePlayer {
 		return 0;
 	}
 	
-	public static ArrayList<UUID> allLotteryEnteredPeople() {
+	public synchronized static ArrayList<UUID> allLotteryEnteredPeople() {
 		ArrayList<UUID> list = new ArrayList<>();
 		try {
 			Statement stmt = null;
@@ -106,7 +106,7 @@ public class DatabasePlayer {
 		return list;
 	}
 	
-	public static ArrayList<JSONPlayerData> allJsonPlayerData() {
+	public synchronized static ArrayList<JSONPlayerData> allJsonPlayerData() {
 		ArrayList<JSONPlayerData> list = new ArrayList<>();
 		try {
 			Statement stmt = null;
@@ -185,7 +185,7 @@ public class DatabasePlayer {
 		return jpl;
 	}
 	
-	protected void saveJsonPlayer() {
+	protected synchronized void saveJsonPlayer() {
 		try {
 			PreparedStatement stmt = Database.ctn.prepareStatement(
 					"UPDATE players\n" + "SET json=? WHERE uuid = '" + uuid.toString() + "';");
@@ -196,7 +196,7 @@ public class DatabasePlayer {
 		}
 	}
 	
-	public double getMoney() throws SQLException {
+	public synchronized double getMoney() throws SQLException {
 		Statement stmt = null;
 		stmt = Database.ctn.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT money FROM players WHERE uuid = '" + uuid.toString() + "'");
@@ -204,7 +204,7 @@ public class DatabasePlayer {
 		return (double) rs.getInt("money");
 	}
 	
-	public void setMoney(double v) throws SQLException {
+	public synchronized void setMoney(double v) throws SQLException {
 		Statement stmt = Database.ctn.createStatement();
 		stmt.execute("UPDATE players\n" + "SET money = " + v + " WHERE uuid = '" + uuid.toString() + "';");
 	}
@@ -217,7 +217,7 @@ public class DatabasePlayer {
 		}
 	}
 	
-	public boolean setMoneySafe(int v) {
+	public synchronized boolean setMoneySafe(int v) {
 		try {
 			setMoney(v);
 			return true;
@@ -239,7 +239,7 @@ public class DatabasePlayer {
 		return false;
 	}
 	
-	public void setJoinedLottery(boolean val) {
+	public synchronized void setJoinedLottery(boolean val) {
 		try {
 			Statement stmt = null;
 			stmt = Database.ctn.createStatement();
@@ -250,7 +250,7 @@ public class DatabasePlayer {
 		
 	}
 	
-	public boolean exists() {
+	public synchronized boolean exists() {
 		Statement stmt = null;
 		try {
 			stmt = Database.ctn.createStatement();
@@ -265,7 +265,7 @@ public class DatabasePlayer {
 		}
 	}
 	
-	public void delete(boolean giveStartingBonus) {
+	public synchronized void delete(boolean giveStartingBonus) {
 		var    banHistory     = this.getJsonPlayer().getBanRecord();
 		var    banRetractions = this.getJsonPlayer().getRetractedBans();
 		long   banUntil       = this.getJsonPlayer().getBannedUntil();
@@ -292,7 +292,7 @@ public class DatabasePlayer {
 		
 	}
 	
-	public void generate(double startingCash) {
+	public synchronized void generate(double startingCash) {
 		
 		String sql = "INSERT INTO players\n" + "VALUES ('" + uuid.toString() + "', " + 0 + ", 0, \"{}\"); ";
 		try {

@@ -14,7 +14,7 @@ public class ClaimManager {
 	public static        HashMap<UUID, Claim> adminDrafts   = new HashMap<>();
 	private static       long                 lastCacheMiss = 0;
 	
-	public static ArrayList<Claim> getAllClaims() {
+	public synchronized static ArrayList<Claim> getAllClaims() {
 		if (System.currentTimeMillis() - lastCacheMiss > 8000) {
 			ArrayList<JSONPlayerData> data = DatabasePlayer.allJsonPlayerData();
 			claimCache.clear();
@@ -26,7 +26,7 @@ public class ClaimManager {
 		return claimCache;
 	}
 	
-	public static Claim getDatabaseClaim(Claim c) {
+	public synchronized static Claim getDatabaseClaim(Claim c) {
 		for (JSONPlayerData jpd : DatabasePlayer.allJsonPlayerData()) {
 			for (Claim playerClaim : jpd.claims) {
 				if (playerClaim.location.hashCode() == c.location.hashCode()) {

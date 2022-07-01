@@ -41,10 +41,13 @@ public class BlueMapIntergration {
 						} catch (IOException e) {
 							throw new RuntimeException(e);
 						}
-						for (Claim c : ClaimManager.getAllClaims()) {
-							if (c == null) continue;
-							tick(c, api);
-						}
+						try {
+							for (Claim c : ClaimManager.getAllClaims()) {
+								if (c == null) continue;
+								tick(c, api);
+							}
+						} catch(Exception ignored) {}
+
 					}
 				}.runTaskTimerAsynchronously(Capitalism.plugin, 0, 80);
 			} catch (IOException e) {
