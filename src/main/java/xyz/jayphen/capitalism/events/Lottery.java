@@ -126,7 +126,7 @@ public class Lottery implements Listener {
 	private static boolean checkForLottery() {
 		Calendar rightNow = Calendar.getInstance();
 		int      hour     = rightNow.get(Calendar.HOUR_OF_DAY);
-		return hour == ( 0 );
+		return hour == ( 12 + 5 );
 	}
 	
 	
