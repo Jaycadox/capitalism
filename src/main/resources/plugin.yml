@@ -42,3 +42,13 @@ commands:
       - l
   admin:
     permission: core.admin
+  matrix:
+    permission: core.admin
+  aac:
+    permission: core.admin
+  spartan:
+    permission: core.admin
+  vulcan:
+    permission: core.admin
+  ncp:
+    permission: core.admin
