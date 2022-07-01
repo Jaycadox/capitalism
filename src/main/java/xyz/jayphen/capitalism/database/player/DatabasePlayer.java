@@ -39,7 +39,7 @@ public class DatabasePlayer {
 			jsonPlayer.save();
 			if (!didExist) {
 				this.getJsonPlayer().queueMessage(
-						new MessageBuilder("Welcome").appendCaption("Hello,").appendVariable(Bukkit.getOfflinePlayer(uuid).getName() + ".")
+						new MessageBuilder("Welcome").appendCaption("Hello,")
 								.appendCaption("Welcome to Capitalism. The goal is to reach $1,000,000,000. You have been awarded")
 								.appendVariable("$" + NumberFormatter.addCommas(amount))
 								.appendCaption("as a starting bonus. For more information regarding how to play,")
