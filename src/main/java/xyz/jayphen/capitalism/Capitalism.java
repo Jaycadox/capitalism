@@ -14,6 +14,7 @@ import xyz.jayphen.capitalism.helpers.BlueMapIntergration;
 import xyz.jayphen.capitalism.hooks.EconomyHook;
 
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.logging.Logger;
 
 public final class Capitalism extends JavaPlugin {
@@ -28,6 +29,8 @@ public final class Capitalism extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
+		
+		
 		ADVENTURE = BukkitAudiences.create(this);
 		plugin    = this;
 		LOG       = this.getLogger();
@@ -52,6 +55,7 @@ public final class Capitalism extends JavaPlugin {
 		} else {
 			WorldEdit.getInstance().getItemFactory();
 		}
+		
 	}
 	
 	

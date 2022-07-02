@@ -39,7 +39,8 @@ public class PlaytimeRewards implements Listener {
 						.appendCaption("to redeem your playtime reward. This will expire in 2 minutes").send(p);
 			} else {
 				new MessageBuilder("Reward").appendCaption("Right-click a bed inside a residential " +
-				                                           "land claim that you own to redeem your playtime reward. This will expire in 2 minutes")
+				                                           "land claim that you own to redeem your playtime reward. This will expire in 5" +
+				                                           " minutes")
 						.send(p);
 			}
 			
@@ -55,7 +56,7 @@ public class PlaytimeRewards implements Listener {
 					eligiblePlayers.clear();
 				}
 			}
-		}.runTaskLater(Capitalism.plugin, 60 * 20 * 2);
+		}.runTaskLater(Capitalism.plugin, 60 * 20 * 5);
 	}
 	
 	
