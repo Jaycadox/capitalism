@@ -14,6 +14,7 @@ public class CommandRegister {
 		p.getCommand("cheapest").setExecutor(new Cheapest());
 		p.getCommand("land").setExecutor(new Land());
 		p.getCommand("land").setTabCompleter(new Land());
+		p.getCommand("hud").setExecutor(new Hud());
 		
 	}
 	

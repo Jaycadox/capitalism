@@ -18,7 +18,8 @@ public class PlayerListManager {
 		
 		final Component header = MiniMessage.miniMessage().deserialize("<color:#d34aff><bold>CAPITALISM SMP</bold></color><newline>");
 		final Component footer = MiniMessage.miniMessage().deserialize(
-				"<newline><color:blue>Version: 0.1.1</color><newline><red><bold>REPORT BUGS TO: <reset><yellow>jayphen#6666");
+				"<newline><color:blue>Version: " + Capitalism.VERSION + "</color><newline><red><bold>REPORT BUGS TO: " +
+				                                                  "<reset><yellow>jayphen#6666");
 		Capitalism.ADVENTURE.player(p).sendPlayerListHeaderAndFooter(header, footer);
 		
 	}
