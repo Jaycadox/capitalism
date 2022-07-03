@@ -2,7 +2,8 @@ name: Capitalism
 version: '${project.version}'
 main: xyz.jayphen.capitalism.Capitalism
 api-version: 1.18
-depend: [ Vault, WorldEdit, BlueMap ]
+depend: [ Vault, WorldEdit ]
+softdepend: [BlueMap]
 commands:
   balance:
     description: View your balance
