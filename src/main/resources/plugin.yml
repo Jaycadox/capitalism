@@ -40,6 +40,9 @@ commands:
     aliases:
       - landlord
       - l
+  hud:
+    description: Toggles the scoreboard hud, showcasing various stats
+    permission: core.hud
   admin:
     permission: core.admin
   matrix:
