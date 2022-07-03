@@ -26,7 +26,7 @@ public final class Capitalism extends JavaPlugin {
 	public static BlueMapIntergration BLUEMAP   = null;
 	public static BukkitAudiences     ADVENTURE = null;
 	public final  EconomyHook         HOOK      = new EconomyHook(this);
-	
+	public static final String VERSION = "0.1.2";
 	@Override
 	public void onEnable() {
 		

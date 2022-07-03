@@ -4,6 +4,7 @@ package xyz.jayphen.capitalism.commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -18,6 +19,7 @@ import xyz.jayphen.capitalism.Capitalism;
 import xyz.jayphen.capitalism.claims.ClaimManager;
 import xyz.jayphen.capitalism.claims.region.RegionManager;
 import xyz.jayphen.capitalism.database.player.DatabasePlayer;
+import xyz.jayphen.capitalism.lang.MessageBuilder;
 import xyz.jayphen.capitalism.lang.NumberFormatter;
 
 import java.util.HashMap;
@@ -46,29 +48,32 @@ public class Hud implements CommandExecutor {
 	private void update(Player p, Objective o) {
 		states.get(p.getUniqueId()).board.getObjectives().forEach(Objective::unregister);
 		o = states.get(p.getUniqueId()).board.registerNewObjective(p.getUniqueId() + "-obj", "dummy",
-		                                                           Component.text("Capitalism HUD", TextColor.color(0xeeeeee))
+		                                                           Component.text("Capitalism (mc.jayphen.xyz)", TextColor.color(0xeeeeee)).decorate(TextDecoration.BOLD)
 		);
-		String line1 = serializer.serialize(Component.text("Region > ", TextColor.color(0xddddff))
+		String line1 = serializer.serialize(Component.text("Region > ", TextColor.color(0xddddff)).decorate(TextDecoration.BOLD)
 				                                    .append(Component.text(
 						                                    RegionManager.getRegion(p.getLocation()).toString().toUpperCase(),
 						                                    NamedTextColor.YELLOW
 				                                    )));
-		o.getScore(line1).setScore(1);
+		o.getScore(line1).setScore(2);
 		
-		String line2 = serializer.serialize(Component.text("Balance > ", TextColor.color(0xddddff))
+		String line2 = serializer.serialize(Component.text("Balance > ", TextColor.color(0xddddff)).decorate(TextDecoration.BOLD)
 				                                    .append(Component.text(
 						                                    "$" + NumberFormatter.addCommas(DatabasePlayer.from(p).getMoneySafe()),
 						                                    NamedTextColor.YELLOW
 				                                    )));
-		o.getScore(line2).setScore(0);
+		o.getScore(line2).setScore(1);
 		var claimOwner = "Not inside claim";
 		var claim      = ClaimManager.getCachedClaim(p.getLocation()).orElse(null);
 		if (claim != null) {
 			claimOwner = Bukkit.getOfflinePlayer(UUID.fromString(claim.owner)).getName();
 		}
-		String line3 = serializer.serialize(Component.text("Claim > ", TextColor.color(0xddddff))
+		String line3 = serializer.serialize(Component.text("Claim > ", TextColor.color(0xddddff)).decorate(TextDecoration.BOLD)
 				                                    .append(Component.text(claimOwner, NamedTextColor.YELLOW)));
-		o.getScore(line3).setScore(2);
+		o.getScore(line3).setScore(3);
+		
+		String line4 = serializer.serialize(Component.text("Server running Capitalism v" + Capitalism.VERSION, NamedTextColor.DARK_GRAY));
+		o.getScore(line4).setScore(0);
 		
 		o.setDisplaySlot(DisplaySlot.SIDEBAR);
 		
@@ -89,10 +94,17 @@ public class Hud implements CommandExecutor {
 	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 		if (!( sender instanceof Player p )) return true;
 		if (!states.containsKey(p.getUniqueId())) {
+			p.sendMessage(Component.text("This feature is currently ", NamedTextColor.GRAY)
+					              .append(Component.text("EXPERIMENTAL", NamedTextColor.RED).decorate(TextDecoration.BOLD))
+					              .append(Component.text(". Please report any issues found.", NamedTextColor.GRAY))
+			);
+			
+			
 			generateScoreboard(p);
 		}
 		states.get(p.getUniqueId()).open[0] = !states.get(p.getUniqueId()).open[0];
-		
+		new MessageBuilder("Capitalism").appendCaption("Your HUD has been")
+				.appendVariable(states.get(p.getUniqueId()).open[0] ? "enabled" : "disabled").send(p);
 		return true;
 	}
 	
